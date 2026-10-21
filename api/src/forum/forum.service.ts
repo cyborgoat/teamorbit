@@ -50,6 +50,13 @@ export class ForumService {
   }
 
   async findOne(id: string, userId: string) {
+    // updateMany avoids bumping @updatedAt while recording a view.
+    const updated = await this.prisma.forumPost.updateMany({
+      where: { id },
+      data: { viewCount: { increment: 1 } },
+    });
+    if (updated.count === 0)
+      throw new NotFoundException('Forum post not found');
     const post = await this.prisma.forumPost.findUnique({
       where: { id },
       include: {
@@ -57,13 +64,12 @@ export class ForumService {
         votes: { where: { userId }, select: { value: true } },
       },
     });
-    if (!post) throw new NotFoundException('Forum post not found');
     const { items: comments } = await this.comments.listForResource(
       'forum',
       id,
       userId,
     );
-    const { votes, ...rest } = post;
+    const { votes, ...rest } = post!;
     return {
       ...rest,
       author: presentUser(rest.author),

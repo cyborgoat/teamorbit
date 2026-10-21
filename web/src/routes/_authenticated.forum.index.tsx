@@ -98,6 +98,7 @@ function ForumPage() {
                 <TableHead>Post</TableHead>
                 <TableHead>Score</TableHead>
                 <TableHead>Comments</TableHead>
+                <TableHead>Views</TableHead>
                 <TableHead>Author</TableHead>
                 <TableHead>Created</TableHead>
                 <TableHead className="w-20" />
@@ -122,6 +123,7 @@ function ForumPage() {
                   <TableCell className="tabular-nums">
                     {item.commentCount}
                   </TableCell>
+                  <TableCell className="tabular-nums">{item.viewCount}</TableCell>
                   <TableCell className="text-muted-foreground">
                     <div className="flex items-center gap-2">
                       <UserAvatar

@@ -29,8 +29,15 @@ await orbit.auth.login('admin', 'password123');
 
 const { items } = await orbit.forum.listPosts({ page: 1, limit: 10, q: 'welcome' });
 items[0].commentCount; // number
+items[0].viewCount; // detail fetches so far
 
-await orbit.news.create({ title: 'v2 released', content: '## Notes\n...', tags: ['release'] });
+const created = await orbit.news.create({
+  title: 'v2 released',
+  content: '## Notes\n...',
+  tags: ['release'],
+});
+const article = await orbit.news.get(created.id); // increments viewCount
+article.viewCount;
 await orbit.forum.votePost(items[0].id, 1); // 1 = up, -1 = down, 0 = clear
 ```
 

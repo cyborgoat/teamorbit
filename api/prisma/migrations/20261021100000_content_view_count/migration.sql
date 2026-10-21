@@ -1,0 +1,8 @@
+-- AlterTable
+ALTER TABLE "News" ADD COLUMN "viewCount" INTEGER NOT NULL DEFAULT 0;
+
+-- AlterTable
+ALTER TABLE "BlogPost" ADD COLUMN "viewCount" INTEGER NOT NULL DEFAULT 0;
+
+-- AlterTable
+ALTER TABLE "ForumPost" ADD COLUMN "viewCount" INTEGER NOT NULL DEFAULT 0;

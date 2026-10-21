@@ -110,6 +110,7 @@ Both models share the same shape.
 | `content` | String | Markdown |
 | `tags` | Tag[] | Many-to-many; unique tag names |
 | `coverImageUrl` | String? | |
+| `viewCount` | Int | Detail fetches; default `0` |
 | `authorId` | String | FK → `User.id` |
 | `createdAt`, `updatedAt` | DateTime | |
 
@@ -120,6 +121,7 @@ Both models share the same shape.
 | `id` | String | PK, UUID |
 | `title`, `content` | String | `content` is Markdown |
 | `score` | Int | Denormalized sum of votes, default `0` |
+| `viewCount` | Int | Detail fetches; default `0` |
 | `authorId` | String | FK → `User.id` |
 | `createdAt`, `updatedAt` | DateTime | |
 

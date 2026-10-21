@@ -59,6 +59,9 @@ export class ForumPostDto {
   @ApiProperty()
   score: number;
 
+  @ApiProperty({ description: 'Times the post detail has been fetched' })
+  viewCount: number;
+
   @ApiProperty()
   authorId: string;
 

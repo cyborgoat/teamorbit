@@ -96,6 +96,7 @@ export function ArticleList({ kind }: { kind: 'news' | 'blog' }) {
               <TableRow>
                 <TableHead>Article</TableHead>
                 <TableHead>Tags</TableHead>
+                <TableHead>Views</TableHead>
                 <TableHead>Created</TableHead>
                 <TableHead className="w-20" />
               </TableRow>
@@ -124,6 +125,7 @@ export function ArticleList({ kind }: { kind: 'news' | 'blog' }) {
                       ))}
                     </div>
                   </TableCell>
+                  <TableCell className="tabular-nums">{item.viewCount}</TableCell>
                   <TableCell className="text-muted-foreground">
                     {new Date(item.createdAt).toLocaleDateString()}
                   </TableCell>

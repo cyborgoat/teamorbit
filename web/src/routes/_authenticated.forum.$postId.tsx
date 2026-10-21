@@ -26,6 +26,9 @@ function ForumPostPage() {
   } = useQuery({
     queryKey: queryKeys.post(postId),
     queryFn: () => orbit.forum.getPost(postId),
+    // Detail GET increments viewCount; avoid focus refetch inflation.
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
   })
   const invalidate = () => {
     void qc.invalidateQueries({ queryKey: queryKeys.post(postId) })

@@ -1,7 +1,8 @@
 # Changelog
 
-## Unreleased
+## 0.2.2 — 2026-10-21
 
+- News, blog posts, and forum posts include `viewCount`, incremented on each detail GET.
 - Add admin upload cleanup preview and background cleanup helpers, with typed run summaries.
 
 ## 0.2.1 — 2026-10-21

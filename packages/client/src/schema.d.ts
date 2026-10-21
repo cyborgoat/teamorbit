@@ -719,6 +719,8 @@ export interface components {
             content: string;
             coverImageUrl: string | null;
             authorId: string;
+            /** @description Times the article detail has been fetched */
+            viewCount: number;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
@@ -753,6 +755,8 @@ export interface components {
             content: string;
             coverImageUrl: string | null;
             authorId: string;
+            /** @description Times the article detail has been fetched */
+            viewCount: number;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
@@ -882,6 +886,8 @@ export interface components {
             /** @description Markdown body */
             content: string;
             score: number;
+            /** @description Times the post detail has been fetched */
+            viewCount: number;
             authorId: string;
             /** Format: date-time */
             createdAt: string;
@@ -902,6 +908,8 @@ export interface components {
             /** @description Markdown body */
             content: string;
             score: number;
+            /** @description Times the post detail has been fetched */
+            viewCount: number;
             authorId: string;
             /** Format: date-time */
             createdAt: string;
@@ -927,6 +935,8 @@ export interface components {
             /** @description Markdown body */
             content: string;
             score: number;
+            /** @description Times the post detail has been fetched */
+            viewCount: number;
             authorId: string;
             /** Format: date-time */
             createdAt: string;
@@ -951,6 +961,8 @@ export interface components {
             /** @description Markdown body */
             content: string;
             score: number;
+            /** @description Times the post detail has been fetched */
+            viewCount: number;
             authorId: string;
             /** Format: date-time */
             createdAt: string;

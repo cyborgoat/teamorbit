@@ -95,17 +95,43 @@ export class ArticleService {
     };
   }
 
+  private async assertExists(kind: ArticleKind, id: string) {
+    const found =
+      kind === 'news'
+        ? await this.prisma.news.findUnique({
+            where: { id },
+            select: { id: true },
+          })
+        : await this.prisma.blogPost.findUnique({
+            where: { id },
+            select: { id: true },
+          });
+    if (!found) throw new NotFoundException(config[kind].notFound);
+  }
+
   async findOne(kind: ArticleKind, id: string) {
     const include = {
       tags: true,
       author: { select: authorSelect },
     } as const;
+    // updateMany avoids bumping @updatedAt while recording a view.
+    const updated =
+      kind === 'news'
+        ? await this.prisma.news.updateMany({
+            where: { id },
+            data: { viewCount: { increment: 1 } },
+          })
+        : await this.prisma.blogPost.updateMany({
+            where: { id },
+            data: { viewCount: { increment: 1 } },
+          });
+    if (updated.count === 0)
+      throw new NotFoundException(config[kind].notFound);
     const item =
       kind === 'news'
         ? await this.prisma.news.findUnique({ where: { id }, include })
         : await this.prisma.blogPost.findUnique({ where: { id }, include });
-    if (!item) throw new NotFoundException(config[kind].notFound);
-    return this.map(item);
+    return this.map(item!);
   }
 
   async create(
@@ -158,7 +184,7 @@ export class ArticleService {
       coverImageUrl?: string | null;
     },
   ) {
-    await this.findOne(kind, id);
+    await this.assertExists(kind, id);
     const data = {
       title: dto.title,
       content: dto.content,
@@ -183,7 +209,7 @@ export class ArticleService {
   }
 
   async remove(kind: ArticleKind, id: string) {
-    await this.findOne(kind, id);
+    await this.assertExists(kind, id);
     if (kind === 'news') {
       await this.prisma.$transaction([
         this.prisma.comment.deleteMany({

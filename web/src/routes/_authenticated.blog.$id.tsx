@@ -17,6 +17,9 @@ function BlogDetailPage() {
   const { data, error, refetch, isLoading } = useQuery({
     queryKey: [...queryKeys.blog, id],
     queryFn: () => orbit.blogPosts.get(id),
+    // Detail GET increments viewCount; avoid focus refetch inflation.
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
   })
   if (isLoading)
     return <p className="text-sm text-muted-foreground">Loading…</p>
@@ -29,7 +32,7 @@ function BlogDetailPage() {
     <div className="space-y-6">
       <PageHeader
         title={data.title}
-        description={`By ${data.author.fullName} · ${new Date(data.createdAt).toLocaleString()}`}
+        description={`By ${data.author.fullName} · ${new Date(data.createdAt).toLocaleString()} · ${data.viewCount} ${data.viewCount === 1 ? 'view' : 'views'}`}
       />
       {(data.tags?.length ?? 0) > 0 && (
         <div className="flex flex-wrap gap-1">

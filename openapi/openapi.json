@@ -3388,6 +3388,10 @@
           "authorId": {
             "type": "string"
           },
+          "viewCount": {
+            "type": "number",
+            "description": "Times the article detail has been fetched"
+          },
           "createdAt": {
             "format": "date-time",
             "type": "string"
@@ -3412,6 +3416,7 @@
           "content",
           "coverImageUrl",
           "authorId",
+          "viewCount",
           "createdAt",
           "updatedAt",
           "tags",
@@ -3514,6 +3519,10 @@
           "authorId": {
             "type": "string"
           },
+          "viewCount": {
+            "type": "number",
+            "description": "Times the article detail has been fetched"
+          },
           "createdAt": {
             "format": "date-time",
             "type": "string"
@@ -3538,6 +3547,7 @@
           "content",
           "coverImageUrl",
           "authorId",
+          "viewCount",
           "createdAt",
           "updatedAt",
           "tags",
@@ -3978,6 +3988,10 @@
           "score": {
             "type": "number"
           },
+          "viewCount": {
+            "type": "number",
+            "description": "Times the post detail has been fetched"
+          },
           "authorId": {
             "type": "string"
           },
@@ -4001,6 +4015,7 @@
           "title",
           "content",
           "score",
+          "viewCount",
           "authorId",
           "createdAt",
           "updatedAt",
@@ -4050,6 +4065,10 @@
           "score": {
             "type": "number"
           },
+          "viewCount": {
+            "type": "number",
+            "description": "Times the post detail has been fetched"
+          },
           "authorId": {
             "type": "string"
           },
@@ -4086,6 +4105,7 @@
           "title",
           "content",
           "score",
+          "viewCount",
           "authorId",
           "createdAt",
           "updatedAt",
@@ -4128,6 +4148,10 @@
           "score": {
             "type": "number"
           },
+          "viewCount": {
+            "type": "number",
+            "description": "Times the post detail has been fetched"
+          },
           "authorId": {
             "type": "string"
           },
@@ -4160,6 +4184,7 @@
           "title",
           "content",
           "score",
+          "viewCount",
           "authorId",
           "createdAt",
           "updatedAt",
@@ -4198,6 +4223,10 @@
           "score": {
             "type": "number"
           },
+          "viewCount": {
+            "type": "number",
+            "description": "Times the post detail has been fetched"
+          },
           "authorId": {
             "type": "string"
           },
@@ -4218,6 +4247,7 @@
           "title",
           "content",
           "score",
+          "viewCount",
           "authorId",
           "createdAt",
           "updatedAt",

@@ -43,6 +43,9 @@ export class BlogPostBaseDto {
   @ApiProperty()
   authorId: string;
 
+  @ApiProperty({ description: 'Times the article detail has been fetched' })
+  viewCount: number;
+
   @ApiProperty()
   createdAt: Date;
 

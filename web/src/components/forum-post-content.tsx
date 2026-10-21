@@ -41,7 +41,7 @@ export function ForumPostContent({
             />
             <PageHeader
               title={post.title}
-              description={`By ${post.author.fullName} · ${new Date(post.createdAt).toLocaleString()}`}
+              description={`By ${post.author.fullName} · ${new Date(post.createdAt).toLocaleString()} · ${post.viewCount} ${post.viewCount === 1 ? 'view' : 'views'}`}
             />
           </div>
         </div>

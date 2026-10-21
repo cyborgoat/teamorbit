@@ -616,6 +616,59 @@ describe('App (e2e)', () => {
     ).toBe(false);
   });
 
+  it('increments viewCount on news, blog, and forum detail reads', async () => {
+    const token = await adminToken();
+    const news = await request(app.getHttpServer())
+      .post('/api/news')
+      .auth(token, { type: 'bearer' })
+      .send({ title: 'Views news', content: 'Body', tags: [] })
+      .expect(201);
+    expect(dataOf(news).viewCount).toBe(0);
+    const newsDetail = await request(app.getHttpServer())
+      .get(`/api/news/${dataOf(news).id}`)
+      .auth(token, { type: 'bearer' })
+      .expect(200);
+    expect(dataOf(newsDetail).viewCount).toBe(1);
+    await request(app.getHttpServer())
+      .get(`/api/news/${dataOf(news).id}`)
+      .auth(token, { type: 'bearer' })
+      .expect(200)
+      .expect((res) => expect(dataOf(res).viewCount).toBe(2));
+
+    const blog = await request(app.getHttpServer())
+      .post('/api/blog-posts')
+      .auth(token, { type: 'bearer' })
+      .send({ title: 'Views blog', content: 'Body', tags: [] })
+      .expect(201);
+    expect(dataOf(blog).viewCount).toBe(0);
+    await request(app.getHttpServer())
+      .get(`/api/blog-posts/${dataOf(blog).id}`)
+      .auth(token, { type: 'bearer' })
+      .expect(200)
+      .expect((res) => expect(dataOf(res).viewCount).toBe(1));
+
+    const post = await request(app.getHttpServer())
+      .post('/api/forum-posts')
+      .auth(token, { type: 'bearer' })
+      .send({ title: 'Views forum', content: 'Body' })
+      .expect(201);
+    expect(dataOf(post).viewCount).toBe(0);
+    await request(app.getHttpServer())
+      .get(`/api/forum-posts/${dataOf(post).id}`)
+      .auth(token, { type: 'bearer' })
+      .expect(200)
+      .expect((res) => expect(dataOf(res).viewCount).toBe(1));
+    const listed = await request(app.getHttpServer())
+      .get('/api/forum-posts?limit=100')
+      .auth(token, { type: 'bearer' })
+      .expect(200);
+    expect(
+      dataOf(listed).items.find(
+        (item: { id: string }) => item.id === dataOf(post).id,
+      )?.viewCount,
+    ).toBe(1);
+  });
+
   it('keeps concurrent post and comment votes consistent with stored vote totals', async () => {
     const token = await adminToken();
     const post = await request(app.getHttpServer())

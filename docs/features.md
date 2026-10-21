@@ -58,7 +58,7 @@ Admins create/update/delete; list and detail respect audience (non-invitees get 
 
 ### News (markdown)
 
-Articles with markdown `content`, `tags[]`, and optional cover. Creating one emits a notification.
+Articles with markdown `content`, `tags[]`, optional cover, and a `viewCount` incremented on each detail GET. Creating one emits a notification.
 
 ### Blog posts (markdown)
 
@@ -71,6 +71,7 @@ Team discussion board with markdown posts (and post-level votes).
 | Capability | Notes |
 |------------|--------|
 | Posts | Any authenticated user; markdown body; images via absolute upload URLs |
+| Views | `viewCount` increments on each post detail GET |
 | Post votes | Up/down (or clear); one vote per user per post |
 | Moderation | Authors edit/delete their own; Admin/Superuser can moderate any |
 | Notifications | Global on new post |

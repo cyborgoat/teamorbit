@@ -95,6 +95,7 @@ model News {
   content       String
   tags          Tag[]
   coverImageUrl String?
+  viewCount     Int      @default(0)
   authorId      String
   author        User     @relation(fields: [authorId], references: [id])
   createdAt     DateTime @default(now())
@@ -107,6 +108,7 @@ model BlogPost {
   content       String
   tags          Tag[]
   coverImageUrl String?
+  viewCount     Int      @default(0)
   authorId      String
   author        User     @relation(fields: [authorId], references: [id])
   createdAt     DateTime @default(now())
@@ -171,6 +173,7 @@ model ForumPost {
   title     String
   content   String
   score     Int      @default(0)
+  viewCount Int      @default(0)
   authorId  String
   author    User     @relation(fields: [authorId], references: [id])
   createdAt DateTime @default(now())
