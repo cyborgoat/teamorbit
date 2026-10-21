@@ -86,7 +86,7 @@ All params, bodies and responses are typed from the OpenAPI spec.
 | `orbit.auth` | `login(identifier, password, method?)`, `register(body)`, `me()`, `updateMe(body)`, `changePassword(body)`, `logout()` |
 | `orbit.users`, `events`, `announcements`, `news`, `blogPosts` | `list(query?)`, `get(id)`, `create(body)`, `update(id, body)`, `delete(id)`, `iterate(query?)` |
 | `orbit.forum` | `listPosts`, `getPost`, `createPost`, `updatePost`, `deletePost`, `addComment(postId, body)`, `updateComment`, `deleteComment`, `votePost(id, value)`, `voteComment(id, value)` |
-| `orbit.notifications` | `list(query?)`, `markRead(id)` |
+| `orbit.notifications` | `list(query?)`, `markRead(id)`, `markAllRead()`, `delete(id)` |
 | `orbit.uploads` | `upload(file, filename?)` |
 | `orbit.health()` | |
 
@@ -209,7 +209,9 @@ under `components['schemas']`. List endpoints accept `page`, `limit` (max 100) a
 | Method | Path | Auth | Request body | Response |
 | --- | --- | --- | --- | --- |
 | `GET` | `/api/notifications` | Bearer |  | `PaginatedNotificationsDto` |
+| `POST` | `/api/notifications/read-all` | Bearer |  | `MarkAllReadDto` |
 | `POST` | `/api/notifications/{id}/read` | Bearer |  | `NotificationReadDto` |
+| `DELETE` | `/api/notifications/{id}` | Bearer |  | `OkDto` |
 
 #### events
 
@@ -273,8 +275,8 @@ under `components['schemas']`. List endpoints accept `page`, `limit` (max 100) a
 
 - **Realtime notifications.** The API emits `notification:new` over Socket.IO (global to all
   authenticated clients, or directed to specific user rooms). Use `socket.io-client` for that. This
-  package covers the REST API only (`GET /api/notifications` and `POST /api/notifications/{id}/read`
-  are included). List responses include `audience` (`GLOBAL` | `DIRECTED`).
+  package covers the REST API only (list, mark read, mark all read, and per-user delete/dismiss).
+  List responses include `audience` (`GLOBAL` | `DIRECTED`).
 - **Per-status error types.** Every failure shares one `error` type, so use `response.status`
   (401, 403, 404, ...) to tell them apart.
 

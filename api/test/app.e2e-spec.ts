@@ -817,6 +817,102 @@ describe('App (e2e)', () => {
     );
   });
 
+  it('marks all notifications read and dismisses one without affecting other users', async () => {
+    const member = await prisma.user.create({
+      data: {
+        username: `${prefix}-inbox-member`,
+        fullName: 'Inbox Member',
+        passwordHash: await bcrypt.hash(password, 10),
+        role: 'USER',
+        status: 'ACTIVE',
+      },
+    });
+    createdIds.push(member.id);
+    const adminTok = await adminToken();
+    const memberLogin = await request(app.getHttpServer())
+      .post('/api/auth/login')
+      .send({ username: member.username, password })
+      .expect(201);
+    const memberTok = bodyOf(memberLogin).accessToken;
+
+    const newsA = await request(app.getHttpServer())
+      .post('/api/news')
+      .auth(adminTok, { type: 'bearer' })
+      .send({ title: 'Inbox A', content: 'Body' })
+      .expect(201);
+    const newsB = await request(app.getHttpServer())
+      .post('/api/news')
+      .auth(adminTok, { type: 'bearer' })
+      .send({ title: 'Inbox B', content: 'Body' })
+      .expect(201);
+
+    const listFor = async (token: string) => {
+      const res = await request(app.getHttpServer())
+        .get('/api/notifications?limit=100')
+        .auth(token, { type: 'bearer' })
+        .expect(200);
+      return (
+        res.body as {
+          items: { id: string; body: string; read: boolean }[];
+          total: number;
+        }
+      ).items;
+    };
+
+    const memberBefore = await listFor(memberTok);
+    const targets = memberBefore.filter(
+      (n) => n.body === 'Inbox A' || n.body === 'Inbox B',
+    );
+    expect(targets).toHaveLength(2);
+    expect(targets.every((n) => !n.read)).toBe(true);
+
+    const markAll = await request(app.getHttpServer())
+      .post('/api/notifications/read-all')
+      .auth(memberTok, { type: 'bearer' })
+      .expect(201);
+    expect(markAll.body).toMatchObject({ ok: true });
+    expect((markAll.body as { marked: number }).marked).toBeGreaterThanOrEqual(
+      2,
+    );
+
+    const memberAfterRead = await listFor(memberTok);
+    expect(
+      memberAfterRead
+        .filter((n) => n.body === 'Inbox A' || n.body === 'Inbox B')
+        .every((n) => n.read),
+    ).toBe(true);
+
+    const adminAfterMemberRead = await listFor(adminTok);
+    const adminTargets = adminAfterMemberRead.filter(
+      (n) => n.body === 'Inbox A' || n.body === 'Inbox B',
+    );
+    expect(adminTargets.some((n) => !n.read)).toBe(true);
+
+    const dismissId = memberAfterRead.find((n) => n.body === 'Inbox A')!.id;
+    await request(app.getHttpServer())
+      .delete(`/api/notifications/${dismissId}`)
+      .auth(memberTok, { type: 'bearer' })
+      .expect(200)
+      .expect({ ok: true });
+
+    const memberAfterDismiss = await listFor(memberTok);
+    expect(memberAfterDismiss.some((n) => n.body === 'Inbox A')).toBe(false);
+    expect(memberAfterDismiss.some((n) => n.body === 'Inbox B')).toBe(true);
+
+    const adminAfterDismiss = await listFor(adminTok);
+    expect(adminAfterDismiss.some((n) => n.body === 'Inbox A')).toBe(true);
+    expect(
+      await prisma.notification.count({
+        where: { resourceId: dataOf(newsA).id },
+      }),
+    ).toBe(1);
+    expect(
+      await prisma.notification.count({
+        where: { resourceId: dataOf(newsB).id },
+      }),
+    ).toBe(1);
+  });
+
   it('delivers committed content notifications over a real socket', async () => {
     const token = await adminToken();
     const socket = io(process.env.PUBLIC_BASE_URL, {

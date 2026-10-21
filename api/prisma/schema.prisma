@@ -37,12 +37,13 @@ model User {
   announcements       Announcement[]
   news                News[]
   blogPosts           BlogPost[]
-  notificationReads      NotificationRead[]
-  notificationRecipients NotificationRecipient[]
-  forumPosts             ForumPost[]
-  forumComments          ForumComment[]
-  forumPostVotes         ForumPostVote[]
-  forumCommentVotes      ForumCommentVote[]
+  notificationReads       NotificationRead[]
+  notificationRecipients  NotificationRecipient[]
+  notificationDismissals  NotificationDismissal[]
+  forumPosts              ForumPost[]
+  forumComments           ForumComment[]
+  forumPostVotes          ForumPostVote[]
+  forumCommentVotes       ForumCommentVote[]
 }
 
 model Event {
@@ -109,6 +110,7 @@ model Notification {
   createdAt    DateTime             @default(now())
   reads        NotificationRead[]
   recipients   NotificationRecipient[]
+  dismissals   NotificationDismissal[]
 }
 
 model NotificationRecipient {
@@ -131,6 +133,18 @@ model NotificationRead {
   notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
 
   @@unique([userId, notificationId])
+}
+
+model NotificationDismissal {
+  id             String       @id @default(uuid())
+  userId         String
+  notificationId String
+  dismissedAt    DateTime     @default(now())
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, notificationId])
+  @@index([userId])
 }
 
 model ForumPost {

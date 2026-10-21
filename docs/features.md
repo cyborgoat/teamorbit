@@ -78,7 +78,7 @@ Authenticated image upload; returns an absolute public URL like `https://orbit.e
 - **Global** (`audience: GLOBAL`): announcements, events, news, blog posts, forum posts — visible to all users
 - **Directed** (`audience: DIRECTED`): forum comments — top-level notifies the post author; replies notify the parent comment author (self-notifications are skipped)
 - Live toast via Socket.io `notification:new` (global to all authenticated sockets; directed to recipient user rooms)
-- List + mark-read over REST (list is filtered to notifications the caller may see)
+- List, mark-read, mark-all-read, and per-user dismiss over REST (list excludes notifications the caller dismissed; dismiss does not delete the shared row for others)
 
 ## HTTP API (summary)
 
@@ -94,7 +94,7 @@ All content and user routes (except register/login) require a Bearer JWT unless 
 | Blog | GET/POST/PATCH/DELETE | `/api/blog-posts` |
 | Forum | GET/POST/PATCH/DELETE posts & comments, PUT votes | `/api/forum-posts`, `/api/forum-comments` |
 | Uploads | POST | `/api/uploads` |
-| Notifications | GET list, POST `:id/read` | `/api/notifications` |
+| Notifications | GET list, POST `read-all`, POST `:id/read`, DELETE `:id` | `/api/notifications` |
 | Health | GET | `/api/health` |
 | Metrics | GET | `/metrics` |
 | Swagger | UI | `/docs` |

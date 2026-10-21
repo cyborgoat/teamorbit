@@ -95,6 +95,14 @@ export function createResources(client: Raw, auth: { setToken(t: string | undefi
         call(client, 'POST', '/api/notifications/{id}/read', withId(id)) as Promise<
           ResponseOf<'/api/notifications/{id}/read', 'post'>
         >,
+      markAllRead: () =>
+        call(client, 'POST', '/api/notifications/read-all') as Promise<
+          ResponseOf<'/api/notifications/read-all', 'post'>
+        >,
+      delete: (id: string) =>
+        call(client, 'DELETE', '/api/notifications/{id}', withId(id)) as Promise<
+          ResponseOf<'/api/notifications/{id}', 'delete'>
+        >,
     },
     forum: {
       listPosts: (query?: QueryOf<'/api/forum-posts'>) =>

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.2 — 2026-10-21
+
+- Client helpers: `orbit.notifications.markAllRead()` and `orbit.notifications.delete(id)` (per-user dismiss; does not remove shared global rows for others).
+
 ## 0.1.1 — 2026-10-21
 
 - Notification list items include `audience` (`GLOBAL` | `DIRECTED`) for targeted vs broadcast notifications.

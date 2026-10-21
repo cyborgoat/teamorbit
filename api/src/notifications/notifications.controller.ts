@@ -1,4 +1,12 @@
-import { Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiCreatedResponse,
@@ -11,10 +19,11 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { PaginationQueryDto } from '../common/dto/pagination.dto';
 import { NotificationsService } from './notifications.service';
 import {
+  MarkAllReadDto,
   NotificationReadDto,
   PaginatedNotificationsDto,
 } from './dto/notification.dto';
-import { ErrorDto } from '../common/dto/response.dto';
+import { ErrorDto, OkDto } from '../common/dto/response.dto';
 
 @ApiDefaultResponse({ type: ErrorDto })
 @ApiTags('notifications')
@@ -33,9 +42,21 @@ export class NotificationsController {
     return this.notifications.listForUser(user.id, query.page, query.limit);
   }
 
+  @Post('read-all')
+  @ApiOkResponse({ type: MarkAllReadDto })
+  markAllRead(@CurrentUser() user: { id: string }) {
+    return this.notifications.markAllRead(user.id);
+  }
+
   @Post(':id/read')
   @ApiCreatedResponse({ type: NotificationReadDto })
   markRead(@CurrentUser() user: { id: string }, @Param('id') id: string) {
     return this.notifications.markRead(user.id, id);
+  }
+
+  @Delete(':id')
+  @ApiOkResponse({ type: OkDto })
+  dismiss(@CurrentUser() user: { id: string }, @Param('id') id: string) {
+    return this.notifications.dismissForUser(user.id, id);
   }
 }

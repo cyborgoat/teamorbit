@@ -6,7 +6,10 @@ export class NotificationDto {
   @ApiProperty()
   id: string;
 
-  @ApiProperty({ enum: NotificationAudience, example: NotificationAudience.GLOBAL })
+  @ApiProperty({
+    enum: NotificationAudience,
+    example: NotificationAudience.GLOBAL,
+  })
   audience: NotificationAudience;
 
   @ApiProperty({ example: 'forum.created' })
@@ -48,4 +51,12 @@ export class NotificationReadDto {
 
   @ApiProperty()
   readAt: Date;
+}
+
+export class MarkAllReadDto {
+  @ApiProperty({ example: true })
+  ok: boolean;
+
+  @ApiProperty({ description: 'Number of notifications newly marked read' })
+  marked: number;
 }

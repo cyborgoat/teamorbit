@@ -1,6 +1,10 @@
 import { NotificationAudience, Prisma } from '@prisma/client';
 import { paginate } from '../common/utils';
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsGateway } from './notifications.gateway';
 
@@ -21,6 +25,28 @@ export class NotificationsService {
     private prisma: PrismaService,
     private gateway: NotificationsGateway,
   ) {}
+
+  private visibleWhere(userId: string): Prisma.NotificationWhereInput {
+    return {
+      AND: [
+        {
+          OR: [
+            { audience: NotificationAudience.GLOBAL },
+            { recipients: { some: { userId } } },
+          ],
+        },
+        { dismissals: { none: { userId } } },
+      ],
+    };
+  }
+
+  private async requireVisible(userId: string, notificationId: string) {
+    const notification = await this.prisma.notification.findFirst({
+      where: { id: notificationId, ...this.visibleWhere(userId) },
+    });
+    if (!notification) throw new NotFoundException('Notification not found');
+    return notification;
+  }
 
   async createWithNotification<T>(
     create: (tx: Prisma.TransactionClient) => Promise<T>,
@@ -78,12 +104,7 @@ export class NotificationsService {
 
   async listForUser(userId: string, page = 1, limit = 20) {
     const { skip, take } = paginate(page, limit);
-    const where: Prisma.NotificationWhereInput = {
-      OR: [
-        { audience: NotificationAudience.GLOBAL },
-        { recipients: { some: { userId } } },
-      ],
-    };
+    const where = this.visibleWhere(userId);
     const [items, total] = await Promise.all([
       this.prisma.notification.findMany({
         where,
@@ -115,6 +136,7 @@ export class NotificationsService {
   }
 
   async markRead(userId: string, notificationId: string) {
+    await this.requireVisible(userId, notificationId);
     return this.prisma.notificationRead.upsert({
       where: {
         userId_notificationId: { userId, notificationId },
@@ -122,5 +144,34 @@ export class NotificationsService {
       create: { userId, notificationId },
       update: { readAt: new Date() },
     });
+  }
+
+  async markAllRead(userId: string) {
+    const unread = await this.prisma.notification.findMany({
+      where: {
+        ...this.visibleWhere(userId),
+        reads: { none: { userId } },
+      },
+      select: { id: true },
+    });
+    if (unread.length === 0) {
+      return { ok: true as const, marked: 0 };
+    }
+    const result = await this.prisma.notificationRead.createMany({
+      data: unread.map((n) => ({ userId, notificationId: n.id })),
+    });
+    return { ok: true as const, marked: result.count };
+  }
+
+  async dismissForUser(userId: string, notificationId: string) {
+    await this.requireVisible(userId, notificationId);
+    await this.prisma.notificationDismissal.upsert({
+      where: {
+        userId_notificationId: { userId, notificationId },
+      },
+      create: { userId, notificationId },
+      update: { dismissedAt: new Date() },
+    });
+    return { ok: true as const };
   }
 }
