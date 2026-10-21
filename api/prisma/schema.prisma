@@ -34,6 +34,7 @@ model User {
   updatedAt    DateTime   @updatedAt
 
   events                   Event[]
+  eventRecipients          EventRecipient[]
   announcements            Announcement[]
   news                     News[]
   blogPosts                BlogPost[]
@@ -46,18 +47,36 @@ model User {
   commentVotes             CommentVote[]
 }
 
+enum EventAudience {
+  GLOBAL
+  SELECTED
+}
+
 model Event {
-  id            String   @id @default(uuid())
+  id            String        @id @default(uuid())
   title         String
   description   String
   startAt       DateTime
   endAt         DateTime
   location      String
   coverImageUrl String?
+  audience      EventAudience @default(GLOBAL)
   createdById   String
-  createdBy     User     @relation(fields: [createdById], references: [id])
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdBy     User          @relation(fields: [createdById], references: [id])
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  recipients    EventRecipient[]
+}
+
+model EventRecipient {
+  id      String @id @default(uuid())
+  eventId String
+  userId  String
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+  @@index([userId])
 }
 
 model Announcement {

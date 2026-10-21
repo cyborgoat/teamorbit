@@ -4,12 +4,13 @@ import { useResourceList } from '@/hooks/use-resource-list'
 import { ListControls } from '@/components/list-controls'
 import { queryKeys } from '@/lib/query-keys'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { CalendarDays, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { ImageUpload } from '@/components/image-upload'
 import { PageHeader } from '@/components/page-header'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -49,6 +50,17 @@ function fromLocalInput(value: string) {
   return new Date(value).toISOString()
 }
 
+const emptyForm = {
+  title: '',
+  description: '',
+  startAt: '',
+  endAt: '',
+  location: '',
+  coverImageUrl: '',
+  audience: 'GLOBAL' as 'GLOBAL' | 'SELECTED',
+  recipientIds: [] as string[],
+}
+
 function EventsPage() {
   const { user } = useAuth()
   const qc = useQueryClient()
@@ -57,13 +69,13 @@ function EventsPage() {
       orbit.events.list(query),
     )
   const [open, setOpen] = useState(false)
-  const [form, setForm] = useState({
-    title: '',
-    description: '',
-    startAt: '',
-    endAt: '',
-    location: '',
-    coverImageUrl: '',
+  const [form, setForm] = useState(emptyForm)
+
+  const usersQuery = useQuery({
+    queryKey: [...queryKeys.users, 'active-picker'],
+    queryFn: () =>
+      orbit.users.list({ page: 1, limit: 100, status: 'ACTIVE' }),
+    enabled: canManage(user) && open && form.audience === 'SELECTED',
   })
 
   const create = useMutation({
@@ -75,16 +87,12 @@ function EventsPage() {
         startAt: fromLocalInput(form.startAt),
         endAt: fromLocalInput(form.endAt),
         coverImageUrl: form.coverImageUrl || undefined,
+        audience: form.audience,
+        recipientIds:
+          form.audience === 'SELECTED' ? form.recipientIds : undefined,
       }),
     onSuccess: () => {
-      setForm({
-        title: '',
-        description: '',
-        startAt: '',
-        endAt: '',
-        location: '',
-        coverImageUrl: '',
-      })
+      setForm(emptyForm)
       setOpen(false)
       qc.invalidateQueries({ queryKey: queryKeys.events })
       toast.success('Event created')
@@ -100,6 +108,16 @@ function EventsPage() {
     },
     onError: (e: Error) => toast.error(e.message),
   })
+
+  const toggleRecipient = (id: string) => {
+    if (id === user?.id) return
+    setForm((prev) => ({
+      ...prev,
+      recipientIds: prev.recipientIds.includes(id)
+        ? prev.recipientIds.filter((x) => x !== id)
+        : [...prev.recipientIds, id],
+    }))
+  }
 
   return (
     <div>
@@ -189,6 +207,78 @@ function EventsPage() {
                       required
                     />
                   </div>
+                  <fieldset className="space-y-2">
+                    <legend className="text-sm font-medium">Audience</legend>
+                    <label className="flex items-center gap-2 text-sm">
+                      <input
+                        type="radio"
+                        name="ev-audience"
+                        checked={form.audience === 'GLOBAL'}
+                        onChange={() =>
+                          setForm({
+                            ...form,
+                            audience: 'GLOBAL',
+                            recipientIds: [],
+                          })
+                        }
+                      />
+                      Entire team
+                    </label>
+                    <label className="flex items-center gap-2 text-sm">
+                      <input
+                        type="radio"
+                        name="ev-audience"
+                        checked={form.audience === 'SELECTED'}
+                        onChange={() =>
+                          setForm({ ...form, audience: 'SELECTED' })
+                        }
+                      />
+                      Selected users
+                    </label>
+                  </fieldset>
+                  {form.audience === 'SELECTED' ? (
+                    <div className="space-y-2">
+                      <Label>Invitees</Label>
+                      <p className="text-xs text-muted-foreground">
+                        You are always included as the creator.
+                      </p>
+                      <div className="max-h-40 space-y-1 overflow-y-auto rounded-md border p-2">
+                        {usersQuery.isLoading ? (
+                          <p className="text-sm text-muted-foreground">
+                            Loading members…
+                          </p>
+                        ) : (
+                          (usersQuery.data?.items ?? []).map((member) => {
+                            const isCreator = member.id === user?.id
+                            const checked =
+                              isCreator ||
+                              form.recipientIds.includes(member.id)
+                            return (
+                              <label
+                                key={member.id}
+                                className="flex items-center gap-2 text-sm"
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={checked}
+                                  disabled={isCreator}
+                                  onChange={() => toggleRecipient(member.id)}
+                                />
+                                <span>
+                                  {member.fullName}
+                                  <span className="text-muted-foreground">
+                                    {' '}
+                                    @{member.username}
+                                    {isCreator ? ' (you)' : ''}
+                                  </span>
+                                </span>
+                              </label>
+                            )
+                          })
+                        )}
+                      </div>
+                    </div>
+                  ) : null}
                   <div className="space-y-2">
                     <Label>Cover image</Label>
                     <ImageUpload
@@ -244,6 +334,7 @@ function EventsPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Event</TableHead>
+                <TableHead>Audience</TableHead>
                 <TableHead>When</TableHead>
                 <TableHead>Location</TableHead>
                 <TableHead className="w-20" />
@@ -274,6 +365,11 @@ function EventsPage() {
                         </div>
                       </div>
                     </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="secondary">
+                      {item.audience === 'SELECTED' ? 'Invitees' : 'Team'}
+                    </Badge>
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
                     {new Date(item.startAt).toLocaleString()}

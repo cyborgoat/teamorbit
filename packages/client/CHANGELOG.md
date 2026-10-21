@@ -4,6 +4,10 @@
 
 - Add admin upload cleanup preview and background cleanup helpers, with typed run summaries.
 
+## 0.2.1 — 2026-10-21
+
+- Events support `audience` (`GLOBAL` | `SELECTED`) and `recipientIds` / `recipients` for invite-only visibility and directed create notifications.
+
 ## 0.2.0 — 2026-10-21
 
 - Universal comments: `orbit.comments.{list,create,update,delete,vote}` for any content `resourceType`.

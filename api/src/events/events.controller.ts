@@ -41,14 +41,17 @@ export class EventsController {
 
   @Get()
   @ApiOkResponse({ type: PaginatedEventsDto })
-  findAll(@Query() query: PaginationQueryDto) {
-    return this.events.findAll(query.page, query.limit, query.q);
+  findAll(
+    @Query() query: PaginationQueryDto,
+    @CurrentUser() user: { id: string },
+  ) {
+    return this.events.findAll(user.id, query.page, query.limit, query.q);
   }
 
   @Get(':id')
   @ApiOkResponse({ type: EventDto })
-  findOne(@Param('id') id: string) {
-    return this.events.findOne(id);
+  findOne(@Param('id') id: string, @CurrentUser() user: { id: string }) {
+    return this.events.findOne(id, user.id);
   }
 
   @Post()
@@ -61,14 +64,18 @@ export class EventsController {
   @Patch(':id')
   @Roles(Role.ADMIN, Role.SUPERUSER)
   @ApiOkResponse({ type: EventDto })
-  update(@Param('id') id: string, @Body() dto: UpdateEventDto) {
-    return this.events.update(id, dto);
+  update(
+    @Param('id') id: string,
+    @Body() dto: UpdateEventDto,
+    @CurrentUser() user: { id: string },
+  ) {
+    return this.events.update(id, dto, user.id);
   }
 
   @Delete(':id')
   @Roles(Role.ADMIN, Role.SUPERUSER)
   @ApiOkResponse({ type: OkDto })
-  remove(@Param('id') id: string) {
-    return this.events.remove(id);
+  remove(@Param('id') id: string, @CurrentUser() user: { id: string }) {
+    return this.events.remove(id, user.id);
   }
 }

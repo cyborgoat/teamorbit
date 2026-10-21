@@ -266,6 +266,11 @@ export async function seedDatabase(
       for (const [index, event] of events.entries()) {
         const id = demoId(`event:${index}`);
         const { day, hours, ...data } = event;
+        const createdById = author(index);
+        const selected = index >= 4;
+        const inviteeIds = selected
+          ? [...new Set([createdById, participant(index + 1), participant(index + 2)])]
+          : [];
         await missing(
           'Event',
           () => tx.event.findUnique({ where: { id } }),
@@ -274,10 +279,18 @@ export async function seedDatabase(
               data: {
                 id,
                 ...data,
-                createdById: author(index),
+                audience: selected ? 'SELECTED' : 'GLOBAL',
+                createdById,
                 createdAt: date(-28 + index),
                 startAt: date(day),
                 endAt: date(day, hours),
+                ...(selected
+                  ? {
+                      recipients: {
+                        create: inviteeIds.map((userId) => ({ userId })),
+                      },
+                    }
+                  : {}),
               },
             }),
         );

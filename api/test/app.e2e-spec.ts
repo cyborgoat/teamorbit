@@ -501,6 +501,121 @@ describe('App (e2e)', () => {
       .expect(400);
   });
 
+  it('scopes selected events to invitees and directs create notifications', async () => {
+    const admin = await prisma.user.findUniqueOrThrow({
+      where: { username: adminUsername },
+    });
+    const invitee = await prisma.user.create({
+      data: {
+        username: `${prefix}-event-invitee`,
+        fullName: 'Event Invitee',
+        passwordHash: await bcrypt.hash(password, 10),
+        role: 'USER',
+        status: 'ACTIVE',
+      },
+    });
+    const outsider = await prisma.user.create({
+      data: {
+        username: `${prefix}-event-outsider`,
+        fullName: 'Event Outsider',
+        passwordHash: await bcrypt.hash(password, 10),
+        role: 'USER',
+        status: 'ACTIVE',
+      },
+    });
+    createdIds.push(invitee.id, outsider.id);
+    const token = await adminToken();
+    const inviteeTok = bodyOf(
+      await request(app.getHttpServer())
+        .post('/api/auth/login')
+        .send({ username: invitee.username, password })
+        .expect(201),
+    ).accessToken;
+    const outsiderTok = bodyOf(
+      await request(app.getHttpServer())
+        .post('/api/auth/login')
+        .send({ username: outsider.username, password })
+        .expect(201),
+    ).accessToken;
+
+    const created = await request(app.getHttpServer())
+      .post('/api/events')
+      .auth(token, { type: 'bearer' })
+      .send({
+        title: 'Invite-only planning',
+        description: 'Private',
+        location: 'Room B',
+        startAt: '2026-12-01T10:00:00Z',
+        endAt: '2026-12-01T11:00:00Z',
+        audience: 'SELECTED',
+        recipientIds: [invitee.id],
+      })
+      .expect(201);
+    const body = created.body as {
+      id: string;
+      audience: string;
+      recipients: { id: string }[];
+    };
+    expect(body.audience).toBe('SELECTED');
+    expect(body.recipients.map((r) => r.id).sort()).toEqual(
+      [admin.id, invitee.id].sort(),
+    );
+
+    await request(app.getHttpServer())
+      .get(`/api/events/${body.id}`)
+      .auth(inviteeTok, { type: 'bearer' })
+      .expect(200);
+    await request(app.getHttpServer())
+      .get(`/api/events/${body.id}`)
+      .auth(outsiderTok, { type: 'bearer' })
+      .expect(404);
+
+    const outsiderList = await request(app.getHttpServer())
+      .get('/api/events?limit=100')
+      .auth(outsiderTok, { type: 'bearer' })
+      .expect(200);
+    expect(
+      (outsiderList.body as { items: { id: string }[] }).items.some(
+        (item) => item.id === body.id,
+      ),
+    ).toBe(false);
+
+    const inviteeNotifs = await request(app.getHttpServer())
+      .get('/api/notifications?limit=100')
+      .auth(inviteeTok, { type: 'bearer' })
+      .expect(200);
+    const inviteeHit = (
+      inviteeNotifs.body as {
+        items: {
+          type: string;
+          audience: string;
+          resourceId: string;
+          body: string;
+        }[];
+      }
+    ).items.find(
+      (n) => n.type === 'event.created' && n.resourceId === body.id,
+    );
+    expect(inviteeHit).toMatchObject({
+      audience: 'DIRECTED',
+      body: 'Invite-only planning',
+    });
+
+    const outsiderNotifs = await request(app.getHttpServer())
+      .get('/api/notifications?limit=100')
+      .auth(outsiderTok, { type: 'bearer' })
+      .expect(200);
+    expect(
+      (
+        outsiderNotifs.body as {
+          items: { type: string; resourceId: string }[];
+        }
+      ).items.some(
+        (n) => n.type === 'event.created' && n.resourceId === body.id,
+      ),
+    ).toBe(false);
+  });
+
   it('keeps concurrent post and comment votes consistent with stored vote totals', async () => {
     const token = await adminToken();
     const post = await request(app.getHttpServer())

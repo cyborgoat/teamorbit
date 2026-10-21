@@ -1,7 +1,16 @@
 import { MediaInput } from '../../common/media';
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
+import { EventAudience } from '@prisma/client';
 import { PageMetaDto, UserSummaryDto } from '../../common/dto/response.dto';
-import { IsDateString, IsOptional, IsString, MinLength } from 'class-validator';
+import {
+  IsArray,
+  IsDateString,
+  IsEnum,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MinLength,
+} from 'class-validator';
 
 export class CreateEventDto {
   @ApiProperty()
@@ -29,6 +38,17 @@ export class CreateEventDto {
   @IsOptional()
   @MediaInput()
   coverImageUrl?: string | null;
+
+  @ApiPropertyOptional({ enum: EventAudience, default: EventAudience.GLOBAL })
+  @IsOptional()
+  @IsEnum(EventAudience)
+  audience?: EventAudience;
+
+  @ApiPropertyOptional({ type: [String] })
+  @IsOptional()
+  @IsArray()
+  @IsUUID('4', { each: true })
+  recipientIds?: string[];
 }
 
 export class UpdateEventDto extends PartialType(CreateEventDto) {}
@@ -55,6 +75,9 @@ export class EventRecordDto {
   @ApiProperty({ type: String, nullable: true })
   coverImageUrl: string | null;
 
+  @ApiProperty({ enum: EventAudience })
+  audience: EventAudience;
+
   @ApiProperty()
   createdById: string;
 
@@ -68,6 +91,9 @@ export class EventRecordDto {
 export class EventDto extends EventRecordDto {
   @ApiProperty({ type: UserSummaryDto })
   createdBy: UserSummaryDto;
+
+  @ApiProperty({ type: [UserSummaryDto] })
+  recipients: UserSummaryDto[];
 }
 
 export class PaginatedEventsDto extends PageMetaDto {

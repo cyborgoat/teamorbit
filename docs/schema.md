@@ -16,6 +16,7 @@ Source of truth: [`api/prisma/schema.prisma`](../api/prisma/schema.prisma). Data
 | `Role` | `SUPERUSER`, `ADMIN`, `USER` |
 | `UserStatus` | `ACTIVE`, `INACTIVE`, `PENDING`, `SUSPENDED`, `DELETED` |
 | `NotificationAudience` | `GLOBAL`, `DIRECTED` |
+| `EventAudience` | `GLOBAL`, `SELECTED` |
 
 ## Entity relationships
 
@@ -24,6 +25,7 @@ erDiagram
   News }o--o{ Tag : tagged
   BlogPost }o--o{ Tag : tagged
   User ||--o{ Event : creates
+  User ||--o{ EventRecipient : invited
   User ||--o{ Announcement : writes
   User ||--o{ News : writes
   User ||--o{ BlogPost : writes
@@ -34,6 +36,7 @@ erDiagram
   User ||--o{ NotificationRead : has
   User ||--o{ NotificationRecipient : receives
   User ||--o{ NotificationDismissal : dismisses
+  Event ||--o{ EventRecipient : invites
   ForumPost ||--o{ ForumPostVote : receives
   Comment ||--o{ Comment : "replies (parentId)"
   Comment ||--o{ CommentVote : receives
@@ -42,7 +45,7 @@ erDiagram
   Notification ||--o{ NotificationDismissal : "hidden for"
 ```
 
-`Notification` and `Comment` point at source content loosely through `resourceType` + `resourceId` (no foreign key). `GLOBAL` notifications have no recipient rows; `DIRECTED` ones list intended users in `NotificationRecipient`. Per-user dismissals hide a notification from one inbox only.
+`Notification` and `Comment` point at source content loosely through `resourceType` + `resourceId` (no foreign key). `GLOBAL` notifications have no recipient rows; `DIRECTED` ones list intended users in `NotificationRecipient`. Per-user dismissals hide a notification from one inbox only. `SELECTED` events list invitees in `EventRecipient` (creator always included); `GLOBAL` events have no recipient rows.
 
 ## Models
 
@@ -72,8 +75,20 @@ Username is required and is the default login identifier.
 | `title`, `description`, `location` | String | |
 | `startAt`, `endAt` | DateTime | |
 | `coverImageUrl` | String? | |
+| `audience` | EventAudience | `GLOBAL` (default) or `SELECTED` |
 | `createdById` | String | FK → `User.id` |
 | `createdAt`, `updatedAt` | DateTime | |
+
+### EventRecipient
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `id` | String | PK, UUID |
+| `eventId` | String | FK → `Event.id` (cascade delete) |
+| `userId` | String | FK → `User.id` |
+| | | Unique on `(eventId, userId)` |
+
+Used only when `Event.audience` is `SELECTED`. Visibility and create notifications are limited to these users (creator always present).
 
 ### Announcement
 

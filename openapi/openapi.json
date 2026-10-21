@@ -3211,6 +3211,13 @@
             "type": "string",
             "nullable": true
           },
+          "audience": {
+            "enum": [
+              "GLOBAL",
+              "SELECTED"
+            ],
+            "type": "string"
+          },
           "createdById": {
             "type": "string"
           },
@@ -3224,6 +3231,12 @@
           },
           "createdBy": {
             "$ref": "#/components/schemas/UserSummaryDto"
+          },
+          "recipients": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserSummaryDto"
+            }
           }
         },
         "required": [
@@ -3234,10 +3247,12 @@
           "endAt",
           "location",
           "coverImageUrl",
+          "audience",
           "createdById",
           "createdAt",
           "updatedAt",
-          "createdBy"
+          "createdBy",
+          "recipients"
         ]
       },
       "PaginatedEventsDto": {
@@ -3288,6 +3303,21 @@
           "coverImageUrl": {
             "type": "string",
             "nullable": true
+          },
+          "audience": {
+            "enum": [
+              "GLOBAL",
+              "SELECTED"
+            ],
+            "type": "string",
+            "default": "GLOBAL"
+          },
+          "recipientIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         },
         "required": [
@@ -3320,6 +3350,21 @@
           "coverImageUrl": {
             "type": "string",
             "nullable": true
+          },
+          "audience": {
+            "enum": [
+              "GLOBAL",
+              "SELECTED"
+            ],
+            "type": "string",
+            "default": "GLOBAL"
+          },
+          "recipientIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         }
       },

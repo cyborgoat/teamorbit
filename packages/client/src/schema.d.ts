@@ -668,12 +668,15 @@ export interface components {
             endAt: string;
             location: string;
             coverImageUrl: string | null;
+            /** @enum {string} */
+            audience: "GLOBAL" | "SELECTED";
             createdById: string;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
             createdBy: components["schemas"]["UserSummaryDto"];
+            recipients: components["schemas"]["UserSummaryDto"][];
         };
         PaginatedEventsDto: {
             total: number;
@@ -688,6 +691,12 @@ export interface components {
             endAt: string;
             location: string;
             coverImageUrl?: string | null;
+            /**
+             * @default GLOBAL
+             * @enum {string}
+             */
+            audience: "GLOBAL" | "SELECTED";
+            recipientIds?: string[];
         };
         UpdateEventDto: {
             title?: string;
@@ -696,6 +705,12 @@ export interface components {
             endAt?: string;
             location?: string;
             coverImageUrl?: string | null;
+            /**
+             * @default GLOBAL
+             * @enum {string}
+             */
+            audience: "GLOBAL" | "SELECTED";
+            recipientIds?: string[];
         };
         NewsDto: {
             id: string;

@@ -47,7 +47,14 @@ Short team notices (`title`, `description`, author). Creating one emits a notifi
 
 ### Events
 
-Scheduled items with `startAt`, `endAt`, `location`, and optional `coverImageUrl`. Creating one emits a notification.
+Scheduled items with `startAt`, `endAt`, `location`, optional `coverImageUrl`, and audience:
+
+| Audience | Visibility | Create notification |
+|----------|------------|---------------------|
+| `GLOBAL` (default) | All authenticated users | Global |
+| `SELECTED` | Invitees only (creator always included) | Directed to invitees |
+
+Admins create/update/delete; list and detail respect audience (non-invitees get a 404 for selected events).
 
 ### News (markdown)
 
@@ -86,8 +93,8 @@ Authenticated image upload; returns an absolute public URL like `https://orbit.e
 
 ### Notifications
 
-- **Global** (`audience: GLOBAL`): announcements, events, news, blog posts, forum posts — visible to all users
-- **Directed** (`audience: DIRECTED`): comments on any content type — top-level notifies the content author; replies notify the parent comment author (self-notifications are skipped)
+- **Global** (`audience: GLOBAL`): announcements, global events, news, blog posts, forum posts — visible to all users
+- **Directed** (`audience: DIRECTED`): selected-event creates (invitees); comments on any content type — top-level notifies the content author; replies notify the parent comment author (self-notifications are skipped)
 - Live toast via Socket.io `notification:new` (global to all authenticated sockets; directed to recipient user rooms)
 - List (optional `status=unread|read|dismissed`), mark-read, mark-unread, mark-all-read, per-user dismiss, and restore over REST (dismiss hides for one user only)
 
@@ -124,8 +131,8 @@ Interactive OpenAPI docs: http://localhost:3000/docs
 | `/` | Home shortcuts (authenticated) |
 | `/announcements` | List + create dialog |
 | `/announcements/$id` | Detail + comments |
-| `/events` | List + create with datetime-local + cover |
-| `/events/$id` | Detail + comments |
+| `/events` | List + create (audience, invitees, datetime-local, cover) |
+| `/events/$id` | Detail + audience/invitees + comments |
 | `/news` | News list and permitted deletion |
 | `/news/new` | Dedicated news creation page (Admin+) |
 | `/news/$id` | Detail + comments |
