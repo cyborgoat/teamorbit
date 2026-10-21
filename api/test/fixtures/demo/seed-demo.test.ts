@@ -85,9 +85,9 @@ async function main() {
       News: 8,
       BlogPost: 8,
       ForumPost: 10,
-      ForumComment: 30,
+      Comment: 30,
       ForumPostVote: 30,
-      ForumCommentVote: 60,
+      CommentVote: 60,
       Notification: 16,
       NotificationRead: 24,
     };
@@ -120,7 +120,7 @@ async function main() {
         post.votes.reduce((sum, vote) => sum + vote.value, 0),
       );
     }
-    const comments = await prisma.forumComment.findMany({
+    const comments = await prisma.comment.findMany({
       include: { votes: true, parent: true },
     });
     assert.equal(comments.filter((comment) => comment.parentId).length, 10);
@@ -131,7 +131,8 @@ async function main() {
       );
       if (comment.parent) {
         assert.equal(comment.parent.parentId, null);
-        assert.equal(comment.parent.postId, comment.postId);
+        assert.equal(comment.parent.resourceId, comment.resourceId);
+        assert.equal(comment.parent.resourceType, comment.resourceType);
       }
     }
     const resourceModels = {
@@ -206,7 +207,7 @@ async function main() {
       where: { id: demoId('forum:0') },
       data: { score: 0 },
     });
-    await prisma.forumComment.update({
+    await prisma.comment.update({
       where: { id: demoId('comment:0:2') },
       data: { content: 'Edited reply' },
     });

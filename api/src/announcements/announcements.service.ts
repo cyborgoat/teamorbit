@@ -1,3 +1,4 @@
+import { globalCreatedNotification } from '../common/content-crud';
 import { authorSelect, presentContent } from '../common/media';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { paginate } from '../common/utils';
@@ -63,14 +64,14 @@ export class AnnouncementsService {
             },
           },
         }),
-      (item) => ({
-        audience: 'GLOBAL' as const,
-        type: 'announcement.created',
-        title: 'New announcement',
-        body: item.title,
-        resourceType: 'announcement',
-        resourceId: item.id,
-      }),
+      (item) =>
+        globalCreatedNotification({
+          type: 'announcement.created',
+          title: 'New announcement',
+          body: item.title,
+          resourceType: 'announcement',
+          resourceId: item.id,
+        }),
     );
     return presentContent(item);
   }
@@ -92,7 +93,12 @@ export class AnnouncementsService {
 
   async remove(id: string) {
     await this.findOne(id);
-    await this.prisma.announcement.delete({ where: { id } });
+    await this.prisma.$transaction([
+      this.prisma.comment.deleteMany({
+        where: { resourceType: 'announcement', resourceId: id },
+      }),
+      this.prisma.announcement.delete({ where: { id } }),
+    ]);
     return { ok: true };
   }
 }

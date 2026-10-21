@@ -33,17 +33,17 @@ model User {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
-  events              Event[]
-  announcements       Announcement[]
-  news                News[]
-  blogPosts           BlogPost[]
-  notificationReads       NotificationRead[]
-  notificationRecipients  NotificationRecipient[]
-  notificationDismissals  NotificationDismissal[]
-  forumPosts              ForumPost[]
-  forumComments           ForumComment[]
-  forumPostVotes          ForumPostVote[]
-  forumCommentVotes       ForumCommentVote[]
+  events                   Event[]
+  announcements            Announcement[]
+  news                     News[]
+  blogPosts                BlogPost[]
+  notificationReads        NotificationRead[]
+  notificationRecipients   NotificationRecipient[]
+  notificationDismissals   NotificationDismissal[]
+  forumPosts               ForumPost[]
+  forumPostVotes           ForumPostVote[]
+  comments                 Comment[]
+  commentVotes             CommentVote[]
 }
 
 model Event {
@@ -157,25 +157,7 @@ model ForumPost {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  comments ForumComment[]
-  votes    ForumPostVote[]
-}
-
-model ForumComment {
-  id        String   @id @default(uuid())
-  content   String
-  score     Int      @default(0)
-  postId    String
-  post      ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
-  authorId  String
-  author    User     @relation(fields: [authorId], references: [id])
-  parentId  String?
-  parent    ForumComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
-  replies   ForumComment[] @relation("CommentReplies")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  votes ForumCommentVote[]
+  votes ForumPostVote[]
 }
 
 model ForumPostVote {
@@ -191,22 +173,40 @@ model ForumPostVote {
   @@unique([userId, postId])
 }
 
-model ForumCommentVote {
-  id        String       @id @default(uuid())
+model Comment {
+  id           String   @id @default(uuid())
+  content      String
+  score        Int      @default(0)
+  resourceType String
+  resourceId   String
+  authorId     String
+  author       User     @relation(fields: [authorId], references: [id])
+  parentId     String?
+  parent       Comment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies      Comment[] @relation("CommentReplies")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  votes        CommentVote[]
+
+  @@index([resourceType, resourceId])
+}
+
+model CommentVote {
+  id        String   @id @default(uuid())
   value     Int
   userId    String
-  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   commentId String
-  comment   ForumComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([userId, commentId])
 }
 
 model Tag {
-  id String @id @default(uuid())
-  name String @unique
-  news News[]
+  id        String     @id @default(uuid())
+  name      String     @unique
+  news      News[]
   blogPosts BlogPost[]
 }

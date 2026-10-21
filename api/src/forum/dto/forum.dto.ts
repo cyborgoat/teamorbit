@@ -1,14 +1,8 @@
-import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
+import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { PageMetaDto } from '../../common/dto/response.dto';
 import { Type } from 'class-transformer';
-import {
-  IsIn,
-  IsInt,
-  IsOptional,
-  IsString,
-  IsUUID,
-  MinLength,
-} from 'class-validator';
+import { IsIn, IsInt, IsString, MinLength } from 'class-validator';
+import { CommentDto } from '../../comments/dto/comment.dto';
 
 export class CreateForumPostDto {
   @ApiProperty()
@@ -25,27 +19,6 @@ export class CreateForumPostDto {
 }
 
 export class UpdateForumPostDto extends PartialType(CreateForumPostDto) {}
-
-export class CreateForumCommentDto {
-  @ApiProperty({ description: 'Markdown body' })
-  @IsString()
-  @MinLength(1)
-  content: string;
-
-  @ApiPropertyOptional({
-    description: 'Top-level comment id to reply to (one-level nesting only)',
-  })
-  @IsOptional()
-  @IsUUID()
-  parentId?: string;
-}
-
-export class UpdateForumCommentDto {
-  @ApiProperty()
-  @IsString()
-  @MinLength(1)
-  content: string;
-}
 
 export class VoteDto {
   @ApiProperty({
@@ -117,49 +90,6 @@ export class PaginatedForumPostsDto extends PageMetaDto {
   items: ForumPostSummaryDto[];
 }
 
-/** A comment as returned by PATCH (no vote or replies info). */
-export class ForumCommentBaseDto {
-  @ApiProperty()
-  id: string;
-
-  @ApiProperty({ description: 'Markdown body' })
-  content: string;
-
-  @ApiProperty()
-  score: number;
-
-  @ApiProperty()
-  postId: string;
-
-  @ApiProperty()
-  authorId: string;
-
-  @ApiProperty({ type: String, nullable: true })
-  parentId: string | null;
-
-  @ApiProperty()
-  createdAt: Date;
-
-  @ApiProperty()
-  updatedAt: Date;
-
-  @ApiProperty({ type: ForumAuthorDto })
-  author: ForumAuthorDto;
-}
-
-export class ForumReplyDto extends ForumCommentBaseDto {
-  @ApiProperty({
-    description: 'Current user vote: 1, -1 or 0',
-    enum: [1, -1, 0],
-  })
-  myVote: number;
-}
-
-export class ForumCommentDto extends ForumReplyDto {
-  @ApiProperty({ type: [ForumReplyDto] })
-  replies: ForumReplyDto[];
-}
-
 export class ForumPostDetailDto extends ForumPostDto {
   @ApiProperty({
     description: 'Current user vote: 1, -1 or 0',
@@ -167,8 +97,8 @@ export class ForumPostDetailDto extends ForumPostDto {
   })
   myVote: number;
 
-  @ApiProperty({ type: [ForumCommentDto], description: 'Top-level comments' })
-  comments: ForumCommentDto[];
+  @ApiProperty({ type: [CommentDto], description: 'Top-level comments' })
+  comments: CommentDto[];
 }
 
 export class VoteResultDto {

@@ -1,10 +1,10 @@
 import { useAuth } from '@/lib/auth'
 import { canManage } from '@/lib/policies'
-import { useListPage } from '@/hooks/use-list-page'
+import { useResourceList } from '@/hooks/use-resource-list'
 import { ListControls } from '@/components/list-controls'
 import { queryKeys } from '@/lib/query-keys'
-import { createFileRoute } from '@tanstack/react-router'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { createFileRoute, Link } from '@tanstack/react-router'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { CalendarDays, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -39,6 +39,7 @@ import {
 } from '@/components/ui/table'
 import { Textarea } from '@/components/ui/textarea'
 import { orbit } from '@/lib/api'
+import type { Event } from '@goatcheese/teamorbit-client'
 
 export const Route = createFileRoute('/_authenticated/events')({
   component: EventsPage,
@@ -51,12 +52,10 @@ function fromLocalInput(value: string) {
 function EventsPage() {
   const { user } = useAuth()
   const qc = useQueryClient()
-  const pagination = useListPage()
-  const { data, error, refetch, isFetching, isLoading } = useQuery({
-    queryKey: [...queryKeys.events, pagination.page],
-    queryFn: () =>
-      orbit.events.list({ page: pagination.page, limit: pagination.limit }),
-  })
+  const { data, error, refetch, isFetching, isLoading, pagination, items } =
+    useResourceList<Event>(queryKeys.events, (query) =>
+      orbit.events.list(query),
+    )
   const [open, setOpen] = useState(false)
   const [form, setForm] = useState({
     title: '',
@@ -101,8 +100,6 @@ function EventsPage() {
     },
     onError: (e: Error) => toast.error(e.message),
   })
-
-  const items = data?.items ?? []
 
   return (
     <div>
@@ -265,7 +262,13 @@ function EventsPage() {
                         />
                       ) : null}
                       <div>
-                        <div className="font-medium">{item.title}</div>
+                        <Link
+                          to="/events/$id"
+                          params={{ id: item.id }}
+                          className="font-medium hover:underline"
+                        >
+                          {item.title}
+                        </Link>
                         <div className="line-clamp-1 text-sm text-muted-foreground">
                           {item.description}
                         </div>

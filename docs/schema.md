@@ -28,22 +28,21 @@ erDiagram
   User ||--o{ News : writes
   User ||--o{ BlogPost : writes
   User ||--o{ ForumPost : writes
-  User ||--o{ ForumComment : writes
+  User ||--o{ Comment : writes
   User ||--o{ ForumPostVote : casts
-  User ||--o{ ForumCommentVote : casts
+  User ||--o{ CommentVote : casts
   User ||--o{ NotificationRead : has
   User ||--o{ NotificationRecipient : receives
   User ||--o{ NotificationDismissal : dismisses
-  ForumPost ||--o{ ForumComment : has
   ForumPost ||--o{ ForumPostVote : receives
-  ForumComment ||--o{ ForumComment : "replies (parentId)"
-  ForumComment ||--o{ ForumCommentVote : receives
+  Comment ||--o{ Comment : "replies (parentId)"
+  Comment ||--o{ CommentVote : receives
   Notification ||--o{ NotificationRead : "read by"
   Notification ||--o{ NotificationRecipient : "sent to"
   Notification ||--o{ NotificationDismissal : "hidden for"
 ```
 
-`Notification` points at its source content loosely through `resourceType` + `resourceId` (no foreign key), so deleting the source does not cascade. `GLOBAL` notifications have no recipient rows; `DIRECTED` ones list intended users in `NotificationRecipient`. Per-user dismissals hide a notification from one inbox only.
+`Notification` and `Comment` point at source content loosely through `resourceType` + `resourceId` (no foreign key). `GLOBAL` notifications have no recipient rows; `DIRECTED` ones list intended users in `NotificationRecipient`. Per-user dismissals hide a notification from one inbox only.
 
 ## Models
 
@@ -109,26 +108,29 @@ Both models share the same shape.
 | `authorId` | String | FK → `User.id` |
 | `createdAt`, `updatedAt` | DateTime | |
 
-### ForumComment
+### Comment
 
 | Field | Type | Notes |
 |-------|------|-------|
 | `id` | String | PK, UUID |
 | `content` | String | Markdown |
 | `score` | Int | Denormalized sum of votes, default `0` |
-| `postId` | String | FK → `ForumPost.id`, cascade delete |
+| `resourceType` | String | `announcement` \| `event` \| `news` \| `blog` \| `forum` |
+| `resourceId` | String | Target content id (no FK) |
 | `authorId` | String | FK → `User.id` |
-| `parentId` | String? | FK → `ForumComment.id` for replies, cascade delete |
+| `parentId` | String? | FK → `Comment.id` for replies, cascade delete |
 | `createdAt`, `updatedAt` | DateTime | |
 
-### ForumPostVote and ForumCommentVote
+Indexed on `(resourceType, resourceId)`. One-level replies enforced in the service.
+
+### ForumPostVote and CommentVote
 
 | Field | Type | Notes |
 |-------|------|-------|
 | `id` | String | PK, UUID |
 | `value` | Int | `1` or `-1` |
 | `userId` | String | FK → `User.id`, cascade delete |
-| `postId` / `commentId` | String | FK → target, cascade delete |
+| `postId` / `commentId` | String | FK → forum post or comment, cascade delete |
 | `createdAt`, `updatedAt` | DateTime | |
 
 Unique on `(userId, postId)` or `(userId, commentId)`: one vote per user per target.

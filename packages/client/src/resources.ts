@@ -112,6 +112,27 @@ export function createResources(client: Raw, auth: { setToken(t: string | undefi
           ResponseOf<'/api/notifications/{id}/restore', 'post'>
         >,
     },
+    comments: {
+      list: (query: QueryOf<'/api/comments'>) =>
+        call(client, 'GET', '/api/comments', { params: { query } }) as Promise<
+          ResponseOf<'/api/comments', 'get'>
+        >,
+      create: (body: BodyOf<'/api/comments', 'post'>) =>
+        call(client, 'POST', '/api/comments', { body }) as Promise<ResponseOf<'/api/comments', 'post'>>,
+      update: (id: string, body: BodyOf<'/api/comments/{id}', 'patch'>) =>
+        call(client, 'PATCH', '/api/comments/{id}', { ...withId(id), body }) as Promise<
+          ResponseOf<'/api/comments/{id}', 'patch'>
+        >,
+      delete: (id: string) =>
+        call(client, 'DELETE', '/api/comments/{id}', withId(id)) as Promise<
+          ResponseOf<'/api/comments/{id}', 'delete'>
+        >,
+      /** `1` = up, `-1` = down, `0` = clear. */
+      vote: (id: string, value: BodyOf<'/api/comments/{id}/vote', 'put'>['value']) =>
+        call(client, 'PUT', '/api/comments/{id}/vote', { ...withId(id), body: { value } }) as Promise<
+          ResponseOf<'/api/comments/{id}/vote', 'put'>
+        >,
+    },
     forum: {
       listPosts: (query?: QueryOf<'/api/forum-posts'>) =>
         call(client, 'GET', '/api/forum-posts', { params: { query } }) as Promise<ResponseOf<'/api/forum-posts', 'get'>>,
@@ -127,26 +148,10 @@ export function createResources(client: Raw, auth: { setToken(t: string | undefi
         call(client, 'DELETE', '/api/forum-posts/{id}', withId(id)) as Promise<
           ResponseOf<'/api/forum-posts/{id}', 'delete'>
         >,
-      addComment: (postId: string, body: BodyOf<'/api/forum-posts/{id}/comments', 'post'>) =>
-        call(client, 'POST', '/api/forum-posts/{id}/comments', { ...withId(postId), body }) as Promise<
-          ResponseOf<'/api/forum-posts/{id}/comments', 'post'>
-        >,
-      updateComment: (id: string, body: BodyOf<'/api/forum-comments/{id}', 'patch'>) =>
-        call(client, 'PATCH', '/api/forum-comments/{id}', { ...withId(id), body }) as Promise<
-          ResponseOf<'/api/forum-comments/{id}', 'patch'>
-        >,
-      deleteComment: (id: string) =>
-        call(client, 'DELETE', '/api/forum-comments/{id}', withId(id)) as Promise<
-          ResponseOf<'/api/forum-comments/{id}', 'delete'>
-        >,
       /** `1` = up, `-1` = down, `0` = clear. */
       votePost: (id: string, value: BodyOf<'/api/forum-posts/{id}/vote', 'put'>['value']) =>
         call(client, 'PUT', '/api/forum-posts/{id}/vote', { ...withId(id), body: { value } }) as Promise<
           ResponseOf<'/api/forum-posts/{id}/vote', 'put'>
-        >,
-      voteComment: (id: string, value: BodyOf<'/api/forum-comments/{id}/vote', 'put'>['value']) =>
-        call(client, 'PUT', '/api/forum-comments/{id}/vote', { ...withId(id), body: { value } }) as Promise<
-          ResponseOf<'/api/forum-comments/{id}/vote', 'put'>
         >,
     },
     uploads: {

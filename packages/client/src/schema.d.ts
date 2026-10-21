@@ -340,6 +340,54 @@ export interface paths {
         patch: operations["BlogController_update"];
         trace?: never;
     };
+    "/api/comments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["CommentsController_list"];
+        put?: never;
+        post: operations["CommentsController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/comments/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["CommentsController_remove"];
+        options?: never;
+        head?: never;
+        patch: operations["CommentsController_update"];
+        trace?: never;
+    };
+    "/api/comments/{id}/vote": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["CommentsController_vote"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/forum-posts": {
         parameters: {
             query?: never;
@@ -372,22 +420,6 @@ export interface paths {
         patch: operations["ForumController_update"];
         trace?: never;
     };
-    "/api/forum-posts/{id}/comments": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["ForumController_createComment"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/forum-posts/{id}/vote": {
         parameters: {
             query?: never;
@@ -397,38 +429,6 @@ export interface paths {
         };
         get?: never;
         put: operations["ForumController_votePost"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/forum-comments/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete: operations["ForumController_removeComment"];
-        options?: never;
-        head?: never;
-        patch: operations["ForumController_updateComment"];
-        trace?: never;
-    };
-    "/api/forum-comments/{id}/vote": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put: operations["ForumController_voteComment"];
         post?: never;
         delete?: never;
         options?: never;
@@ -749,6 +749,96 @@ export interface components {
             tags?: string[];
             coverImageUrl?: string | null;
         };
+        CommentAuthorDto: {
+            id: string;
+            username: string;
+            fullName: string;
+            avatarUrl: string;
+        };
+        CommentReplyDto: {
+            id: string;
+            /** @description Markdown body */
+            content: string;
+            score: number;
+            /** @enum {string} */
+            resourceType: "announcement" | "event" | "news" | "blog" | "forum";
+            resourceId: string;
+            authorId: string;
+            parentId: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            author: components["schemas"]["CommentAuthorDto"];
+            /** @enum {number} */
+            myVote: 1 | -1 | 0;
+        };
+        CommentDto: {
+            id: string;
+            /** @description Markdown body */
+            content: string;
+            score: number;
+            /** @enum {string} */
+            resourceType: "announcement" | "event" | "news" | "blog" | "forum";
+            resourceId: string;
+            authorId: string;
+            parentId: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            author: components["schemas"]["CommentAuthorDto"];
+            /** @enum {number} */
+            myVote: 1 | -1 | 0;
+            replies: components["schemas"]["CommentReplyDto"][];
+        };
+        CommentThreadDto: {
+            items: components["schemas"]["CommentDto"][];
+        };
+        CreateCommentDto: {
+            /** @enum {string} */
+            resourceType: "announcement" | "event" | "news" | "blog" | "forum";
+            /** Format: uuid */
+            resourceId: string;
+            /** @description Markdown body */
+            content: string;
+            /**
+             * Format: uuid
+             * @description Top-level comment id to reply to (one-level nesting only)
+             */
+            parentId?: string;
+        };
+        UpdateCommentDto: {
+            content: string;
+        };
+        CommentBaseDto: {
+            id: string;
+            /** @description Markdown body */
+            content: string;
+            score: number;
+            /** @enum {string} */
+            resourceType: "announcement" | "event" | "news" | "blog" | "forum";
+            resourceId: string;
+            authorId: string;
+            parentId: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            author: components["schemas"]["CommentAuthorDto"];
+        };
+        VoteDto: {
+            /**
+             * @description 1 = upvote, -1 = downvote, 0 = clear vote
+             * @enum {number}
+             */
+            value: 1 | -1 | 0;
+        };
+        VoteResultDto: {
+            score: number;
+            /** @enum {number} */
+            myVote: 1 | -1 | 0;
+        };
         ForumAuthorDto: {
             id: string;
             username: string;
@@ -775,45 +865,6 @@ export interface components {
             limit: number;
             items: components["schemas"]["ForumPostSummaryDto"][];
         };
-        ForumReplyDto: {
-            id: string;
-            /** @description Markdown body */
-            content: string;
-            score: number;
-            postId: string;
-            authorId: string;
-            parentId: string | null;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-            author: components["schemas"]["ForumAuthorDto"];
-            /**
-             * @description Current user vote: 1, -1 or 0
-             * @enum {number}
-             */
-            myVote: 1 | -1 | 0;
-        };
-        ForumCommentDto: {
-            id: string;
-            /** @description Markdown body */
-            content: string;
-            score: number;
-            postId: string;
-            authorId: string;
-            parentId: string | null;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-            author: components["schemas"]["ForumAuthorDto"];
-            /**
-             * @description Current user vote: 1, -1 or 0
-             * @enum {number}
-             */
-            myVote: 1 | -1 | 0;
-            replies: components["schemas"]["ForumReplyDto"][];
-        };
         ForumPostDetailDto: {
             id: string;
             title: string;
@@ -832,7 +883,7 @@ export interface components {
              */
             myVote: 1 | -1 | 0;
             /** @description Top-level comments */
-            comments: components["schemas"]["ForumCommentDto"][];
+            comments: components["schemas"]["CommentDto"][];
         };
         CreateForumPostDto: {
             title: string;
@@ -870,44 +921,6 @@ export interface components {
             content: string;
             score: number;
             authorId: string;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-            author: components["schemas"]["ForumAuthorDto"];
-        };
-        CreateForumCommentDto: {
-            /** @description Markdown body */
-            content: string;
-            /**
-             * Format: uuid
-             * @description Top-level comment id to reply to (one-level nesting only)
-             */
-            parentId?: string;
-        };
-        VoteDto: {
-            /**
-             * @description 1 = upvote, -1 = downvote, 0 = clear vote
-             * @enum {number}
-             */
-            value: 1 | -1 | 0;
-        };
-        VoteResultDto: {
-            score: number;
-            /** @enum {number} */
-            myVote: 1 | -1 | 0;
-        };
-        UpdateForumCommentDto: {
-            content: string;
-        };
-        ForumCommentBaseDto: {
-            id: string;
-            /** @description Markdown body */
-            content: string;
-            score: number;
-            postId: string;
-            authorId: string;
-            parentId: string | null;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
@@ -2066,6 +2079,162 @@ export interface operations {
             };
         };
     };
+    CommentsController_list: {
+        parameters: {
+            query: {
+                resourceType: "announcement" | "event" | "news" | "blog" | "forum";
+                resourceId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommentThreadDto"];
+                };
+            };
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    CommentsController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCommentDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommentDto"];
+                };
+            };
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    CommentsController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OkDto"];
+                };
+            };
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    CommentsController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCommentDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommentBaseDto"];
+                };
+            };
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    CommentsController_vote: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VoteDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VoteResultDto"];
+                };
+            };
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
     ForumController_findAll: {
         parameters: {
             query?: {
@@ -2219,135 +2388,7 @@ export interface operations {
             };
         };
     };
-    ForumController_createComment: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateForumCommentDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ForumCommentDto"];
-                };
-            };
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorDto"];
-                };
-            };
-        };
-    };
     ForumController_votePost: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["VoteDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["VoteResultDto"];
-                };
-            };
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorDto"];
-                };
-            };
-        };
-    };
-    ForumController_removeComment: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["OkDto"];
-                };
-            };
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorDto"];
-                };
-            };
-        };
-    };
-    ForumController_updateComment: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateForumCommentDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ForumCommentBaseDto"];
-                };
-            };
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorDto"];
-                };
-            };
-        };
-    };
-    ForumController_voteComment: {
         parameters: {
             query?: never;
             header?: never;

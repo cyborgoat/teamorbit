@@ -59,15 +59,26 @@ Same content model as news, kept as a separate resource for clearer product and 
 
 ### Forum
 
-Team discussion board with markdown posts and comments.
+Team discussion board with markdown posts (and post-level votes).
 
 | Capability | Notes |
 |------------|--------|
 | Posts | Any authenticated user; markdown body; images via absolute upload URLs |
-| Comments | Top-level + one-level replies |
-| Votes | Up/down (or clear) on posts and comments; one vote per user |
+| Post votes | Up/down (or clear); one vote per user per post |
 | Moderation | Authors edit/delete their own; Admin/Superuser can moderate any |
-| Notifications | Global on new post; directed to post/parent author on new comment |
+| Notifications | Global on new post |
+
+### Comments (all content)
+
+Shared markdown comments on announcements, events, news, blog posts, and forum posts.
+
+| Capability | Notes |
+|------------|--------|
+| Nesting | Top-level + one-level replies |
+| Votes | Up/down (or clear) on comments; one vote per user |
+| Moderation | Authors edit/delete their own; Admin/Superuser can moderate any |
+| Notifications | Directed to content author (top-level) or parent author (reply); self skipped |
+| API | `/api/comments` with `resourceType` + `resourceId` |
 
 ### Uploads
 
@@ -76,7 +87,7 @@ Authenticated image upload; returns an absolute public URL like `https://orbit.e
 ### Notifications
 
 - **Global** (`audience: GLOBAL`): announcements, events, news, blog posts, forum posts — visible to all users
-- **Directed** (`audience: DIRECTED`): forum comments — top-level notifies the post author; replies notify the parent comment author (self-notifications are skipped)
+- **Directed** (`audience: DIRECTED`): comments on any content type — top-level notifies the content author; replies notify the parent comment author (self-notifications are skipped)
 - Live toast via Socket.io `notification:new` (global to all authenticated sockets; directed to recipient user rooms)
 - List (optional `status=unread|read|dismissed`), mark-read, mark-unread, mark-all-read, per-user dismiss, and restore over REST (dismiss hides for one user only)
 
@@ -92,7 +103,8 @@ All content and user routes (except register/login) require a Bearer JWT unless 
 | Events | GET/POST/PATCH/DELETE | `/api/events` |
 | News | GET/POST/PATCH/DELETE | `/api/news` |
 | Blog | GET/POST/PATCH/DELETE | `/api/blog-posts` |
-| Forum | GET/POST/PATCH/DELETE posts & comments, PUT votes | `/api/forum-posts`, `/api/forum-comments` |
+| Forum | GET/POST/PATCH/DELETE posts, PUT post votes | `/api/forum-posts` |
+| Comments | GET/POST/PATCH/DELETE, PUT vote | `/api/comments` |
 | Uploads | POST | `/api/uploads` |
 | Notifications | GET list (`status`), POST `read-all`, POST/DELETE `:id/read`, POST `:id/restore`, DELETE `:id` | `/api/notifications` |
 | Health | GET | `/api/health` |
@@ -111,14 +123,18 @@ Interactive OpenAPI docs: http://localhost:3000/docs
 | `/register` | Self-signup with optional email (PENDING) |
 | `/` | Home shortcuts (authenticated) |
 | `/announcements` | List + create dialog |
+| `/announcements/$id` | Detail + comments |
 | `/events` | List + create with datetime-local + cover |
-| `/news` | News list, previews, and permitted deletion |
+| `/events/$id` | Detail + comments |
+| `/news` | News list and permitted deletion |
 | `/news/new` | Dedicated news creation page (Admin+) |
-| `/blog` | Blog list, previews, and permitted deletion |
+| `/news/$id` | Detail + comments |
+| `/blog` | Blog list and permitted deletion |
 | `/blog/new` | Dedicated blog creation page (Admin+) |
+| `/blog/$id` | Detail + comments |
 | `/forum` | Forum list |
 | `/forum/new` | Dedicated forum creation page |
-| `/forum/$postId` | Post detail, comments, votes |
+| `/forum/$postId` | Post detail, post votes, comments |
 | `/users` | Create user (Admin+), status and permitted role changes |
 | `/settings` | Self-service profile + change password |
 | `/notifications` | Unread / read / dismissed groups + mark read/unread, dismiss, restore, mark all read |

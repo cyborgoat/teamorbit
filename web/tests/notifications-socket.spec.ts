@@ -41,6 +41,7 @@ test('Strict Mode opens one notification connection, receives updates, and recon
         '/news',
         '/blog-posts',
         '/forum-posts',
+        '/comments',
         '/events',
         '/announcements',
         '/notifications',

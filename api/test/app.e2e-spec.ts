@@ -507,24 +507,32 @@ describe('App (e2e)', () => {
       .send({ title: 'Votes', content: 'Vote here' })
       .expect(201);
     const comment = await request(app.getHttpServer())
-      .post(`/api/forum-posts/${dataOf(post).id}/comments`)
+      .post('/api/comments')
       .auth(token, { type: 'bearer' })
-      .send({ content: 'Comment' })
+      .send({
+        resourceType: 'forum',
+        resourceId: dataOf(post).id,
+        content: 'Comment',
+      })
       .expect(201);
-    for (const [collection, id] of [
-      ['forum-posts', dataOf(post).id],
-      ['forum-comments', dataOf(comment).id],
-    ]) {
-      await Promise.all(
-        [1, -1, 1, 0, -1].map((value) =>
-          request(app.getHttpServer())
-            .put(`/api/${collection}/${id}/vote`)
-            .auth(token, { type: 'bearer' })
-            .send({ value })
-            .expect(200),
-        ),
-      );
-    }
+    await Promise.all(
+      [1, -1, 1, 0, -1].map((value) =>
+        request(app.getHttpServer())
+          .put(`/api/forum-posts/${dataOf(post).id}/vote`)
+          .auth(token, { type: 'bearer' })
+          .send({ value })
+          .expect(200),
+      ),
+    );
+    await Promise.all(
+      [1, -1, 1, 0, -1].map((value) =>
+        request(app.getHttpServer())
+          .put(`/api/comments/${dataOf(comment).id}/vote`)
+          .auth(token, { type: 'bearer' })
+          .send({ value })
+          .expect(200),
+      ),
+    );
     const stored = await prisma.forumPost.findUniqueOrThrow({
       where: { id: dataOf(post).id },
       include: { votes: true },
@@ -532,7 +540,7 @@ describe('App (e2e)', () => {
     expect(stored.score).toBe(
       stored.votes.reduce((sum, vote) => sum + vote.value, 0),
     );
-    const storedComment = await prisma.forumComment.findUniqueOrThrow({
+    const storedComment = await prisma.comment.findUniqueOrThrow({
       where: { id: dataOf(comment).id },
       include: { votes: true },
     });
@@ -638,9 +646,13 @@ describe('App (e2e)', () => {
       where: { type: 'forum.comment.created', resourceId: postId },
     });
     await request(app.getHttpServer())
-      .post(`/api/forum-posts/${postId}/comments`)
+      .post('/api/comments')
       .auth(adminTok, { type: 'bearer' })
-      .send({ content: 'Self comment' })
+      .send({
+        resourceType: 'forum',
+        resourceId: postId,
+        content: 'Self comment',
+      })
       .expect(201);
     expect(
       await prisma.notification.count({
@@ -649,9 +661,13 @@ describe('App (e2e)', () => {
     ).toBe(beforeSelf);
 
     const topLevel = await request(app.getHttpServer())
-      .post(`/api/forum-posts/${postId}/comments`)
+      .post('/api/comments')
       .auth(memberTok, { type: 'bearer' })
-      .send({ content: 'Top-level for author' })
+      .send({
+        resourceType: 'forum',
+        resourceId: postId,
+        content: 'Top-level for author',
+      })
       .expect(201);
     const directed = await prisma.notification.findFirstOrThrow({
       where: {
@@ -690,9 +706,14 @@ describe('App (e2e)', () => {
 
     const parentId = dataOf(topLevel).id;
     await request(app.getHttpServer())
-      .post(`/api/forum-posts/${postId}/comments`)
+      .post('/api/comments')
       .auth(otherTok, { type: 'bearer' })
-      .send({ content: 'Reply to member', parentId })
+      .send({
+        resourceType: 'forum',
+        resourceId: postId,
+        content: 'Reply to member',
+        parentId,
+      })
       .expect(201);
     const replyNotif = await prisma.notification.findFirstOrThrow({
       where: {

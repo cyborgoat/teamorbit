@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.0 — 2026-10-21
+
+- Universal comments: `orbit.comments.{list,create,update,delete,vote}` for any content `resourceType`.
+- Removed forum-scoped comment helpers (`orbit.forum.addComment` / `voteComment` / …); forum posts still use `orbit.forum.*`.
+
 ## 0.1.3 — 2026-10-21
 
 - List notifications with `status=unread|read|dismissed`.

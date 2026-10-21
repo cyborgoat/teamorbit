@@ -1,4 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
+import { globalCreatedNotification } from '../common/content-crud';
 import { authorSelect, presentContent } from '../common/media';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { paginate } from '../common/utils';
@@ -79,14 +80,14 @@ export class EventsService {
             },
           },
         }),
-      (item) => ({
-        audience: 'GLOBAL' as const,
-        type: 'event.created',
-        title: 'New event',
-        body: item.title,
-        resourceType: 'event',
-        resourceId: item.id,
-      }),
+      (item) =>
+        globalCreatedNotification({
+          type: 'event.created',
+          title: 'New event',
+          body: item.title,
+          resourceType: 'event',
+          resourceId: item.id,
+        }),
     );
     return presentContent(item);
   }
@@ -116,7 +117,12 @@ export class EventsService {
 
   async remove(id: string) {
     await this.findOne(id);
-    await this.prisma.event.delete({ where: { id } });
+    await this.prisma.$transaction([
+      this.prisma.comment.deleteMany({
+        where: { resourceType: 'event', resourceId: id },
+      }),
+      this.prisma.event.delete({ where: { id } }),
+    ]);
     return { ok: true };
   }
 }

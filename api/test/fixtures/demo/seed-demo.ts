@@ -392,13 +392,14 @@ export async function seedDatabase(
         for (const [commentIndex, content] of commentContent[index].entries()) {
           const commentId = demoId(`comment:${index}:${commentIndex}`);
           const comment = await missing(
-            'ForumComment',
-            () => tx.forumComment.findUnique({ where: { id: commentId } }),
+            'Comment',
+            () => tx.comment.findUnique({ where: { id: commentId } }),
             () =>
-              tx.forumComment.create({
+              tx.comment.create({
                 data: {
                   id: commentId,
-                  postId: id,
+                  resourceType: 'forum',
+                  resourceId: id,
                   content: markdown(content),
                   authorId: participant(index + commentIndex + 3),
                   parentId:
@@ -407,11 +408,11 @@ export async function seedDatabase(
                 },
               }),
           );
-          summary.ForumCommentVote ??= { created: 0, skipped: 0 };
+          summary.CommentVote ??= { created: 0, skipped: 0 };
           if (comment.created) {
             const votes = [1, commentIndex === 1 ? -1 : 1];
             for (const [voter, value] of votes.entries()) {
-              await tx.forumCommentVote.create({
+              await tx.commentVote.create({
                 data: {
                   id: demoId(`comment-vote:${index}:${commentIndex}:${voter}`),
                   commentId,
@@ -421,13 +422,13 @@ export async function seedDatabase(
                 },
               });
             }
-            summary.ForumCommentVote.created += votes.length;
-            await tx.forumComment.update({
+            summary.CommentVote.created += votes.length;
+            await tx.comment.update({
               where: { id: commentId },
               data: { score: votes.reduce((a, b) => a + b, 0) },
             });
           } else {
-            summary.ForumCommentVote.skipped += 2;
+            summary.CommentVote.skipped += 2;
           }
         }
       }

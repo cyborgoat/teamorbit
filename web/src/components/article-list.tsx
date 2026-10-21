@@ -2,13 +2,10 @@ import { canManage } from '@/lib/policies'
 import { useListPage } from '@/hooks/use-list-page'
 import { ListControls } from '@/components/list-controls'
 import { queryKeys } from '@/lib/query-keys'
-import type { News as Item } from '@goatcheese/teamorbit-client'
 import { Link } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Newspaper, Plus, Trash2 } from 'lucide-react'
-import { useState } from 'react'
 import { toast } from 'sonner'
-import { MarkdownPreview } from '@/components/markdown-preview'
 import { PageHeader } from '@/components/page-header'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -42,7 +39,6 @@ export function ArticleList({ kind }: { kind: 'news' | 'blog' }) {
         limit: pagination.limit,
       }),
   })
-  const [preview, setPreview] = useState<Item | null>(null)
   const remove = useMutation({
     mutationFn: (id: string) =>
       orbit[kind === 'blog' ? 'blogPosts' : 'news'].delete(id),
@@ -106,19 +102,15 @@ export function ArticleList({ kind }: { kind: 'news' | 'blog' }) {
             </TableHeader>
             <TableBody>
               {items.map((item) => (
-                <TableRow
-                  key={item.id}
-                  className="cursor-pointer"
-                  onClick={() => setPreview(item)}
-                >
+                <TableRow key={item.id}>
                   <TableCell>
-                    <button
-                      type="button"
-                      className="text-left font-medium hover:underline focus-visible:underline"
-                      onClick={() => setPreview(item)}
+                    <Link
+                      to={kind === 'blog' ? '/blog/$id' : '/news/$id'}
+                      params={{ id: item.id }}
+                      className="font-medium hover:underline"
                     >
                       {item.title}
-                    </button>
+                    </Link>
                     <pre className="mt-1 max-w-md truncate font-mono text-xs text-muted-foreground">
                       {item.content}
                     </pre>
@@ -157,18 +149,6 @@ export function ArticleList({ kind }: { kind: 'news' | 'blog' }) {
           </Table>
         </div>
       )}
-
-      <MarkdownPreview
-        open={preview !== null}
-        onOpenChange={(next) => {
-          if (!next) setPreview(null)
-        }}
-        title={preview?.title ?? ''}
-        content={preview?.content ?? ''}
-        tags={preview?.tags}
-        coverImageUrl={preview?.coverImageUrl}
-        createdAt={preview?.createdAt}
-      />
     </div>
   )
 }

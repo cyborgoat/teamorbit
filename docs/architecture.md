@@ -7,7 +7,7 @@ teamorbit is a NestJS API, a React administration console, and a typed client pa
 - JSON endpoints live under `/api`; Swagger lives at `/docs`. Public image files live under `/uploads` and `/avatars`. Socket.IO uses `/socket.io`.
 - Development Vite proxies those four prefixes using `API_PROXY_TARGET`; frontend route navigation never overlaps API routes.
 - Configuration is validated before startup. `DATABASE_URL`, `JWT_SECRET`, and an HTTP(S) origin in `PUBLIC_BASE_URL` are required. `UPLOAD_DIR` is resolved once, and `PORT` must be valid.
-- Domain modules retain separate announcements, events, news, blog, forum, users, and notification resources. Shared helpers handle user selections, response presentation, media validation, tags, and pagination.
+- Domain modules retain separate announcements, events, news, blog, forum, users, and notification resources. Comments are a shared module keyed by `resourceType` + `resourceId`. News and blog CRUD share `ArticleService`. Shared helpers handle user selections, response presentation, media validation, tags, pagination, and GLOBAL create-notification payloads.
 
 ## Data and contracts
 

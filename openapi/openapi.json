@@ -1816,6 +1816,264 @@
         ]
       }
     },
+    "/api/comments": {
+      "get": {
+        "operationId": "CommentsController_list",
+        "parameters": [
+          {
+            "name": "resourceType",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "announcement",
+                "event",
+                "news",
+                "blog",
+                "forum"
+              ]
+            }
+          },
+          {
+            "name": "resourceId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommentThreadDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "comments"
+        ]
+      },
+      "post": {
+        "operationId": "CommentsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCommentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommentDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "comments"
+        ]
+      }
+    },
+    "/api/comments/{id}": {
+      "patch": {
+        "operationId": "CommentsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCommentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommentBaseDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "comments"
+        ]
+      },
+      "delete": {
+        "operationId": "CommentsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "comments"
+        ]
+      }
+    },
+    "/api/comments/{id}/vote": {
+      "put": {
+        "operationId": "CommentsController_vote",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VoteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VoteResultDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "comments"
+        ]
+      }
+    },
     "/api/forum-posts": {
       "get": {
         "operationId": "ForumController_findAll",
@@ -2067,217 +2325,9 @@
         ]
       }
     },
-    "/api/forum-posts/{id}/comments": {
-      "post": {
-        "operationId": "ForumController_createComment",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateForumCommentDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ForumCommentDto"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorDto"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "forum-posts"
-        ]
-      }
-    },
     "/api/forum-posts/{id}/vote": {
       "put": {
         "operationId": "ForumController_votePost",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/VoteDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/VoteResultDto"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorDto"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "forum-posts"
-        ]
-      }
-    },
-    "/api/forum-comments/{id}": {
-      "patch": {
-        "operationId": "ForumController_updateComment",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateForumCommentDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ForumCommentBaseDto"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorDto"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "forum-posts"
-        ]
-      },
-      "delete": {
-        "operationId": "ForumController_removeComment",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/OkDto"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorDto"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "forum-posts"
-        ]
-      }
-    },
-    "/api/forum-comments/{id}/vote": {
-      "put": {
-        "operationId": "ForumController_voteComment",
         "parameters": [
           {
             "name": "id",
@@ -3415,6 +3465,325 @@
           }
         }
       },
+      "CommentAuthorDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "fullName": {
+            "type": "string"
+          },
+          "avatarUrl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "username",
+          "fullName",
+          "avatarUrl"
+        ]
+      },
+      "CommentReplyDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string",
+            "description": "Markdown body"
+          },
+          "score": {
+            "type": "number"
+          },
+          "resourceType": {
+            "type": "string",
+            "enum": [
+              "announcement",
+              "event",
+              "news",
+              "blog",
+              "forum"
+            ]
+          },
+          "resourceId": {
+            "type": "string"
+          },
+          "authorId": {
+            "type": "string"
+          },
+          "parentId": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "author": {
+            "$ref": "#/components/schemas/CommentAuthorDto"
+          },
+          "myVote": {
+            "type": "number",
+            "enum": [
+              1,
+              -1,
+              0
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "content",
+          "score",
+          "resourceType",
+          "resourceId",
+          "authorId",
+          "parentId",
+          "createdAt",
+          "updatedAt",
+          "author",
+          "myVote"
+        ]
+      },
+      "CommentDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string",
+            "description": "Markdown body"
+          },
+          "score": {
+            "type": "number"
+          },
+          "resourceType": {
+            "type": "string",
+            "enum": [
+              "announcement",
+              "event",
+              "news",
+              "blog",
+              "forum"
+            ]
+          },
+          "resourceId": {
+            "type": "string"
+          },
+          "authorId": {
+            "type": "string"
+          },
+          "parentId": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "author": {
+            "$ref": "#/components/schemas/CommentAuthorDto"
+          },
+          "myVote": {
+            "type": "number",
+            "enum": [
+              1,
+              -1,
+              0
+            ]
+          },
+          "replies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CommentReplyDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "content",
+          "score",
+          "resourceType",
+          "resourceId",
+          "authorId",
+          "parentId",
+          "createdAt",
+          "updatedAt",
+          "author",
+          "myVote",
+          "replies"
+        ]
+      },
+      "CommentThreadDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CommentDto"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "CreateCommentDto": {
+        "type": "object",
+        "properties": {
+          "resourceType": {
+            "enum": [
+              "announcement",
+              "event",
+              "news",
+              "blog",
+              "forum"
+            ],
+            "type": "string"
+          },
+          "resourceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "content": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Markdown body"
+          },
+          "parentId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Top-level comment id to reply to (one-level nesting only)"
+          }
+        },
+        "required": [
+          "resourceType",
+          "resourceId",
+          "content"
+        ]
+      },
+      "UpdateCommentDto": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "content"
+        ]
+      },
+      "CommentBaseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string",
+            "description": "Markdown body"
+          },
+          "score": {
+            "type": "number"
+          },
+          "resourceType": {
+            "type": "string",
+            "enum": [
+              "announcement",
+              "event",
+              "news",
+              "blog",
+              "forum"
+            ]
+          },
+          "resourceId": {
+            "type": "string"
+          },
+          "authorId": {
+            "type": "string"
+          },
+          "parentId": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "author": {
+            "$ref": "#/components/schemas/CommentAuthorDto"
+          }
+        },
+        "required": [
+          "id",
+          "content",
+          "score",
+          "resourceType",
+          "resourceId",
+          "authorId",
+          "parentId",
+          "createdAt",
+          "updatedAt",
+          "author"
+        ]
+      },
+      "VoteDto": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "number",
+            "description": "1 = upvote, -1 = downvote, 0 = clear vote",
+            "enum": [
+              1,
+              -1,
+              0
+            ]
+          }
+        },
+        "required": [
+          "value"
+        ]
+      },
+      "VoteResultDto": {
+        "type": "object",
+        "properties": {
+          "score": {
+            "type": "number"
+          },
+          "myVote": {
+            "type": "number",
+            "enum": [
+              1,
+              -1,
+              0
+            ]
+          }
+        },
+        "required": [
+          "score",
+          "myVote"
+        ]
+      },
       "ForumAuthorDto": {
         "type": "object",
         "properties": {
@@ -3510,127 +3879,6 @@
           "items"
         ]
       },
-      "ForumReplyDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "content": {
-            "type": "string",
-            "description": "Markdown body"
-          },
-          "score": {
-            "type": "number"
-          },
-          "postId": {
-            "type": "string"
-          },
-          "authorId": {
-            "type": "string"
-          },
-          "parentId": {
-            "type": "string",
-            "nullable": true
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "author": {
-            "$ref": "#/components/schemas/ForumAuthorDto"
-          },
-          "myVote": {
-            "type": "number",
-            "description": "Current user vote: 1, -1 or 0",
-            "enum": [
-              1,
-              -1,
-              0
-            ]
-          }
-        },
-        "required": [
-          "id",
-          "content",
-          "score",
-          "postId",
-          "authorId",
-          "parentId",
-          "createdAt",
-          "updatedAt",
-          "author",
-          "myVote"
-        ]
-      },
-      "ForumCommentDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "content": {
-            "type": "string",
-            "description": "Markdown body"
-          },
-          "score": {
-            "type": "number"
-          },
-          "postId": {
-            "type": "string"
-          },
-          "authorId": {
-            "type": "string"
-          },
-          "parentId": {
-            "type": "string",
-            "nullable": true
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "author": {
-            "$ref": "#/components/schemas/ForumAuthorDto"
-          },
-          "myVote": {
-            "type": "number",
-            "description": "Current user vote: 1, -1 or 0",
-            "enum": [
-              1,
-              -1,
-              0
-            ]
-          },
-          "replies": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ForumReplyDto"
-            }
-          }
-        },
-        "required": [
-          "id",
-          "content",
-          "score",
-          "postId",
-          "authorId",
-          "parentId",
-          "createdAt",
-          "updatedAt",
-          "author",
-          "myVote",
-          "replies"
-        ]
-      },
       "ForumPostDetailDto": {
         "type": "object",
         "properties": {
@@ -3674,7 +3922,7 @@
             "description": "Top-level comments",
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ForumCommentDto"
+              "$ref": "#/components/schemas/CommentDto"
             }
           }
         },
@@ -3816,120 +4064,6 @@
           "content",
           "score",
           "authorId",
-          "createdAt",
-          "updatedAt",
-          "author"
-        ]
-      },
-      "CreateForumCommentDto": {
-        "type": "object",
-        "properties": {
-          "content": {
-            "type": "string",
-            "minLength": 1,
-            "description": "Markdown body"
-          },
-          "parentId": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Top-level comment id to reply to (one-level nesting only)"
-          }
-        },
-        "required": [
-          "content"
-        ]
-      },
-      "VoteDto": {
-        "type": "object",
-        "properties": {
-          "value": {
-            "type": "number",
-            "description": "1 = upvote, -1 = downvote, 0 = clear vote",
-            "enum": [
-              1,
-              -1,
-              0
-            ]
-          }
-        },
-        "required": [
-          "value"
-        ]
-      },
-      "VoteResultDto": {
-        "type": "object",
-        "properties": {
-          "score": {
-            "type": "number"
-          },
-          "myVote": {
-            "type": "number",
-            "enum": [
-              1,
-              -1,
-              0
-            ]
-          }
-        },
-        "required": [
-          "score",
-          "myVote"
-        ]
-      },
-      "UpdateForumCommentDto": {
-        "type": "object",
-        "properties": {
-          "content": {
-            "type": "string",
-            "minLength": 1
-          }
-        },
-        "required": [
-          "content"
-        ]
-      },
-      "ForumCommentBaseDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "content": {
-            "type": "string",
-            "description": "Markdown body"
-          },
-          "score": {
-            "type": "number"
-          },
-          "postId": {
-            "type": "string"
-          },
-          "authorId": {
-            "type": "string"
-          },
-          "parentId": {
-            "type": "string",
-            "nullable": true
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "author": {
-            "$ref": "#/components/schemas/ForumAuthorDto"
-          }
-        },
-        "required": [
-          "id",
-          "content",
-          "score",
-          "postId",
-          "authorId",
-          "parentId",
           "createdAt",
           "updatedAt",
           "author"

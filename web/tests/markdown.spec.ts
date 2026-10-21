@@ -84,16 +84,43 @@ async function mockMarkdownApi(
       return route.continue()
     const path = new URL(request.url()).pathname.replace(/^\/api(?=\/)/, '')
     if (
-      !/^\/(auth|news|blog-posts|forum-posts|notifications|socket\.io)(\/|$)/.test(
+      !/^\/(auth|news|blog-posts|forum-posts|comments|notifications|socket\.io)(\/|$)/.test(
         path,
       )
     )
       return route.continue()
     let body: unknown = { items: [] }
     if (path === '/auth/me') body = author
+    else if (path === '/comments' && request.method() === 'GET')
+      body = {
+        items: [
+          {
+            id: 'comment',
+            content,
+            resourceType: 'forum',
+            resourceId: 'thread',
+            author,
+            createdAt,
+            score: 0,
+            myVote: 0,
+            replies: [
+              {
+                id: 'reply',
+                content,
+                resourceType: 'forum',
+                resourceId: 'thread',
+                author,
+                createdAt,
+                score: 0,
+                myVote: 0,
+              },
+            ],
+          },
+        ],
+      }
     else if (request.method() === 'POST') {
       published.push(request.postDataJSON())
-      body = { id: 'created' }
+      body = { id: 'created', replies: [] }
     } else if (path === '/news' || path === '/blog-posts')
       body = {
         items: (
@@ -113,27 +140,7 @@ async function mockMarkdownApi(
         createdAt,
         score: 0,
         myVote: 0,
-        comments: [
-          {
-            id: 'comment',
-            content,
-            author,
-            createdAt,
-            score: 0,
-            myVote: 0,
-            replies: [
-              {
-                id: 'reply',
-                content,
-                author,
-                createdAt,
-                score: 0,
-                myVote: 0,
-                replies: [],
-              },
-            ],
-          },
-        ],
+        comments: [],
       }
     await route.fulfill({ json: body })
   })

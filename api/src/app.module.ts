@@ -10,6 +10,7 @@ import { join } from 'path';
 import { AnnouncementsModule } from './announcements/announcements.module';
 import { AuthModule } from './auth/auth.module';
 import { BlogModule } from './blog/blog.module';
+import { CommentsModule } from './comments/comments.module';
 import { EventsModule } from './events/events.module';
 import { ForumModule } from './forum/forum.module';
 import { HealthModule } from './health/health.module';
@@ -66,6 +67,7 @@ import { AvatarsModule } from './avatars/avatars.module';
     EventsModule,
     NewsModule,
     BlogModule,
+    CommentsModule,
     ForumModule,
     UploadsModule,
     NotificationsModule,

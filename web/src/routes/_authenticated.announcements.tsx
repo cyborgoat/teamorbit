@@ -1,10 +1,10 @@
 import { useAuth } from '@/lib/auth'
 import { canManage } from '@/lib/policies'
-import { useListPage } from '@/hooks/use-list-page'
+import { useResourceList } from '@/hooks/use-resource-list'
 import { ListControls } from '@/components/list-controls'
 import { queryKeys } from '@/lib/query-keys'
-import { createFileRoute } from '@tanstack/react-router'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { createFileRoute, Link } from '@tanstack/react-router'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Megaphone, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -38,6 +38,7 @@ import {
 } from '@/components/ui/table'
 import { Textarea } from '@/components/ui/textarea'
 import { orbit } from '@/lib/api'
+import type { Announcement } from '@goatcheese/teamorbit-client'
 
 export const Route = createFileRoute('/_authenticated/announcements')({
   component: AnnouncementsPage,
@@ -46,15 +47,10 @@ export const Route = createFileRoute('/_authenticated/announcements')({
 function AnnouncementsPage() {
   const { user } = useAuth()
   const qc = useQueryClient()
-  const pagination = useListPage()
-  const { data, error, refetch, isFetching, isLoading } = useQuery({
-    queryKey: [...queryKeys.announcements, pagination.page],
-    queryFn: () =>
-      orbit.announcements.list({
-        page: pagination.page,
-        limit: pagination.limit,
-      }),
-  })
+  const { data, error, refetch, isFetching, isLoading, pagination, items } =
+    useResourceList<Announcement>(queryKeys.announcements, (query) =>
+      orbit.announcements.list(query),
+    )
   const [open, setOpen] = useState(false)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -79,8 +75,6 @@ function AnnouncementsPage() {
     },
     onError: (e: Error) => toast.error(e.message),
   })
-
-  const items = data?.items ?? []
 
   return (
     <div>
@@ -183,7 +177,13 @@ function AnnouncementsPage() {
               {items.map((item) => (
                 <TableRow key={item.id}>
                   <TableCell>
-                    <div className="font-medium">{item.title}</div>
+                    <Link
+                      to="/announcements/$id"
+                      params={{ id: item.id }}
+                      className="font-medium hover:underline"
+                    >
+                      {item.title}
+                    </Link>
                     <div className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">
                       {item.description}
                     </div>

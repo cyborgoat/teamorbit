@@ -1,17 +1,13 @@
+import { globalCreatedNotification } from '../common/content-crud';
 import { assertCanModerate, type Actor } from '../common/policies';
 import { authorSelect, presentContent, presentUser } from '../common/media';
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { paginate } from '../common/utils';
+import { CommentsService } from '../comments/comments.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import {
-  CreateForumCommentDto,
   CreateForumPostDto,
-  UpdateForumCommentDto,
   UpdateForumPostDto,
   VoteDto,
 } from './dto/forum.dto';
@@ -21,6 +17,7 @@ export class ForumService {
   constructor(
     private prisma: PrismaService,
     private notifications: NotificationsService,
+    private comments: CommentsService,
   ) {}
 
   async findAll(page = 1, limit = 20, q?: string) {
@@ -38,14 +35,16 @@ export class ForumService {
         orderBy: [{ score: 'desc' }, { createdAt: 'desc' }, { id: 'desc' }],
         include: {
           author: { select: authorSelect },
-          _count: { select: { comments: true } },
         },
       }),
       this.prisma.forumPost.count({ where }),
     ]);
-    const items = rows.map(({ _count, ...item }) => ({
+    const counts = await Promise.all(
+      rows.map((row) => this.comments.countForResource('forum', row.id)),
+    );
+    const items = rows.map((item, index) => ({
       ...presentContent(item),
-      commentCount: _count.comments,
+      commentCount: counts[index],
     }));
     return { items, total, page, limit: take };
   }
@@ -56,81 +55,20 @@ export class ForumService {
       include: {
         author: { select: authorSelect },
         votes: { where: { userId }, select: { value: true } },
-        comments: {
-          where: { parentId: null },
-          orderBy: [{ score: 'desc' }, { createdAt: 'asc' }],
-          include: {
-            author: { select: authorSelect },
-            votes: { where: { userId }, select: { value: true } },
-            replies: {
-              orderBy: { createdAt: 'asc' },
-              include: {
-                author: { select: authorSelect },
-                votes: { where: { userId }, select: { value: true } },
-              },
-            },
-          },
-        },
       },
     });
     if (!post) throw new NotFoundException('Forum post not found');
-
-    const mapComment = (comment: {
-      id: string;
-      content: string;
-      score: number;
-      postId: string;
-      authorId: string;
-      parentId: string | null;
-      createdAt: Date;
-      updatedAt: Date;
-      author: {
-        id: string;
-        username: string;
-        fullName: string;
-        avatarUrl: string | null;
-      };
-      votes: { value: number }[];
-      replies?: {
-        id: string;
-        content: string;
-        score: number;
-        postId: string;
-        authorId: string;
-        parentId: string | null;
-        createdAt: Date;
-        updatedAt: Date;
-        author: {
-          id: string;
-          username: string;
-          fullName: string;
-          avatarUrl: string | null;
-        };
-        votes: { value: number }[];
-      }[];
-    }) => {
-      const { votes, replies, ...rest } = comment;
-      return {
-        ...rest,
-        author: presentUser(rest.author),
-        myVote: votes[0]?.value ?? 0,
-        replies: (replies ?? []).map((r) => {
-          const { votes: replyVotes, ...replyRest } = r;
-          return {
-            ...replyRest,
-            author: presentUser(replyRest.author),
-            myVote: replyVotes[0]?.value ?? 0,
-          };
-        }),
-      };
-    };
-
-    const { votes, comments, ...rest } = post;
+    const { items: comments } = await this.comments.listForResource(
+      'forum',
+      id,
+      userId,
+    );
+    const { votes, ...rest } = post;
     return {
       ...rest,
       author: presentUser(rest.author),
       myVote: votes[0]?.value ?? 0,
-      comments: comments.map((c) => mapComment(c)),
+      comments,
     };
   }
 
@@ -145,14 +83,14 @@ export class ForumService {
           },
           include: { author: { select: authorSelect } },
         }),
-      (item) => ({
-        audience: 'GLOBAL' as const,
-        type: 'forum.created',
-        title: 'New forum post',
-        body: item.title,
-        resourceType: 'forum',
-        resourceId: item.id,
-      }),
+      (item) =>
+        globalCreatedNotification({
+          type: 'forum.created',
+          title: 'New forum post',
+          body: item.title,
+          resourceType: 'forum',
+          resourceId: item.id,
+        }),
     );
     return { ...presentContent(item), commentCount: 0, myVote: 0 };
   }
@@ -177,141 +115,35 @@ export class ForumService {
     const existing = await this.prisma.forumPost.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Forum post not found');
     assertCanModerate(actor, existing.authorId);
-    await this.prisma.forumPost.delete({ where: { id } });
-    return { ok: true };
-  }
-
-  async createComment(
-    postId: string,
-    dto: CreateForumCommentDto,
-    authorId: string,
-  ) {
-    const post = await this.prisma.forumPost.findUnique({
-      where: { id: postId },
-    });
-    if (!post) throw new NotFoundException('Forum post not found');
-
-    let parentAuthorId: string | undefined;
-    if (dto.parentId) {
-      const parent = await this.prisma.forumComment.findUnique({
-        where: { id: dto.parentId },
-      });
-      if (!parent || parent.postId !== postId) {
-        throw new BadRequestException('Invalid parent comment');
-      }
-      if (parent.parentId) {
-        throw new BadRequestException('Only one level of replies is allowed');
-      }
-      parentAuthorId = parent.authorId;
-    }
-
-    const targetUserId = dto.parentId ? parentAuthorId! : post.authorId;
-
-    const comment = await this.notifications.createWithNotification(
-      (tx) =>
-        tx.forumComment.create({
-          data: {
-            content: dto.content,
-            postId,
-            authorId,
-            parentId: dto.parentId,
-          },
-          include: { author: { select: authorSelect } },
-        }),
-      () =>
-        targetUserId === authorId
-          ? null
-          : {
-              audience: 'DIRECTED' as const,
-              type: 'forum.comment.created',
-              title: 'New forum comment',
-              body: post.title,
-              resourceType: 'forum',
-              resourceId: postId,
-              recipientIds: [targetUserId],
-            },
-    );
-
-    return { ...presentContent(comment), myVote: 0, replies: [] };
-  }
-
-  async updateComment(id: string, dto: UpdateForumCommentDto, actor: Actor) {
-    const existing = await this.prisma.forumComment.findUnique({
-      where: { id },
-    });
-    if (!existing) throw new NotFoundException('Comment not found');
-    assertCanModerate(actor, existing.authorId);
-    return this.prisma.forumComment
-      .update({
-        where: { id },
-        data: { content: dto.content },
-        include: { author: { select: authorSelect } },
-      })
-      .then(presentContent);
-  }
-
-  async removeComment(id: string, actor: Actor) {
-    const existing = await this.prisma.forumComment.findUnique({
-      where: { id },
-    });
-    if (!existing) throw new NotFoundException('Comment not found');
-    assertCanModerate(actor, existing.authorId);
-    await this.prisma.forumComment.delete({ where: { id } });
+    await this.prisma.$transaction([
+      this.prisma.comment.deleteMany({
+        where: { resourceType: 'forum', resourceId: id },
+      }),
+      this.prisma.forumPost.delete({ where: { id } }),
+    ]);
     return { ok: true };
   }
 
   async votePost(postId: string, userId: string, dto: VoteDto) {
-    return this.vote('post', postId, userId, dto.value);
-  }
-  async voteComment(commentId: string, userId: string, dto: VoteDto) {
-    return this.vote('comment', commentId, userId, dto.value);
-  }
-  private async vote(
-    kind: 'post' | 'comment',
-    id: string,
-    userId: string,
-    value: number,
-  ) {
+    const value = dto.value;
     return this.prisma.$transaction(async (tx) => {
-      const target =
-        kind === 'post'
-          ? await tx.forumPost.findUnique({ where: { id } })
-          : await tx.forumComment.findUnique({ where: { id } });
+      const target = await tx.forumPost.findUnique({ where: { id: postId } });
       if (!target) throw new NotFoundException('Vote target not found');
-      const votes =
-        kind === 'post'
-          ? await tx.forumPostVote.findMany({ where: { postId: id, userId } })
-          : await tx.forumCommentVote.findMany({
-              where: { commentId: id, userId },
-            });
+      const votes = await tx.forumPostVote.findMany({
+        where: { postId, userId },
+      });
       const delta = value - (votes[0]?.value ?? 0);
-      if (kind === 'post') {
-        if (value === 0)
-          await tx.forumPostVote.deleteMany({ where: { postId: id, userId } });
-        else
-          await tx.forumPostVote.upsert({
-            where: { userId_postId: { userId, postId: id } },
-            create: { userId, postId: id, value },
-            update: { value },
-          });
-        const updated = await tx.forumPost.update({
-          where: { id },
-          data: { score: { increment: delta } },
-        });
-        return { score: updated.score, myVote: value };
-      }
-      if (value === 0)
-        await tx.forumCommentVote.deleteMany({
-          where: { commentId: id, userId },
-        });
-      else
-        await tx.forumCommentVote.upsert({
-          where: { userId_commentId: { userId, commentId: id } },
-          create: { userId, commentId: id, value },
+      if (value === 0) {
+        await tx.forumPostVote.deleteMany({ where: { postId, userId } });
+      } else {
+        await tx.forumPostVote.upsert({
+          where: { userId_postId: { userId, postId } },
+          create: { userId, postId, value },
           update: { value },
         });
-      const updated = await tx.forumComment.update({
-        where: { id },
+      }
+      const updated = await tx.forumPost.update({
+        where: { id: postId },
         data: { score: { increment: delta } },
       });
       return { score: updated.score, myVote: value };

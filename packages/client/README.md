@@ -85,7 +85,8 @@ All params, bodies and responses are typed from the OpenAPI spec.
 | --- | --- |
 | `orbit.auth` | `login(identifier, password, method?)`, `register(body)`, `me()`, `updateMe(body)`, `changePassword(body)`, `logout()` |
 | `orbit.users`, `events`, `announcements`, `news`, `blogPosts` | `list(query?)`, `get(id)`, `create(body)`, `update(id, body)`, `delete(id)`, `iterate(query?)` |
-| `orbit.forum` | `listPosts`, `getPost`, `createPost`, `updatePost`, `deletePost`, `addComment(postId, body)`, `updateComment`, `deleteComment`, `votePost(id, value)`, `voteComment(id, value)` |
+| `orbit.comments` | `list(query)`, `create(body)`, `update(id, body)`, `delete(id)`, `vote(id, value)` |
+| `orbit.forum` | `listPosts`, `getPost`, `createPost`, `updatePost`, `deletePost`, `votePost(id, value)` |
 | `orbit.notifications` | `list(query?)`, `markRead(id)`, `markUnread(id)`, `markAllRead()`, `delete(id)`, `restore(id)` |
 | `orbit.uploads` | `upload(file, filename?)` |
 | `orbit.health()` | |
@@ -245,6 +246,16 @@ under `components['schemas']`. List endpoints accept `page`, `limit` (max 100) a
 | `PATCH` | `/api/blog-posts/{id}` | Bearer | `UpdateBlogPostDto` | `BlogPostDto` |
 | `DELETE` | `/api/blog-posts/{id}` | Bearer |  | `OkDto` |
 
+#### comments
+
+| Method | Path | Auth | Request body | Response |
+| --- | --- | --- | --- | --- |
+| `GET` | `/api/comments` | Bearer |  | `CommentThreadDto` |
+| `POST` | `/api/comments` | Bearer | `CreateCommentDto` | `CommentDto` |
+| `PATCH` | `/api/comments/{id}` | Bearer | `UpdateCommentDto` | `CommentBaseDto` |
+| `DELETE` | `/api/comments/{id}` | Bearer |  | `OkDto` |
+| `PUT` | `/api/comments/{id}/vote` | Bearer | `VoteDto` | `VoteResultDto` |
+
 #### forum-posts
 
 | Method | Path | Auth | Request body | Response |
@@ -254,11 +265,7 @@ under `components['schemas']`. List endpoints accept `page`, `limit` (max 100) a
 | `GET` | `/api/forum-posts/{id}` | Bearer |  | `ForumPostDetailDto` |
 | `PATCH` | `/api/forum-posts/{id}` | Bearer | `UpdateForumPostDto` | `ForumPostDto` |
 | `DELETE` | `/api/forum-posts/{id}` | Bearer |  | `OkDto` |
-| `POST` | `/api/forum-posts/{id}/comments` | Bearer | `CreateForumCommentDto` | `ForumCommentDto` |
 | `PUT` | `/api/forum-posts/{id}/vote` | Bearer | `VoteDto` | `VoteResultDto` |
-| `PATCH` | `/api/forum-comments/{id}` | Bearer | `UpdateForumCommentDto` | `ForumCommentBaseDto` |
-| `DELETE` | `/api/forum-comments/{id}` | Bearer |  | `OkDto` |
-| `PUT` | `/api/forum-comments/{id}/vote` | Bearer | `VoteDto` | `VoteResultDto` |
 
 #### uploads
 

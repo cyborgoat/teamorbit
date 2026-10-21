@@ -68,7 +68,7 @@ async function mockApi(page: Page, initial = superuser) {
       return route.continue()
     const path = new URL(request.url()).pathname.replace(/^\/api(?=\/)/, '')
     if (
-      !/^\/(auth|users|news|blog-posts|forum-posts|notifications|uploads|socket\.io)(\/|$)/.test(
+      !/^\/(auth|users|news|blog-posts|forum-posts|comments|notifications|uploads|socket\.io)(\/|$)/.test(
         path,
       )
     )
@@ -84,10 +84,16 @@ async function mockApi(page: Page, initial = superuser) {
         createdAt: '2026-10-16T00:00:00Z',
         score: 0,
         myVote: 0,
-        comments: [
+        comments: [],
+      }
+    else if (path === '/comments' && request.method() === 'GET')
+      body = {
+        items: [
           {
             id: 'comment',
             content: 'Existing comment',
+            resourceType: 'forum',
+            resourceId: 'thread',
             author: member,
             createdAt: '2026-10-16T00:00:00Z',
             score: 0,
@@ -96,9 +102,9 @@ async function mockApi(page: Page, initial = superuser) {
           },
         ],
       }
-    else if (path === '/forum-posts/thread/comments') {
+    else if (path === '/comments' && request.method() === 'POST') {
       state.posts.push(request.postDataJSON())
-      body = { id: 'created-comment' }
+      body = { id: 'created-comment', replies: [] }
     } else if (path === '/users') body = { items: state.users }
     else if (path.startsWith('/users/') && request.method() === 'PATCH') {
       const target = state.users.find(

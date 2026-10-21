@@ -14,7 +14,9 @@ export type Announcement = Schemas['AnnouncementDto'];
 export type News = Schemas['NewsDto'];
 export type BlogPost = Schemas['BlogPostDto'];
 export type ForumPost = Schemas['ForumPostDetailDto'];
-export type ForumComment = Schemas['ForumCommentDto'];
+export type Comment = Schemas['CommentDto'];
+/** @deprecated Use `Comment` */
+export type ForumComment = Comment;
 export type Notification = Schemas['PaginatedNotificationsDto']['items'][number];
 
 type Json<T> = T extends { content: { 'application/json': infer J } } ? J : never;

@@ -22,15 +22,11 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { PaginationQueryDto } from '../common/dto/pagination.dto';
 import {
-  CreateForumCommentDto,
   CreateForumPostDto,
-  ForumCommentBaseDto,
-  ForumCommentDto,
   ForumPostCreatedDto,
   ForumPostDetailDto,
   ForumPostDto,
   PaginatedForumPostsDto,
-  UpdateForumCommentDto,
   UpdateForumPostDto,
   VoteDto,
   VoteResultDto,
@@ -83,16 +79,6 @@ export class ForumController {
     return this.forum.remove(id, user);
   }
 
-  @Post('forum-posts/:id/comments')
-  @ApiCreatedResponse({ type: ForumCommentDto })
-  createComment(
-    @Param('id') id: string,
-    @Body() dto: CreateForumCommentDto,
-    @CurrentUser() user: { id: string },
-  ) {
-    return this.forum.createComment(id, dto, user.id);
-  }
-
   @Put('forum-posts/:id/vote')
   @ApiOkResponse({ type: VoteResultDto })
   votePost(
@@ -101,34 +87,5 @@ export class ForumController {
     @CurrentUser() user: { id: string },
   ) {
     return this.forum.votePost(id, user.id, dto);
-  }
-
-  @Patch('forum-comments/:id')
-  @ApiOkResponse({ type: ForumCommentBaseDto })
-  updateComment(
-    @Param('id') id: string,
-    @Body() dto: UpdateForumCommentDto,
-    @CurrentUser() user: { id: string; role: Role },
-  ) {
-    return this.forum.updateComment(id, dto, user);
-  }
-
-  @Delete('forum-comments/:id')
-  @ApiOkResponse({ type: OkDto })
-  removeComment(
-    @Param('id') id: string,
-    @CurrentUser() user: { id: string; role: Role },
-  ) {
-    return this.forum.removeComment(id, user);
-  }
-
-  @Put('forum-comments/:id/vote')
-  @ApiOkResponse({ type: VoteResultDto })
-  voteComment(
-    @Param('id') id: string,
-    @Body() dto: VoteDto,
-    @CurrentUser() user: { id: string },
-  ) {
-    return this.forum.voteComment(id, user.id, dto);
   }
 }

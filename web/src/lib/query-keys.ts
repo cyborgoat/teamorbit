@@ -7,6 +7,8 @@ export const queryKeys = {
   blog: ['blog'] as const,
   forum: ['forum-posts'] as const,
   post: (id: string) => ['forum-post', id] as const,
+  comments: (resourceType: string, resourceId: string) =>
+    ['comments', resourceType, resourceId] as const,
   notifications: ['notifications'] as const,
   avatars: ['avatar-presets'] as const,
 }

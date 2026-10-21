@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Trash2 } from 'lucide-react'
-import type { ForumComment as Comment } from '@goatcheese/teamorbit-client'
+import type { Comment } from '@goatcheese/teamorbit-client'
 import { MarkdownBody } from '@/components/markdown-body'
 import { UserAvatar } from '@/components/user-avatar'
 import { VoteControls } from '@/components/vote-controls'
@@ -13,6 +13,7 @@ import {
   CardDescription,
   CardContent,
 } from '@/components/ui/card'
+
 type Actions = {
   pending: boolean
   voting: boolean
@@ -20,6 +21,7 @@ type Actions = {
   onVote: (id: string, value: 1 | -1 | 0) => void
   onRemove: (id: string) => void
 }
+
 function CommentHeading({
   comment,
   reply = false,
@@ -70,7 +72,8 @@ function CommentHeading({
     </div>
   )
 }
-export function ForumComment({
+
+export function ContentComment({
   comment,
   actions,
   onReply,

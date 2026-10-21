@@ -43,7 +43,7 @@ async function mockAuth(page: Page, initialToken = false) {
       return route.continue()
     const path = new URL(request.url()).pathname.replace(/^\/api(?=\/)/, '')
     if (
-      !/^\/(auth|news|blog-posts|forum-posts|notifications|announcements|events|socket\.io)(\/|$)/.test(
+      !/^\/(auth|news|blog-posts|forum-posts|comments|notifications|announcements|events|socket\.io)(\/|$)/.test(
         path,
       )
     )
