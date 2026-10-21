@@ -129,7 +129,8 @@ teamorbit/
 ├── packages/client/  Typed TypeScript API client
 ├── openapi/          Generated API contract
 ├── docs/             Architecture, schema, features, and usage
-└── scripts/          SDK consistency checks
+├── ecosystem.config.cjs  PM2 production process file
+└── scripts/          SDK checks and production deploy helper
 ```
 
 ## Documentation
@@ -137,7 +138,7 @@ teamorbit/
 - [Architecture](docs/architecture.md) — modules, data flow, auth, and uploads
 - [Schema](docs/schema.md) — database models and relationships
 - [Features](docs/features.md) — capabilities, permissions, and API surface
-- [Usage](docs/usage.md) — setup, account flows, editors, tests, and upgrades
+- [Usage](docs/usage.md) — setup, account flows, editors, tests, upgrades, and PM2 deploy
 - [Web console](web/README.md) — frontend setup and browser checks
 - [Client SDK](packages/client/README.md) — TypeScript integration
 
@@ -156,6 +157,7 @@ teamorbit/
 | Web | Vite, React, TanStack Router/Query, shadcn/ui, MDXEditor |
 | Client | TypeScript + openapi-fetch |
 | Tests | Jest (API), Playwright (web), Node test runner (client) |
+| Process manager | PM2 (`ecosystem.config.cjs`, `scripts/deploy-prod.sh`) |
 
 ## License
 

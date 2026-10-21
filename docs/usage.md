@@ -30,6 +30,43 @@ npm --prefix web run dev
 
 Web: `http://localhost:5173`; API: `http://localhost:3000/api`; Swagger: `http://localhost:3000/docs`; health: `/api/health`; metrics: `/metrics`.
 
+## Production with PM2
+
+Install PM2 once (`npm install -g pm2`). Configure `api/.env` for production:
+set a strong `JWT_SECRET`, a reachable `PUBLIC_BASE_URL` (the origin browsers use),
+and your bootstrap admin values before the first seed if needed.
+
+From the repository root:
+
+```bash
+./scripts/deploy-prod.sh
+```
+
+This builds the client, API, and web console, runs `prisma migrate deploy`, then
+starts or reloads both processes from [`ecosystem.config.cjs`](../ecosystem.config.cjs).
+
+| Process | Role | Default URL |
+|---------|------|-------------|
+| `teamorbit-api` | NestJS API (`node dist/main.js`) | `http://127.0.0.1:3000` |
+| `teamorbit-web` | Vite preview of `web/dist` with API proxy | `http://127.0.0.1:4173` |
+
+SQLite and local uploads require a single API instance; the ecosystem file uses
+fork mode with `instances: 1`. Override the web→API proxy with
+`API_PROXY_TARGET` when starting PM2 if the API is not on `127.0.0.1:3000`.
+
+Useful commands:
+
+```bash
+pm2 status
+pm2 logs
+pm2 reload ecosystem.config.cjs --update-env
+pm2 stop ecosystem.config.cjs
+```
+
+Put a reverse proxy (TLS) in front of the web port for public access, or point
+it at the API and serve `web/dist` yourself. Keep `PUBLIC_BASE_URL` aligned with
+the public origin so absolute upload and avatar URLs stay reachable.
+
 ## Development data
 
 Normal seeding creates one active superuser from `BOOTSTRAP_ADMIN_USERNAME`, `BOOTSTRAP_ADMIN_NAME`, and `BOOTSTRAP_ADMIN_PASSWORD`; email is optional. Credentials are never supplied by the application. Repeating bootstrap does not change an existing administrator.
