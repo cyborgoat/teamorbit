@@ -5,6 +5,8 @@ import { diskStorage } from 'multer';
 import { mkdirSync } from 'node:fs';
 import { extname } from 'node:path';
 import { randomUUID } from 'node:crypto';
+import { UploadCleanupService } from './upload-cleanup.service';
+import { UploadCleanupController } from './upload-cleanup.controller';
 import { UploadsController } from './uploads.controller';
 @Module({
   imports: [
@@ -34,6 +36,7 @@ import { UploadsController } from './uploads.controller';
       },
     }),
   ],
-  controllers: [UploadsController],
+  controllers: [UploadsController, UploadCleanupController],
+  providers: [UploadCleanupService],
 })
 export class UploadsModule {}

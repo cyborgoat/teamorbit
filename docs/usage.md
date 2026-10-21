@@ -80,3 +80,51 @@ npm --prefix web run test:integration
 API tests and real-browser tests create disposable databases and uploads. They do not use your development database. Set `PLAYWRIGHT_CHROME=1` to use an installed Chrome. The real-browser suite reserves ports 3099 and 5189.
 
 After API changes, export OpenAPI from `api/` using `npm run openapi:export`, then rebuild the client. `scripts/check-sdk.sh` verifies generated-contract consistency in CI. It requires the normal API environment settings but does not connect to the database during export.
+
+## Upload cleanup
+
+Uploaded files are retained while any saved post, announcement, event description,
+comment/reply, cover, avatar, or notification references them. A file used by more
+than one record is retained until every saved reference is removed. Mentioning a
+local upload URL in plain text or code also conservatively retains it.
+
+The API checks hourly by default, starting one hour after startup. An unreferenced
+file becomes eligible 24 hours after it is first observed without references.
+Reattaching it resets that clock. Existing files, including nested demo assets,
+are discovered with a fresh grace period; file age alone never causes immediate
+removal. Deleted content is removed immediately, while its orphan assets wait for
+cleanup. Only regular files inside `UPLOAD_DIR` are eligible: symlinks, bundled
+avatars, branding, and remote files are excluded.
+
+Administrators and superusers can open **Upload maintenance** from the sidebar,
+review orphan paths, sizes, eligibility, and errors, then choose **Clean now** and
+confirm. Manual runs follow the same grace period and recheck references before
+deletion. The page shows run progress and counts; failed deletions are retried on
+the next scheduled or manual run. Cleanup runs do not overlap, including across
+API processes sharing the database and upload filesystem. Interrupted claims
+resume on the next run; leases expire after five minutes without progress.
+
+Configure these settings in `api/.env`, then restart the API:
+
+| Setting | Default | Accepted values |
+|---------|---------|-----------------|
+| `UPLOAD_CLEANUP_ENABLED` | `true` | `true` or `false`; disables only scheduled runs |
+| `UPLOAD_CLEANUP_INTERVAL_HOURS` | `1` | Number from 1 to 168 |
+| `UPLOAD_CLEANUP_GRACE_HOURS` | `24` | Number from 1 to 8760 |
+
+After upgrading, run `npx prisma migrate deploy` inside `api/` before starting the
+API. New registry tables are populated by the first preview or cleanup run. Back
+up the database and upload directory together before the first cleanup; restore
+both together if recovery is needed. Set `UPLOAD_CLEANUP_ENABLED=false` to review
+historical files manually before enabling scheduled cleanup.
+
+Unsaved drafts and URLs used only outside this application cannot be detected and
+may be deleted after the grace period. References to local files must use
+`/uploads/...` paths or absolute URLs under the configured `PUBLIC_BASE_URL`;
+review stored absolute URLs before changing that origin. Saving a reference to an
+asset already claimed or deleted returns a conflict; upload the image again.
+
+Admin API / SDK: `GET /api/uploads/cleanup` accepts `page` and `limit` and returns
+the preview, totals, settings, and latest run; `POST /api/uploads/cleanup` starts a
+run and returns `202 { id }` (`409` when already running). Use
+`orbit.uploads.cleanupPreview()` and `orbit.uploads.startCleanup()` in the client.

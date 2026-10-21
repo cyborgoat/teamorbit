@@ -2432,6 +2432,116 @@
         ]
       }
     },
+    "/api/uploads/cleanup": {
+      "get": {
+        "operationId": "UploadCleanupController_preview",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reconcile uploads and preview orphan files without deleting them.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CleanupPreviewDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "uploads"
+        ]
+      },
+      "post": {
+        "operationId": "UploadCleanupController_start",
+        "parameters": [],
+        "responses": {
+          "202": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CleanupStartedDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Cleanup is already running.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "uploads"
+        ]
+      }
+    },
     "/api/health": {
       "get": {
         "operationId": "HealthController_check",
@@ -4091,6 +4201,187 @@
           "filename",
           "mimetype",
           "size"
+        ]
+      },
+      "CleanupAssetDto": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "size": {
+            "type": "number"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "DELETING"
+            ]
+          },
+          "unreferencedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "eligibleAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "eligible": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "path",
+          "size",
+          "state",
+          "unreferencedAt",
+          "eligibleAt",
+          "eligible"
+        ]
+      },
+      "CleanupSettingsDto": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "intervalHours": {
+            "type": "number"
+          },
+          "graceHours": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "enabled",
+          "intervalHours",
+          "graceHours"
+        ]
+      },
+      "CleanupRunDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "trigger": {
+            "type": "string",
+            "enum": [
+              "manual",
+              "scheduled"
+            ]
+          },
+          "actorId": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "RUNNING",
+              "COMPLETED",
+              "FAILED"
+            ]
+          },
+          "startedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "finishedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "deletedCount": {
+            "type": "number"
+          },
+          "deletedBytes": {
+            "type": "number"
+          },
+          "failedCount": {
+            "type": "number"
+          },
+          "error": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "trigger",
+          "status",
+          "startedAt",
+          "deletedCount",
+          "deletedBytes",
+          "failedCount"
+        ]
+      },
+      "CleanupPreviewDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CleanupAssetDto"
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "page": {
+            "type": "number"
+          },
+          "limit": {
+            "type": "number"
+          },
+          "orphanBytes": {
+            "type": "number"
+          },
+          "eligibleCount": {
+            "type": "number"
+          },
+          "reclaimableBytes": {
+            "type": "number"
+          },
+          "settings": {
+            "$ref": "#/components/schemas/CleanupSettingsDto"
+          },
+          "lastRun": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CleanupRunDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "page",
+          "limit",
+          "orphanBytes",
+          "eligibleCount",
+          "reclaimableBytes",
+          "settings",
+          "lastRun"
+        ]
+      },
+      "CleanupStartedDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
         ]
       },
       "HealthDto": {

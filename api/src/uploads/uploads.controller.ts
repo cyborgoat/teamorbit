@@ -1,3 +1,4 @@
+import { UploadCleanupService } from './upload-cleanup.service';
 import { mediaUrl } from '../common/media';
 import {
   BadRequestException,
@@ -26,6 +27,7 @@ import { ErrorDto } from '../common/dto/response.dto';
 @UseGuards(JwtAuthGuard)
 @Controller('uploads')
 export class UploadsController {
+  constructor(private readonly cleanup: UploadCleanupService) {}
   @Post()
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -38,10 +40,11 @@ export class UploadsController {
   })
   @UseInterceptors(FileInterceptor('file'))
   @ApiCreatedResponse({ type: UploadResultDto })
-  upload(@UploadedFile() file: Express.Multer.File) {
+  async upload(@UploadedFile() file: Express.Multer.File) {
     if (!file) {
       throw new BadRequestException('File is required');
     }
+    await this.cleanup.register(file.filename, file.size);
     return {
       url: mediaUrl(`/uploads/${file.filename}`),
       filename: file.filename,

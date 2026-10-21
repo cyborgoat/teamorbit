@@ -112,3 +112,15 @@ test('registration omits email and profile can clear it', async () => {
   await orbit.auth.updateMe({ email: null });
   assert.deepEqual(await calls[1].json(), { email: null });
 });
+
+
+test('admin cleanup helpers send pagination and accept a background run response', async () => {
+  const { fetch, calls } = mockFetch(request => request.method === 'POST' ? { status: 202, body: { id: 'cleanup-run' } } : { body: { items: [], total: 0 } });
+  const orbit = createTeamOrbitClient({ baseUrl: 'https://orbit.example', token: 'admin-token', fetch });
+  assert.deepEqual(await orbit.uploads.cleanupPreview({ page: 2, limit: 10 }), { items: [], total: 0 });
+  assert.equal(new URL(calls[0].url).pathname, '/api/uploads/cleanup');
+  assert.equal(new URL(calls[0].url).searchParams.get('page'), '2');
+  assert.deepEqual(await orbit.uploads.startCleanup(), { id: 'cleanup-run' });
+  assert.equal(calls[1].method, 'POST');
+  assert.equal(calls[1].headers.get('authorization'), 'Bearer admin-token');
+});

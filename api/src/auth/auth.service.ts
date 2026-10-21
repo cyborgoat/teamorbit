@@ -26,16 +26,18 @@ export class AuthService {
   async register(dto: RegisterDto) {
     const passwordHash = await bcrypt.hash(dto.password, 10);
     try {
-      const user = await this.prisma.user.create({
-        data: {
-          username: dto.username,
-          fullName: dto.fullName,
-          email: dto.email ?? null,
-          passwordHash,
-          status: UserStatus.PENDING,
-        },
-        select: userSelect,
-      });
+      const user = await this.prisma.mediaWrite((tx) =>
+        tx.user.create({
+          data: {
+            username: dto.username,
+            fullName: dto.fullName,
+            email: dto.email ?? null,
+            passwordHash,
+            status: UserStatus.PENDING,
+          },
+          select: userSelect,
+        }),
+      );
       return presentUser(user);
     } catch (err) {
       if (
@@ -97,18 +99,20 @@ export class AuthService {
 
   async updateMe(userId: string, dto: UpdateProfileDto) {
     try {
-      return await this.prisma.user
-        .update({
-          where: { id: userId },
-          data: {
-            ...(dto.fullName !== undefined ? { fullName: dto.fullName } : {}),
-            ...(dto.email !== undefined ? { email: dto.email } : {}),
-            ...(dto.avatarUrl !== undefined
-              ? { avatarUrl: dto.avatarUrl }
-              : {}),
-          },
-          select: userSelect,
-        })
+      return await this.prisma
+        .mediaWrite((tx) =>
+          tx.user.update({
+            where: { id: userId },
+            data: {
+              ...(dto.fullName !== undefined ? { fullName: dto.fullName } : {}),
+              ...(dto.email !== undefined ? { email: dto.email } : {}),
+              ...(dto.avatarUrl !== undefined
+                ? { avatarUrl: dto.avatarUrl }
+                : {}),
+            },
+            select: userSelect,
+          }),
+        )
         .then(presentUser);
     } catch (err) {
       if (
@@ -135,10 +139,12 @@ export class AuthService {
       );
     }
     const passwordHash = await bcrypt.hash(dto.newPassword, 10);
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: { passwordHash },
-    });
+    await this.prisma.mediaWrite((tx) =>
+      tx.user.update({
+        where: { id: userId },
+        data: { passwordHash },
+      }),
+    );
     return { ok: true };
   }
 }

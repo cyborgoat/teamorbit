@@ -272,6 +272,8 @@ under `components['schemas']`. List endpoints accept `page`, `limit` (max 100) a
 | Method | Path | Auth | Request body | Response |
 | --- | --- | --- | --- | --- |
 | `POST` | `/api/uploads` | Bearer | multipart | `UploadResultDto` |
+| `GET` | `/api/uploads/cleanup` | Bearer |  | `CleanupPreviewDto` |
+| `POST` | `/api/uploads/cleanup` | Bearer |  | `CleanupStartedDto` |
 
 #### health
 

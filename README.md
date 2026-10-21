@@ -96,6 +96,9 @@ Members can add or remove email from Settings; username login remains available.
   avatar URLs for profiles and forum authors, using the required `PUBLIC_BASE_URL`. Send `avatarUrl: null` to restore the default;
   existing custom avatars are preserved. Broken custom images fall back to the
   default in the web console.
+- **Upload cleanup:** hourly orphan cleanup with a 24-hour grace period protects shared
+  images in saved content. Admins can preview and run cleanup in **Upload maintenance**.
+  See the [cleanup guide](docs/usage.md#upload-cleanup) for configuration and draft limitations.
 - **Avatar catalogue:** public `GET /api/avatars` (SDK: `orbit.avatars.list()`) returns
   preset IDs, names, absolute image URLs, and the default marker. Presets are
   bundled product assets and work without demo seeding. Save a preset's `url`

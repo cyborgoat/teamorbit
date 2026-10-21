@@ -98,20 +98,22 @@ export class EventsService {
       dto.startAt ?? existing.startAt,
       dto.endAt ?? existing.endAt,
     );
-    return this.prisma.event
-      .update({
-        where: { id },
-        data: {
-          ...dto,
-          ...(dto.startAt ? { startAt: new Date(dto.startAt) } : {}),
-          ...(dto.endAt ? { endAt: new Date(dto.endAt) } : {}),
-        },
-        include: {
-          createdBy: {
-            select: authorSelect,
+    return this.prisma
+      .mediaWrite((tx) =>
+        tx.event.update({
+          where: { id },
+          data: {
+            ...dto,
+            ...(dto.startAt ? { startAt: new Date(dto.startAt) } : {}),
+            ...(dto.endAt ? { endAt: new Date(dto.endAt) } : {}),
           },
-        },
-      })
+          include: {
+            createdBy: {
+              select: authorSelect,
+            },
+          },
+        }),
+      )
       .then(presentContent);
   }
 

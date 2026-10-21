@@ -155,6 +155,11 @@ export function createResources(client: Raw, auth: { setToken(t: string | undefi
         >,
     },
     uploads: {
+      /** Admin-only orphan preview; reconciles existing files without deleting them. */
+      cleanupPreview: (query?: QueryOf<'/api/uploads/cleanup'>) =>
+        call(client, 'GET', '/api/uploads/cleanup', { params: { query } }) as Promise<ResponseOf<'/api/uploads/cleanup', 'get'>>,
+      /** Admin-only background cleanup using the configured grace period. */
+      startCleanup: () => call(client, 'POST', '/api/uploads/cleanup') as Promise<ResponseOf<'/api/uploads/cleanup', 'post'>>,
       /** Uploads an image (max 5 MB). Returns `{ url }`, as an absolute public URL. */
       upload(file: Blob, filename?: string) {
         const form = new FormData();

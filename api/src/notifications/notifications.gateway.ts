@@ -73,10 +73,7 @@ export class NotificationsGateway
       !!(await this.users.find(String(client.data.userId)))
     );
   }
-  async broadcastNew(
-    notification: Notification,
-    recipientIds: string[] = [],
-  ) {
+  async broadcastNew(notification: Notification, recipientIds: string[] = []) {
     if (!this.server) return;
     if (notification.audience === NotificationAudience.DIRECTED) {
       for (const userId of recipientIds) {

@@ -78,16 +78,18 @@ export class AnnouncementsService {
 
   async update(id: string, dto: UpdateAnnouncementDto) {
     await this.findOne(id);
-    return this.prisma.announcement
-      .update({
-        where: { id },
-        data: dto,
-        include: {
-          author: {
-            select: authorSelect,
+    return this.prisma
+      .mediaWrite((tx) =>
+        tx.announcement.update({
+          where: { id },
+          data: dto,
+          include: {
+            author: {
+              select: authorSelect,
+            },
           },
-        },
-      })
+        }),
+      )
       .then(presentContent);
   }
 

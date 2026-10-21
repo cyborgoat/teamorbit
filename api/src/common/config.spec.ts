@@ -30,6 +30,26 @@ describe('service configuration', () => {
       validateEnvironment({ ...base, PUBLIC_BASE_URL: value }),
     ).toThrow();
   });
+  it('defaults to hourly cleanup with a 24-hour grace period', () => {
+    expect(validateEnvironment(base)).toMatchObject({
+      UPLOAD_CLEANUP_ENABLED: true,
+      UPLOAD_CLEANUP_INTERVAL_HOURS: 1,
+      UPLOAD_CLEANUP_GRACE_HOURS: 24,
+    });
+    expect(
+      validateEnvironment({ ...base, UPLOAD_CLEANUP_ENABLED: 'false' })
+        .UPLOAD_CLEANUP_ENABLED,
+    ).toBe(false);
+  });
+  it.each([
+    ['UPLOAD_CLEANUP_ENABLED', 'yes'],
+    ['UPLOAD_CLEANUP_INTERVAL_HOURS', 0],
+    ['UPLOAD_CLEANUP_INTERVAL_HOURS', 'no'],
+    ['UPLOAD_CLEANUP_GRACE_HOURS', -1],
+    ['UPLOAD_CLEANUP_GRACE_HOURS', 'Infinity'],
+  ])('rejects invalid cleanup setting %s', (key, value) => {
+    expect(() => validateEnvironment({ ...base, [key]: value })).toThrow(key);
+  });
   it.each(['invalid', 0, 65536])('rejects invalid port %s', (PORT) => {
     expect(() => validateEnvironment({ ...base, PORT })).toThrow('PORT must');
   });

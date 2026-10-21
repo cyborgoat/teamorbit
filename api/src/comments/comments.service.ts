@@ -11,11 +11,7 @@ import {
   ContentRefService,
   type CommentResourceType,
 } from './content-ref.service';
-import {
-  CreateCommentDto,
-  UpdateCommentDto,
-  VoteDto,
-} from './dto/comment.dto';
+import { CreateCommentDto, UpdateCommentDto, VoteDto } from './dto/comment.dto';
 
 @Injectable()
 export class CommentsService {
@@ -119,12 +115,14 @@ export class CommentsService {
     const existing = await this.prisma.comment.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Comment not found');
     assertCanModerate(actor, existing.authorId);
-    return this.prisma.comment
-      .update({
-        where: { id },
-        data: { content: dto.content },
-        include: { author: { select: authorSelect } },
-      })
+    return this.prisma
+      .mediaWrite((tx) =>
+        tx.comment.update({
+          where: { id },
+          data: { content: dto.content },
+          include: { author: { select: authorSelect } },
+        }),
+      )
       .then(presentContent);
   }
 

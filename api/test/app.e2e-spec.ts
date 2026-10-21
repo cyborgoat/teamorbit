@@ -1,3 +1,5 @@
+import { UploadCleanupService } from '../src/uploads/upload-cleanup.service';
+import type { CleanupPreviewDto } from '../src/uploads/dto/upload-cleanup.dto';
 import { ConfigService } from '@nestjs/config';
 import { NotificationsService } from '../src/notifications/notifications.service';
 import { NotificationsGateway } from '../src/notifications/notifications.gateway';
@@ -786,7 +788,7 @@ describe('App (e2e)', () => {
       });
 
       await app.get(NotificationsService).createWithNotification(
-        async () => ({ id: 'directed-socket-resource' }),
+        () => Promise.resolve({ id: 'directed-socket-resource' }),
         () => ({
           audience: 'DIRECTED' as const,
           type: 'test.directed',
@@ -836,6 +838,98 @@ describe('App (e2e)', () => {
     expect(image.headers.get('access-control-allow-origin')).toBe(
       'http://another-app.example',
     );
+  });
+
+  it('restricts cleanup to admins and deletes eligible files while retaining referenced uploads', async () => {
+    const token = await adminToken();
+    for (const method of ['get', 'post'] as const) {
+      await request(app.getHttpServer())
+        [method]('/api/uploads/cleanup')
+        .expect(401);
+    }
+    const member = await prisma.user.create({
+      data: {
+        username: `${prefix}-cleanup-member`,
+        fullName: 'Cleanup Member',
+        role: 'USER',
+        status: 'ACTIVE',
+        passwordHash: await bcrypt.hash(password, 10),
+      },
+    });
+    const login = await request(app.getHttpServer())
+      .post('/api/auth/login')
+      .send({ username: member.username, password })
+      .expect(201);
+    for (const method of ['get', 'post'] as const) {
+      await request(app.getHttpServer())
+        [method]('/api/uploads/cleanup')
+        .auth(bodyOf(login).accessToken, { type: 'bearer' })
+        .expect(403);
+    }
+    const upload = async () => {
+      const response = await request(app.getHttpServer())
+        .post('/api/uploads')
+        .auth(token, { type: 'bearer' })
+        .attach(
+          'file',
+          Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"/>'),
+          { filename: 'cleanup.svg', contentType: 'image/svg+xml' },
+        )
+        .expect(201);
+      return response.body as { filename: string; url: string };
+    };
+    const orphan = await upload();
+    const shared = await upload();
+    await request(app.getHttpServer())
+      .post('/api/news')
+      .auth(token, { type: 'bearer' })
+      .send({
+        title: 'Retained cleanup asset',
+        content: `![keep](${shared.url})`,
+      })
+      .expect(201);
+    const preview = await request(app.getHttpServer())
+      .get('/api/uploads/cleanup?limit=100')
+      .auth(token, { type: 'bearer' })
+      .expect(200);
+    const data = preview.body as CleanupPreviewDto;
+    expect(data.items.some((item) => item.path === orphan.filename)).toBe(true);
+    expect(data.items.some((item) => item.path === shared.filename)).toBe(
+      false,
+    );
+    await prisma.uploadAsset.update({
+      where: { path: orphan.filename },
+      data: { unreferencedAt: new Date(Date.now() - 25 * 3_600_000) },
+    });
+    const started = await request(app.getHttpServer())
+      .post('/api/uploads/cleanup')
+      .auth(token, { type: 'bearer' })
+      .expect(202);
+    const { id } = started.body as { id: string };
+    for (let n = 0; n < 200; n++) {
+      const run = await prisma.uploadCleanupRun.findUniqueOrThrow({
+        where: { id },
+      });
+      if (run.status !== 'RUNNING') break;
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
+    expect(
+      (await prisma.uploadCleanupRun.findUniqueOrThrow({ where: { id } }))
+        .status,
+    ).toBe('COMPLETED');
+    await request(app.getHttpServer())
+      .get(new URL(orphan.url).pathname)
+      .expect(404);
+    await request(app.getHttpServer())
+      .get(new URL(shared.url).pathname)
+      .expect(200);
+    // The completed summary is JSON-safe (registry byte counters use BigInt internally).
+    const report = await request(app.getHttpServer())
+      .get('/api/uploads/cleanup')
+      .auth(token, { type: 'bearer' })
+      .expect(200);
+    expect((report.body as CleanupPreviewDto).lastRun?.deletedCount).toBe(1);
+    expect(app.get(UploadCleanupService).settings.graceHours).toBe(24);
   });
 
   it('filters unread/read/dismissed and supports mark unread plus restore', async () => {

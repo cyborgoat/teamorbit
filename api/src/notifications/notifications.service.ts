@@ -1,10 +1,6 @@
 import { NotificationAudience, Prisma } from '@prisma/client';
 import { paginate } from '../common/utils';
-import {
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsGateway } from './notifications.gateway';
 import { NotificationListStatus } from './dto/notification.dto';
@@ -48,10 +44,7 @@ export class NotificationsService {
   ): Prisma.NotificationWhereInput {
     if (status === NotificationListStatus.DISMISSED) {
       return {
-        AND: [
-          this.audienceWhere(userId),
-          { dismissals: { some: { userId } } },
-        ],
+        AND: [this.audienceWhere(userId), { dismissals: { some: { userId } } }],
       };
     }
     const inbox = this.visibleWhere(userId);
@@ -84,7 +77,7 @@ export class NotificationsService {
     create: (tx: Prisma.TransactionClient) => Promise<T>,
     input: (item: T) => NotificationInput | null,
   ) {
-    const { item, notification, recipientIds } = await this.prisma.$transaction(
+    const { item, notification, recipientIds } = await this.prisma.mediaWrite(
       async (tx) => {
         const item = await create(tx);
         const payload = input(item);
@@ -92,9 +85,7 @@ export class NotificationsService {
           return { item, notification: null, recipientIds: [] as string[] };
         }
         const recipientIds = [
-          ...new Set(
-            (payload.recipientIds ?? []).filter((id) => Boolean(id)),
-          ),
+          ...new Set((payload.recipientIds ?? []).filter((id) => Boolean(id))),
         ];
         if (
           payload.audience === NotificationAudience.DIRECTED &&

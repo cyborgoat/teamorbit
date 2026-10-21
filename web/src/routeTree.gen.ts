@@ -17,6 +17,7 @@ import { Route as AuthenticatedAnnouncementsRouteImport } from './routes/_authen
 import { Route as AuthenticatedEventsRouteImport } from './routes/_authenticated.events'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated.notifications'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated.settings'
+import { Route as AuthenticatedUploadMaintenanceRouteImport } from './routes/_authenticated.upload-maintenance'
 import { Route as AuthenticatedUploadsRouteImport } from './routes/_authenticated.uploads'
 import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated.users'
 import { Route as AuthenticatedAnnouncementsIdRouteImport } from './routes/_authenticated.announcements.$id'
@@ -72,6 +73,12 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedUploadMaintenanceRoute =
+  AuthenticatedUploadMaintenanceRouteImport.update({
+    id: '/upload-maintenance',
+    path: '/upload-maintenance',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedUploadsRoute = AuthenticatedUploadsRouteImport.update({
   id: '/uploads',
   path: '/uploads',
@@ -148,6 +155,7 @@ export interface FileRoutesByFullPath {
   '/events': typeof AuthenticatedEventsRouteWithChildren
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/upload-maintenance': typeof AuthenticatedUploadMaintenanceRoute
   '/uploads': typeof AuthenticatedUploadsRoute
   '/users': typeof AuthenticatedUsersRoute
   '/announcements/$id': typeof AuthenticatedAnnouncementsIdRoute
@@ -169,6 +177,7 @@ export interface FileRoutesByTo {
   '/events': typeof AuthenticatedEventsRouteWithChildren
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/upload-maintenance': typeof AuthenticatedUploadMaintenanceRoute
   '/uploads': typeof AuthenticatedUploadsRoute
   '/users': typeof AuthenticatedUsersRoute
   '/': typeof AuthenticatedIndexRoute
@@ -193,6 +202,7 @@ export interface FileRoutesById {
   '/_authenticated/events': typeof AuthenticatedEventsRouteWithChildren
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/upload-maintenance': typeof AuthenticatedUploadMaintenanceRoute
   '/_authenticated/uploads': typeof AuthenticatedUploadsRoute
   '/_authenticated/users': typeof AuthenticatedUsersRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
@@ -218,6 +228,7 @@ export interface FileRouteTypes {
     | '/events'
     | '/notifications'
     | '/settings'
+    | '/upload-maintenance'
     | '/uploads'
     | '/users'
     | '/announcements/$id'
@@ -239,6 +250,7 @@ export interface FileRouteTypes {
     | '/events'
     | '/notifications'
     | '/settings'
+    | '/upload-maintenance'
     | '/uploads'
     | '/users'
     | '/'
@@ -262,6 +274,7 @@ export interface FileRouteTypes {
     | '/_authenticated/events'
     | '/_authenticated/notifications'
     | '/_authenticated/settings'
+    | '/_authenticated/upload-maintenance'
     | '/_authenticated/uploads'
     | '/_authenticated/users'
     | '/_authenticated/'
@@ -340,6 +353,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/upload-maintenance': {
+      id: '/_authenticated/upload-maintenance'
+      path: '/upload-maintenance'
+      fullPath: '/upload-maintenance'
+      preLoaderRoute: typeof AuthenticatedUploadMaintenanceRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/uploads': {
@@ -466,6 +486,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedEventsRoute: typeof AuthenticatedEventsRouteWithChildren
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedUploadMaintenanceRoute: typeof AuthenticatedUploadMaintenanceRoute
   AuthenticatedUploadsRoute: typeof AuthenticatedUploadsRoute
   AuthenticatedUsersRoute: typeof AuthenticatedUsersRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
@@ -485,6 +506,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedEventsRoute: AuthenticatedEventsRouteWithChildren,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedUploadMaintenanceRoute: AuthenticatedUploadMaintenanceRoute,
   AuthenticatedUploadsRoute: AuthenticatedUploadsRoute,
   AuthenticatedUsersRoute: AuthenticatedUsersRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,

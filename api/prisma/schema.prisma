@@ -210,3 +210,35 @@ model Tag {
   news      News[]
   blogPosts BlogPost[]
 }
+
+model UploadAsset {
+  path           String   @id
+  size           Int
+  state          String   @default("ACTIVE")
+  unreferencedAt DateTime?
+  createdAt      DateTime @default(now())
+  error          String?
+
+  @@index([state, unreferencedAt])
+}
+
+// A shared SQLite write lock for media saves and cleanup claims, plus a run lease.
+model UploadMaintenance {
+  id         Int      @id
+  revision   Int      @default(0)
+  leaseOwner String?
+  leaseUntil DateTime?
+}
+
+model UploadCleanupRun {
+  id           String   @id @default(uuid())
+  trigger      String
+  actorId      String?
+  status       String   @default("RUNNING")
+  startedAt    DateTime @default(now())
+  finishedAt   DateTime?
+  deletedCount Int      @default(0)
+  deletedBytes BigInt   @default(0)
+  failedCount  Int      @default(0)
+  error        String?
+}

@@ -452,6 +452,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/uploads/cleanup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["UploadCleanupController_preview"];
+        put?: never;
+        post: operations["UploadCleanupController_start"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/health": {
         parameters: {
             query?: never;
@@ -933,6 +949,53 @@ export interface components {
             filename: string;
             mimetype: string;
             size: number;
+        };
+        CleanupAssetDto: {
+            path: string;
+            size: number;
+            /** @enum {string} */
+            state: "ACTIVE" | "DELETING";
+            /** Format: date-time */
+            unreferencedAt: string;
+            /** Format: date-time */
+            eligibleAt: string;
+            eligible: boolean;
+            error?: string | null;
+        };
+        CleanupSettingsDto: {
+            enabled: boolean;
+            intervalHours: number;
+            graceHours: number;
+        };
+        CleanupRunDto: {
+            id: string;
+            /** @enum {string} */
+            trigger: "manual" | "scheduled";
+            actorId?: string | null;
+            /** @enum {string} */
+            status: "RUNNING" | "COMPLETED" | "FAILED";
+            /** Format: date-time */
+            startedAt: string;
+            /** Format: date-time */
+            finishedAt?: string | null;
+            deletedCount: number;
+            deletedBytes: number;
+            failedCount: number;
+            error?: string | null;
+        };
+        CleanupPreviewDto: {
+            items: components["schemas"]["CleanupAssetDto"][];
+            total: number;
+            page: number;
+            limit: number;
+            orphanBytes: number;
+            eligibleCount: number;
+            reclaimableBytes: number;
+            settings: components["schemas"]["CleanupSettingsDto"];
+            lastRun: components["schemas"]["CleanupRunDto"] | null;
+        };
+        CleanupStartedDto: {
+            id: string;
         };
         HealthDto: {
             /** @example ok */
@@ -2443,6 +2506,74 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UploadResultDto"];
+                };
+            };
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    UploadCleanupController_preview: {
+        parameters: {
+            query?: {
+                page?: number;
+                limit?: number;
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Reconcile uploads and preview orphan files without deleting them. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CleanupPreviewDto"];
+                };
+            };
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    UploadCleanupController_start: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CleanupStartedDto"];
+                };
+            };
+            /** @description Cleanup is already running. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
                 };
             };
             default: {

@@ -54,19 +54,21 @@ export class UsersService {
   async create(dto: CreateUserDto, actorRole: Role) {
     assertCanAssignRole(actorRole, dto.role);
     const passwordHash = await bcrypt.hash(dto.password, 10);
-    return this.prisma.user
-      .create({
-        data: {
-          username: dto.username,
-          fullName: dto.fullName,
-          email: dto.email ?? null,
-          passwordHash,
-          role: dto.role ?? Role.USER,
-          status: dto.status ?? UserStatus.ACTIVE,
-          avatarUrl: dto.avatarUrl,
-        },
-        select: userSelect,
-      })
+    return this.prisma
+      .mediaWrite((tx) =>
+        tx.user.create({
+          data: {
+            username: dto.username,
+            fullName: dto.fullName,
+            email: dto.email ?? null,
+            passwordHash,
+            role: dto.role ?? Role.USER,
+            status: dto.status ?? UserStatus.ACTIVE,
+            avatarUrl: dto.avatarUrl,
+          },
+          select: userSelect,
+        }),
+      )
       .then(presentUser);
   }
 
@@ -86,12 +88,14 @@ export class UsersService {
       data.passwordHash = await bcrypt.hash(dto.password, 10);
     }
 
-    return this.prisma.user
-      .update({
-        where: { id },
-        data,
-        select: userSelect,
-      })
+    return this.prisma
+      .mediaWrite((tx) =>
+        tx.user.update({
+          where: { id },
+          data,
+          select: userSelect,
+        }),
+      )
       .then(presentUser);
   }
 
@@ -101,10 +105,12 @@ export class UsersService {
     if (existing.role === Role.SUPERUSER && actorRole !== Role.SUPERUSER) {
       throw new ForbiddenException('Cannot delete superuser');
     }
-    await this.prisma.user.update({
-      where: { id },
-      data: { status: UserStatus.DELETED },
-    });
+    await this.prisma.mediaWrite((tx) =>
+      tx.user.update({
+        where: { id },
+        data: { status: UserStatus.DELETED },
+      }),
+    );
     return { ok: true };
   }
 }

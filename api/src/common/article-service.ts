@@ -173,8 +173,12 @@ export class ArticleService {
     };
     const item =
       kind === 'news'
-        ? await this.prisma.news.update({ where: { id }, data, include })
-        : await this.prisma.blogPost.update({ where: { id }, data, include });
+        ? await this.prisma.mediaWrite((tx) =>
+            tx.news.update({ where: { id }, data, include }),
+          )
+        : await this.prisma.mediaWrite((tx) =>
+            tx.blogPost.update({ where: { id }, data, include }),
+          );
     return this.map(item);
   }
 

@@ -99,15 +99,17 @@ export class ForumService {
     const existing = await this.prisma.forumPost.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Forum post not found');
     assertCanModerate(actor, existing.authorId);
-    return this.prisma.forumPost
-      .update({
-        where: { id },
-        data: {
-          ...(dto.title !== undefined ? { title: dto.title } : {}),
-          ...(dto.content !== undefined ? { content: dto.content } : {}),
-        },
-        include: { author: { select: authorSelect } },
-      })
+    return this.prisma
+      .mediaWrite((tx) =>
+        tx.forumPost.update({
+          where: { id },
+          data: {
+            ...(dto.title !== undefined ? { title: dto.title } : {}),
+            ...(dto.content !== undefined ? { content: dto.content } : {}),
+          },
+          include: { author: { select: authorSelect } },
+        }),
+      )
       .then(presentContent);
   }
 

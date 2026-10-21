@@ -18,6 +18,7 @@ import {
   MessageSquare,
   Newspaper,
   Settings,
+  ShieldCheck,
   Users,
 } from 'lucide-react'
 import { useAuth } from '@/lib/auth'
@@ -34,6 +35,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet'
 import { Toaster } from '@/components/ui/sonner'
+import { canManage } from '@/lib/policies'
 import { cn } from '@/lib/utils'
 import { orbit } from '@/lib/api'
 
@@ -52,6 +54,13 @@ const navItems = [
   { to: '/users', label: 'Users', icon: Users, exact: false },
   { to: '/notifications', label: 'Notifications', icon: Bell, exact: false },
   { to: '/uploads', label: 'Uploads', icon: ImageUp, exact: false },
+  {
+    to: '/upload-maintenance',
+    label: 'Upload maintenance',
+    icon: ShieldCheck,
+    exact: false,
+    adminOnly: true,
+  },
   { to: '/settings', label: 'Settings', icon: Settings, exact: false },
 ] as const
 
@@ -62,35 +71,38 @@ function NavLinks({
   onNavigate?: () => void
   unread: number
 }) {
+  const { user } = useAuth()
   const pathname = useRouterState({ select: (s) => s.location.pathname })
 
   return (
     <nav className="flex flex-col gap-1">
-      {navItems.map((item) => {
-        const active = item.exact
-          ? pathname === item.to
-          : pathname === item.to || pathname.startsWith(`${item.to}/`)
-        const Icon = item.icon
-        return (
-          <Link
-            key={item.to}
-            to={item.to}
-            onClick={onNavigate}
-            className={cn(
-              'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-              active
-                ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground',
-            )}
-          >
-            <Icon className="size-4 shrink-0" />
-            <span className="flex-1">{item.label}</span>
-            {item.to === '/notifications' && unread > 0 ? (
-              <Badge variant="secondary">{unread}</Badge>
-            ) : null}
-          </Link>
-        )
-      })}
+      {navItems
+        .filter((item) => !('adminOnly' in item) || canManage(user))
+        .map((item) => {
+          const active = item.exact
+            ? pathname === item.to
+            : pathname === item.to || pathname.startsWith(`${item.to}/`)
+          const Icon = item.icon
+          return (
+            <Link
+              key={item.to}
+              to={item.to}
+              onClick={onNavigate}
+              className={cn(
+                'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                active
+                  ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                  : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground',
+              )}
+            >
+              <Icon className="size-4 shrink-0" />
+              <span className="flex-1">{item.label}</span>
+              {item.to === '/notifications' && unread > 0 ? (
+                <Badge variant="secondary">{unread}</Badge>
+              ) : null}
+            </Link>
+          )
+        })}
     </nav>
   )
 }
