@@ -9,7 +9,7 @@ announcements, news, blog posts, a forum with comments and votes, and notificati
 - Handles login, token storage and the `Authorization: Bearer` header for you
 
 > This package is only the client. You need a running teamorbit API
-> ([source](https://github.com/cyborgoat/team-orbit)) to call.
+> ([source](https://github.com/cyborgoat/teamorbit)) to call.
 
 ## Install
 
@@ -292,7 +292,7 @@ See the [0.1.0 release notes](CHANGELOG.md).
 
 ## Contributing / regenerating
 
-In the [repository](https://github.com/cyborgoat/team-orbit):
+In the [repository](https://github.com/cyborgoat/teamorbit):
 
 ```bash
 cd api

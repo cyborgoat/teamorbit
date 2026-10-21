@@ -10,16 +10,16 @@
     "fetch",
     "sdk"
   ],
-  "homepage": "https://github.com/cyborgoat/team-orbit/tree/main/packages/client#readme",
+  "homepage": "https://github.com/cyborgoat/teamorbit/tree/main/packages/client#readme",
   "bugs": {
-    "url": "https://github.com/cyborgoat/team-orbit/issues"
+    "url": "https://github.com/cyborgoat/teamorbit/issues"
   },
   "type": "module",
   "license": "MIT",
   "sideEffects": false,
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cyborgoat/team-orbit.git",
+    "url": "git+https://github.com/cyborgoat/teamorbit.git",
     "directory": "packages/client"
   },
   "publishConfig": {
