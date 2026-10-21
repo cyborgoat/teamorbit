@@ -1,3 +1,5 @@
+<img src="assets/teamorbit.svg" alt="teamorbit logo" width="64" height="64" />
+
 # Documentation
 
 Guides for teamorbit v1.

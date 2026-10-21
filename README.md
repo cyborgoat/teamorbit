@@ -1,3 +1,5 @@
+<img src="docs/assets/teamorbit.svg" alt="teamorbit logo" width="64" height="64" />
+
 # teamorbit
 
 teamorbit manages team members, events, announcements, Markdown news and blog

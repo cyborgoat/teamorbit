@@ -38,6 +38,13 @@ function LoginPage() {
     <div className="flex min-h-screen items-center justify-center px-4 py-10">
       <Card className="w-full max-w-md shadow-sm">
         <CardHeader>
+          <img
+            src="/favicon.svg"
+            alt="teamorbit"
+            width={48}
+            height={48}
+            className="mb-2 size-12"
+          />
           <CardTitle className="text-2xl">Sign in to teamorbit</CardTitle>
           <CardDescription>
             Sign in with an active account, or register a new one for admin

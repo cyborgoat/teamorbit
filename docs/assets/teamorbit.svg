@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none">
+  <title>teamorbit</title>
+  <desc>Three team members connected by a shared orbit.</desc>
+  <rect width="64" height="64" rx="16" fill="#155E58"/>
+  <ellipse cx="32" cy="32" rx="23" ry="14" transform="rotate(-35 32 32)" stroke="#F0FDFA" stroke-width="4"/>
+  <circle cx="32" cy="32" r="5" fill="#F0FDFA"/>
+  <g fill="#85E3C4" stroke="#155E58" stroke-width="2.5">
+    <circle cx="50.84" cy="18.81" r="5"/>
+    <circle cx="13.16" cy="45.19" r="5"/>
+  </g>
+</svg>
