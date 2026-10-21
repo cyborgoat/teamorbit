@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.3 — 2026-10-21
+
+- List notifications with `status=unread|read|dismissed`.
+- `orbit.notifications.markUnread(id)` and `orbit.notifications.restore(id)`.
+
 ## 0.1.2 — 2026-10-21
 
 - Client helpers: `orbit.notifications.markAllRead()` and `orbit.notifications.delete(id)` (per-user dismiss; does not remove shared global rows for others).

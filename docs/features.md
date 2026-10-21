@@ -78,7 +78,7 @@ Authenticated image upload; returns an absolute public URL like `https://orbit.e
 - **Global** (`audience: GLOBAL`): announcements, events, news, blog posts, forum posts — visible to all users
 - **Directed** (`audience: DIRECTED`): forum comments — top-level notifies the post author; replies notify the parent comment author (self-notifications are skipped)
 - Live toast via Socket.io `notification:new` (global to all authenticated sockets; directed to recipient user rooms)
-- List, mark-read, mark-all-read, and per-user dismiss over REST (list excludes notifications the caller dismissed; dismiss does not delete the shared row for others)
+- List (optional `status=unread|read|dismissed`), mark-read, mark-unread, mark-all-read, per-user dismiss, and restore over REST (dismiss hides for one user only)
 
 ## HTTP API (summary)
 
@@ -94,7 +94,7 @@ All content and user routes (except register/login) require a Bearer JWT unless 
 | Blog | GET/POST/PATCH/DELETE | `/api/blog-posts` |
 | Forum | GET/POST/PATCH/DELETE posts & comments, PUT votes | `/api/forum-posts`, `/api/forum-comments` |
 | Uploads | POST | `/api/uploads` |
-| Notifications | GET list, POST `read-all`, POST `:id/read`, DELETE `:id` | `/api/notifications` |
+| Notifications | GET list (`status`), POST `read-all`, POST/DELETE `:id/read`, POST `:id/restore`, DELETE `:id` | `/api/notifications` |
 | Health | GET | `/api/health` |
 | Metrics | GET | `/metrics` |
 | Swagger | UI | `/docs` |
@@ -121,7 +121,7 @@ Interactive OpenAPI docs: http://localhost:3000/docs
 | `/forum/$postId` | Post detail, comments, votes |
 | `/users` | Create user (Admin+), status and permitted role changes |
 | `/settings` | Self-service profile + change password |
-| `/notifications` | Inbox + mark read + live toasts |
+| `/notifications` | Unread / read / dismissed groups + mark read/unread, dismiss, restore, mark all read |
 | `/uploads` | Standalone image upload check |
 
 All Markdown creation fields use MDXEditor with a formatting toolbar and source

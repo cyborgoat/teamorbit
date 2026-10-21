@@ -817,6 +817,68 @@ describe('App (e2e)', () => {
     );
   });
 
+  it('filters unread/read/dismissed and supports mark unread plus restore', async () => {
+    const token = await adminToken();
+    const news = await request(app.getHttpServer())
+      .post('/api/news')
+      .auth(token, { type: 'bearer' })
+      .send({ title: 'Status filter', content: 'Body' })
+      .expect(201);
+    const list = async (status?: string) => {
+      const qs = status
+        ? `/api/notifications?status=${status}&limit=100`
+        : '/api/notifications?limit=100';
+      const res = await request(app.getHttpServer())
+        .get(qs)
+        .auth(token, { type: 'bearer' })
+        .expect(200);
+      return (
+        res.body as {
+          items: { id: string; body: string; read: boolean }[];
+        }
+      ).items.filter((n) => n.body === 'Status filter');
+    };
+
+    const unread = await list('unread');
+    expect(unread).toHaveLength(1);
+    const id = unread[0].id;
+
+    await request(app.getHttpServer())
+      .post(`/api/notifications/${id}/read`)
+      .auth(token, { type: 'bearer' })
+      .expect(201);
+    expect(await list('unread')).toHaveLength(0);
+    expect(await list('read')).toHaveLength(1);
+
+    await request(app.getHttpServer())
+      .delete(`/api/notifications/${id}/read`)
+      .auth(token, { type: 'bearer' })
+      .expect(200)
+      .expect({ ok: true });
+    expect(await list('unread')).toHaveLength(1);
+    expect(await list('read')).toHaveLength(0);
+
+    await request(app.getHttpServer())
+      .delete(`/api/notifications/${id}`)
+      .auth(token, { type: 'bearer' })
+      .expect(200);
+    expect(await list('dismissed')).toHaveLength(1);
+    expect(await list('unread')).toHaveLength(0);
+
+    await request(app.getHttpServer())
+      .post(`/api/notifications/${id}/restore`)
+      .auth(token, { type: 'bearer' })
+      .expect(201)
+      .expect({ ok: true });
+    expect(await list('dismissed')).toHaveLength(0);
+    expect(await list('unread')).toHaveLength(1);
+    expect(
+      await prisma.notification.count({
+        where: { resourceId: dataOf(news).id },
+      }),
+    ).toBe(1);
+  });
+
   it('marks all notifications read and dismisses one without affecting other users', async () => {
     const member = await prisma.user.create({
       data: {

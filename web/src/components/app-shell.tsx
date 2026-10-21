@@ -100,12 +100,12 @@ function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
   const navigate = useNavigate()
   const qc = useQueryClient()
   const { data } = useQuery({
-    queryKey: queryKeys.notifications,
-    queryFn: () => orbit.notifications.list(),
+    queryKey: [...queryKeys.notifications, 'unread-badge'],
+    queryFn: () => orbit.notifications.list({ status: 'unread', limit: 1 }),
     enabled: !!token,
     refetchInterval: 30_000,
   })
-  const unread = data?.items.filter((n) => !n.read).length ?? 0
+  const unread = data?.total ?? 0
 
   function handleLogout() {
     logout()

@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsGateway } from './notifications.gateway';
+import { NotificationListStatus } from './dto/notification.dto';
 
 export type NotificationInput = {
   audience: NotificationAudience;
@@ -26,23 +27,54 @@ export class NotificationsService {
     private gateway: NotificationsGateway,
   ) {}
 
-  private visibleWhere(userId: string): Prisma.NotificationWhereInput {
+  private audienceWhere(userId: string): Prisma.NotificationWhereInput {
     return {
-      AND: [
-        {
-          OR: [
-            { audience: NotificationAudience.GLOBAL },
-            { recipients: { some: { userId } } },
-          ],
-        },
-        { dismissals: { none: { userId } } },
+      OR: [
+        { audience: NotificationAudience.GLOBAL },
+        { recipients: { some: { userId } } },
       ],
     };
+  }
+
+  private visibleWhere(userId: string): Prisma.NotificationWhereInput {
+    return {
+      AND: [this.audienceWhere(userId), { dismissals: { none: { userId } } }],
+    };
+  }
+
+  private listWhere(
+    userId: string,
+    status?: NotificationListStatus,
+  ): Prisma.NotificationWhereInput {
+    if (status === NotificationListStatus.DISMISSED) {
+      return {
+        AND: [
+          this.audienceWhere(userId),
+          { dismissals: { some: { userId } } },
+        ],
+      };
+    }
+    const inbox = this.visibleWhere(userId);
+    if (status === NotificationListStatus.UNREAD) {
+      return { AND: [inbox, { reads: { none: { userId } } }] };
+    }
+    if (status === NotificationListStatus.READ) {
+      return { AND: [inbox, { reads: { some: { userId } } }] };
+    }
+    return inbox;
   }
 
   private async requireVisible(userId: string, notificationId: string) {
     const notification = await this.prisma.notification.findFirst({
       where: { id: notificationId, ...this.visibleWhere(userId) },
+    });
+    if (!notification) throw new NotFoundException('Notification not found');
+    return notification;
+  }
+
+  private async requireAccessible(userId: string, notificationId: string) {
+    const notification = await this.prisma.notification.findFirst({
+      where: { id: notificationId, ...this.audienceWhere(userId) },
     });
     if (!notification) throw new NotFoundException('Notification not found');
     return notification;
@@ -102,9 +134,14 @@ export class NotificationsService {
     return item;
   }
 
-  async listForUser(userId: string, page = 1, limit = 20) {
+  async listForUser(
+    userId: string,
+    page = 1,
+    limit = 20,
+    status?: NotificationListStatus,
+  ) {
     const { skip, take } = paginate(page, limit);
-    const where = this.visibleWhere(userId);
+    const where = this.listWhere(userId, status);
     const [items, total] = await Promise.all([
       this.prisma.notification.findMany({
         where,
@@ -146,12 +183,17 @@ export class NotificationsService {
     });
   }
 
+  async markUnread(userId: string, notificationId: string) {
+    await this.requireVisible(userId, notificationId);
+    await this.prisma.notificationRead.deleteMany({
+      where: { userId, notificationId },
+    });
+    return { ok: true as const };
+  }
+
   async markAllRead(userId: string) {
     const unread = await this.prisma.notification.findMany({
-      where: {
-        ...this.visibleWhere(userId),
-        reads: { none: { userId } },
-      },
+      where: this.listWhere(userId, NotificationListStatus.UNREAD),
       select: { id: true },
     });
     if (unread.length === 0) {
@@ -172,6 +214,17 @@ export class NotificationsService {
       create: { userId, notificationId },
       update: { dismissedAt: new Date() },
     });
+    return { ok: true as const };
+  }
+
+  async restoreForUser(userId: string, notificationId: string) {
+    await this.requireAccessible(userId, notificationId);
+    const result = await this.prisma.notificationDismissal.deleteMany({
+      where: { userId, notificationId },
+    });
+    if (result.count === 0) {
+      throw new NotFoundException('Notification not found');
+    }
     return { ok: true as const };
   }
 }

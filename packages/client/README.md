@@ -86,7 +86,7 @@ All params, bodies and responses are typed from the OpenAPI spec.
 | `orbit.auth` | `login(identifier, password, method?)`, `register(body)`, `me()`, `updateMe(body)`, `changePassword(body)`, `logout()` |
 | `orbit.users`, `events`, `announcements`, `news`, `blogPosts` | `list(query?)`, `get(id)`, `create(body)`, `update(id, body)`, `delete(id)`, `iterate(query?)` |
 | `orbit.forum` | `listPosts`, `getPost`, `createPost`, `updatePost`, `deletePost`, `addComment(postId, body)`, `updateComment`, `deleteComment`, `votePost(id, value)`, `voteComment(id, value)` |
-| `orbit.notifications` | `list(query?)`, `markRead(id)`, `markAllRead()`, `delete(id)` |
+| `orbit.notifications` | `list(query?)`, `markRead(id)`, `markUnread(id)`, `markAllRead()`, `delete(id)`, `restore(id)` |
 | `orbit.uploads` | `upload(file, filename?)` |
 | `orbit.health()` | |
 
@@ -211,6 +211,8 @@ under `components['schemas']`. List endpoints accept `page`, `limit` (max 100) a
 | `GET` | `/api/notifications` | Bearer |  | `PaginatedNotificationsDto` |
 | `POST` | `/api/notifications/read-all` | Bearer |  | `MarkAllReadDto` |
 | `POST` | `/api/notifications/{id}/read` | Bearer |  | `NotificationReadDto` |
+| `DELETE` | `/api/notifications/{id}/read` | Bearer |  | `OkDto` |
+| `POST` | `/api/notifications/{id}/restore` | Bearer |  | `OkDto` |
 | `DELETE` | `/api/notifications/{id}` | Bearer |  | `OkDto` |
 
 #### events

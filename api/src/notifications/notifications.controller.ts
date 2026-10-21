@@ -16,10 +16,10 @@ import {
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { PaginationQueryDto } from '../common/dto/pagination.dto';
 import { NotificationsService } from './notifications.service';
 import {
   MarkAllReadDto,
+  NotificationListQueryDto,
   NotificationReadDto,
   PaginatedNotificationsDto,
 } from './dto/notification.dto';
@@ -37,9 +37,14 @@ export class NotificationsController {
   @ApiOkResponse({ type: PaginatedNotificationsDto })
   list(
     @CurrentUser() user: { id: string },
-    @Query() query: PaginationQueryDto,
+    @Query() query: NotificationListQueryDto,
   ) {
-    return this.notifications.listForUser(user.id, query.page, query.limit);
+    return this.notifications.listForUser(
+      user.id,
+      query.page,
+      query.limit,
+      query.status,
+    );
   }
 
   @Post('read-all')
@@ -52,6 +57,18 @@ export class NotificationsController {
   @ApiCreatedResponse({ type: NotificationReadDto })
   markRead(@CurrentUser() user: { id: string }, @Param('id') id: string) {
     return this.notifications.markRead(user.id, id);
+  }
+
+  @Delete(':id/read')
+  @ApiOkResponse({ type: OkDto })
+  markUnread(@CurrentUser() user: { id: string }, @Param('id') id: string) {
+    return this.notifications.markUnread(user.id, id);
+  }
+
+  @Post(':id/restore')
+  @ApiOkResponse({ type: OkDto })
+  restore(@CurrentUser() user: { id: string }, @Param('id') id: string) {
+    return this.notifications.restoreForUser(user.id, id);
   }
 
   @Delete(':id')
