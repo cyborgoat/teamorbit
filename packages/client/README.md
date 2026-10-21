@@ -1,6 +1,6 @@
-# @goatcheese/team-orbit-client
+# @goatcheese/teamorbit-client
 
-Typed TypeScript client for the **Team Orbit API**, a team hub with members, events,
+Typed TypeScript client for the **teamorbit API**, a team hub with members, events,
 announcements, news, blog posts, a forum with comments and votes, and notifications.
 
 - Fully typed requests **and** responses, generated from the API's OpenAPI spec
@@ -8,19 +8,19 @@ announcements, news, blog posts, a forum with comments and votes, and notificati
 - Works in browsers, Node 18+, Deno, Bun and edge runtimes (anything with `fetch`)
 - Handles login, token storage and the `Authorization: Bearer` header for you
 
-> This package is only the client. You need a running Team Orbit API
+> This package is only the client. You need a running teamorbit API
 > ([source](https://github.com/cyborgoat/team-orbit)) to call.
 
 ## Install
 
 ```bash
-npm install @goatcheese/team-orbit-client
+npm install @goatcheese/teamorbit-client
 ```
 
 ## Quick start
 
 ```ts
-import { createTeamOrbitClient } from '@goatcheese/team-orbit-client';
+import { createTeamOrbitClient } from '@goatcheese/teamorbit-client';
 
 const orbit = createTeamOrbitClient({ baseUrl: 'https://orbit.example.com' });
 
@@ -45,7 +45,7 @@ Pass `'username'` or `'email'` to choose explicitly. The helper sends exactly
 one API identifier and remembers the returned access token.
 
 ```ts
-import type { LoginMethod, User } from '@goatcheese/team-orbit-client';
+import type { LoginMethod, User } from '@goatcheese/teamorbit-client';
 
 await orbit.auth.login('member', password);                // username
 await orbit.auth.login('member@example.com', password);   // email inferred from the identifier
@@ -91,7 +91,7 @@ All params, bodies and responses are typed from the OpenAPI spec.
 | `orbit.health()` | |
 
 ```ts
-import { TeamOrbitError } from '@goatcheese/team-orbit-client';
+import { TeamOrbitError } from '@goatcheese/teamorbit-client';
 
 try {
   await orbit.events.get(id);
@@ -271,9 +271,10 @@ under `components['schemas']`. List endpoints accept `page`, `limit` (max 100) a
 
 ## Not included
 
-- **Realtime notifications.** The API broadcasts new notifications over Socket.IO. Use
-  `socket.io-client` for that. This package covers the REST API only (`GET /api/notifications` and
-  `POST /api/notifications/{id}/read` are included).
+- **Realtime notifications.** The API emits `notification:new` over Socket.IO (global to all
+  authenticated clients, or directed to specific user rooms). Use `socket.io-client` for that. This
+  package covers the REST API only (`GET /api/notifications` and `POST /api/notifications/{id}/read`
+  are included). List responses include `audience` (`GLOBAL` | `DIRECTED`).
 - **Per-status error types.** Every failure shares one `error` type, so use `response.status`
   (401, 403, 404, ...) to tell them apart.
 

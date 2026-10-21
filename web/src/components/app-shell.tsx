@@ -117,7 +117,7 @@ function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <div className="flex h-full flex-col gap-4 p-4">
       <div>
-        <p className="text-lg font-semibold tracking-tight">Team Orbit</p>
+        <p className="text-lg font-semibold tracking-tight">teamorbit</p>
         <p className="text-xs text-muted-foreground">Team administration</p>
       </div>
       <Separator />
@@ -197,7 +197,7 @@ export function AppShell() {
               <SidebarBody />
             </SheetContent>
           </Sheet>
-          <span className="font-semibold">Team Orbit</span>
+          <span className="font-semibold">teamorbit</span>
         </header>
         <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 sm:px-6">
           <Outlet />

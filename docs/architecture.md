@@ -1,6 +1,6 @@
 # Architecture
 
-Team Orbit is a NestJS API, a React administration console, and a typed client package for teams of about 100 members. Prisma and SQLite provide persistence; images are stored on local disk.
+teamorbit is a NestJS API, a React administration console, and a typed client package for teams of about 100 members. Prisma and SQLite provide persistence; images are stored on local disk.
 
 ## Boundaries
 
@@ -25,7 +25,7 @@ The web keeps its bearer token in localStorage. A shared authenticated route lay
 
 ## Transactions
 
-Content and its notification are inserted in one database transaction. Broadcasting happens after commit and is best effort. REST notification reads recover persisted entries after reconnect. Vote lookup, vote mutation, cached score adjustment, and the returned score share a transaction.
+Content and its notification are inserted in one database transaction. Global notifications have no recipient rows; directed ones store `NotificationRecipient` rows and are listed/emitted only for those users. Broadcasting happens after commit and is best effort. REST notification reads recover persisted entries after reconnect. Vote lookup, vote mutation, cached score adjustment, and the returned score share a transaction.
 
 ## Web and Markdown
 

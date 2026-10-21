@@ -94,6 +94,7 @@ export class BlogService {
           },
         }),
       (item) => ({
+        audience: 'GLOBAL' as const,
         type: 'blog.created',
         title: 'New blog post',
         body: item.title,

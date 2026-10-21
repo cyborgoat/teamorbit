@@ -559,6 +559,11 @@ export interface components {
         };
         NotificationDto: {
             id: string;
+            /**
+             * @example GLOBAL
+             * @enum {string}
+             */
+            audience: "GLOBAL" | "DIRECTED";
             /** @example forum.created */
             type: string;
             title: string;

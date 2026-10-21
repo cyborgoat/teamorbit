@@ -67,7 +67,7 @@ Team discussion board with markdown posts and comments.
 | Comments | Top-level + one-level replies |
 | Votes | Up/down (or clear) on posts and comments; one vote per user |
 | Moderation | Authors edit/delete their own; Admin/Superuser can moderate any |
-| Notifications | Emitted on new post and new comment |
+| Notifications | Global on new post; directed to post/parent author on new comment |
 
 ### Uploads
 
@@ -75,9 +75,10 @@ Authenticated image upload; returns an absolute public URL like `https://orbit.e
 
 ### Notifications
 
-- Persisted when announcements, events, news, blog posts, or forum posts/comments are created
-- Live toast via Socket.io `notification:new`
-- List + mark-read over REST
+- **Global** (`audience: GLOBAL`): announcements, events, news, blog posts, forum posts — visible to all users
+- **Directed** (`audience: DIRECTED`): forum comments — top-level notifies the post author; replies notify the parent comment author (self-notifications are skipped)
+- Live toast via Socket.io `notification:new` (global to all authenticated sockets; directed to recipient user rooms)
+- List + mark-read over REST (list is filtered to notifications the caller may see)
 
 ## HTTP API (summary)
 

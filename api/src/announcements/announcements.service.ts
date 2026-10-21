@@ -64,6 +64,7 @@ export class AnnouncementsService {
           },
         }),
       (item) => ({
+        audience: 'GLOBAL' as const,
         type: 'announcement.created',
         title: 'New announcement',
         body: item.title,

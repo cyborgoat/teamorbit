@@ -9,7 +9,7 @@ test('real API uploads, Markdown, covers, presets, and cross-origin images work 
   await page.getByLabel('Password', { exact: true }).fill('smoke-test-password')
   await page.getByRole('button', { name: 'Sign in', exact: true }).click()
   await expect(page).toHaveURL('http://127.0.0.1:5189/')
-  const token = await page.evaluate(() => localStorage.getItem('team-orbit-token'))
+  const token = await page.evaluate(() => localStorage.getItem('teamorbit-token'))
   const png = await readFile(new URL('../../../api/src/assets/avatars/default-raven.png', import.meta.url))
   const uploaded = await request.post('/api/uploads', { headers: { Authorization: `Bearer ${token}` }, multipart: { file: { name: 'portrait.png', mimeType: 'image/png', buffer: png } } })
   expect(uploaded.status()).toBe(201)

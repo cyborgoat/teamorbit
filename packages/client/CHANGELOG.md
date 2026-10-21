@@ -1,8 +1,12 @@
 # Changelog
 
+## 0.1.1 — 2026-10-21
+
+- Notification list items include `audience` (`GLOBAL` | `DIRECTED`) for targeted vs broadcast notifications.
+
 ## 0.1.0 — 2026-10-16
 
-Initial release of the typed Team Orbit REST client.
+Initial release of the typed teamorbit REST client.
 
 - Typed resource helpers and generated OpenAPI request/response types for `/api` endpoints.
 - Username or email login, optional account email, profile updates, and user administration.
@@ -12,5 +16,5 @@ Initial release of the typed Team Orbit REST client.
 - Notification list/read helpers and consistent API error handling.
 - Custom fetch and token providers, with cancellation support for profile and CRUD list reads.
 
-Use this release with the matching Team Orbit API. Realtime notifications use
+Use this release with the matching teamorbit API. Realtime notifications use
 Socket.IO separately from this REST client.

@@ -94,6 +94,7 @@ export class NewsService {
           },
         }),
       (item) => ({
+        audience: 'GLOBAL' as const,
         type: 'news.created',
         title: 'New news article',
         body: item.title,

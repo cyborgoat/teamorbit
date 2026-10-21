@@ -1,9 +1,9 @@
 {
-  "name": "@goatcheese/team-orbit-client",
-  "version": "0.1.0",
-  "description": "Typed client for the Team Orbit API",
+  "name": "@goatcheese/teamorbit-client",
+  "version": "0.1.1",
+  "description": "Typed client for the teamorbit API",
   "keywords": [
-    "team-orbit",
+    "teamorbit",
     "api-client",
     "openapi",
     "typescript",

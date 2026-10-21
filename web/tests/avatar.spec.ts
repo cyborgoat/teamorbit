@@ -53,7 +53,7 @@ async function mockAvatars(
     uploads: 0,
   }
   await page.addInitScript(() =>
-    localStorage.setItem('team-orbit-token', 'test-token'),
+    localStorage.setItem('teamorbit-token', 'test-token'),
   )
   await mockSocket(page)
   await page.route('**/*', async (route) => {
@@ -165,7 +165,7 @@ test('members preview the animal default, upload an avatar, and reset it persist
     )
     .toBe(true)
   await page.screenshot({
-    path: '/private/tmp/team-orbit-avatar-settings.png',
+    path: '/private/tmp/teamorbit-avatar-settings.png',
     fullPage: true,
   })
   await page.setViewportSize({ width: 390, height: 844 })
@@ -175,7 +175,7 @@ test('members preview the animal default, upload an avatar, and reset it persist
     ),
   ).toBe(true)
   await page.screenshot({
-    path: '/private/tmp/team-orbit-avatar-settings-mobile.png',
+    path: '/private/tmp/teamorbit-avatar-settings-mobile.png',
     fullPage: true,
   })
 })
@@ -276,7 +276,7 @@ test('presets are selectable, persist after reload, and can be reset to the rave
     )
     .toBe(5)
   await page.screenshot({
-    path: '/private/tmp/team-orbit-avatar-presets.png',
+    path: '/private/tmp/teamorbit-avatar-presets.png',
     fullPage: true,
   })
   await page.setViewportSize({ width: 390, height: 844 })
@@ -286,7 +286,7 @@ test('presets are selectable, persist after reload, and can be reset to the rave
     ),
   ).toBe(true)
   await page.screenshot({
-    path: '/private/tmp/team-orbit-avatar-presets-mobile.png',
+    path: '/private/tmp/teamorbit-avatar-presets-mobile.png',
     fullPage: true,
   })
   await page.getByRole('button', { name: 'Select Grumpy Raven avatar' }).click()

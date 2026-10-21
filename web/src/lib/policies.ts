@@ -1,4 +1,4 @@
-import type { User } from '@goatcheese/team-orbit-client'
+import type { User } from '@goatcheese/teamorbit-client'
 export const canManage = (user: Pick<User, 'role'> | null) =>
   user?.role === 'ADMIN' || user?.role === 'SUPERUSER'
 export const canModerate = (

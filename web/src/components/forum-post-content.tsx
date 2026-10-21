@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { ArrowLeft, Eye, Code2, Trash2 } from 'lucide-react'
-import type { ForumPost } from '@goatcheese/team-orbit-client'
+import type { ForumPost } from '@goatcheese/teamorbit-client'
 import { MarkdownBody } from '@/components/markdown-body'
 import { UserAvatar } from '@/components/user-avatar'
 import { PageHeader } from '@/components/page-header'

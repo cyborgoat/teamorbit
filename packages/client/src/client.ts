@@ -3,7 +3,7 @@ import { createResources } from './resources.js';
 import type { paths } from './schema.js';
 
 export interface TeamOrbitClientOptions {
-  /** Base URL of the deployed Team Orbit API, e.g. https://orbit.example.com */
+  /** Base URL of the deployed teamorbit API, e.g. https://orbit.example.com */
   baseUrl: string;
   /**
    * Static JWT, or a function returning one (called on every request).

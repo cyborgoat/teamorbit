@@ -1,6 +1,6 @@
-# Team Orbit
+# teamorbit
 
-Team Orbit manages team members, events, announcements, Markdown news and blog
+teamorbit manages team members, events, announcements, Markdown news and blog
 posts, a discussion forum, uploads, and live notifications for teams of about
 100 members.
 
@@ -105,7 +105,7 @@ This project is pre-release: no compatibility aliases or legacy seed repairs are
 ## TypeScript client
 
 ```ts
-import { createTeamOrbitClient } from '@goatcheese/team-orbit-client';
+import { createTeamOrbitClient } from '@goatcheese/teamorbit-client';
 
 const orbit = createTeamOrbitClient({ baseUrl: 'https://orbit.example.com' });
 await orbit.auth.login('your-username', 'your-password');
@@ -118,7 +118,7 @@ registration, nullable user emails, uploads, and generated request/response type
 ## Repository layout
 
 ```text
-team-orbit/
+teamorbit/
 ├── api/              NestJS API (Prisma, SQLite, JWT, Socket.io)
 ├── web/              React test console and browser tests
 ├── packages/client/  Typed TypeScript API client

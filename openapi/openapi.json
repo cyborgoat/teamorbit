@@ -2240,7 +2240,7 @@
     }
   },
   "info": {
-    "title": "Team Orbit API",
+    "title": "teamorbit API",
     "description": "Team members, events, announcements, news, and blog",
     "version": "1.0",
     "contact": {}
@@ -2737,6 +2737,14 @@
           "id": {
             "type": "string"
           },
+          "audience": {
+            "enum": [
+              "GLOBAL",
+              "DIRECTED"
+            ],
+            "type": "string",
+            "example": "GLOBAL"
+          },
           "type": {
             "type": "string",
             "example": "forum.created"
@@ -2764,6 +2772,7 @@
         },
         "required": [
           "id",
+          "audience",
           "type",
           "title",
           "body",

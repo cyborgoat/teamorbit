@@ -15,6 +15,7 @@ Source of truth: [`api/prisma/schema.prisma`](../api/prisma/schema.prisma). Data
 |------|--------|
 | `Role` | `SUPERUSER`, `ADMIN`, `USER` |
 | `UserStatus` | `ACTIVE`, `INACTIVE`, `PENDING`, `SUSPENDED`, `DELETED` |
+| `NotificationAudience` | `GLOBAL`, `DIRECTED` |
 
 ## Entity relationships
 
@@ -31,14 +32,16 @@ erDiagram
   User ||--o{ ForumPostVote : casts
   User ||--o{ ForumCommentVote : casts
   User ||--o{ NotificationRead : has
+  User ||--o{ NotificationRecipient : receives
   ForumPost ||--o{ ForumComment : has
   ForumPost ||--o{ ForumPostVote : receives
   ForumComment ||--o{ ForumComment : "replies (parentId)"
   ForumComment ||--o{ ForumCommentVote : receives
   Notification ||--o{ NotificationRead : "read by"
+  Notification ||--o{ NotificationRecipient : "sent to"
 ```
 
-`Notification` points at its source content loosely through `resourceType` + `resourceId` (no foreign key), so deleting the source does not cascade.
+`Notification` points at its source content loosely through `resourceType` + `resourceId` (no foreign key), so deleting the source does not cascade. `GLOBAL` notifications have no recipient rows; `DIRECTED` ones list intended users in `NotificationRecipient`.
 
 ## Models
 
@@ -133,9 +136,20 @@ Unique on `(userId, postId)` or `(userId, commentId)`: one vote per user per tar
 | Field | Type | Notes |
 |-------|------|-------|
 | `id` | String | PK, UUID |
+| `audience` | Enum | `GLOBAL` (everyone) or `DIRECTED` (specific recipients) |
 | `type`, `title`, `body` | String | |
 | `resourceType`, `resourceId` | String | Points at the source record (no FK) |
 | `createdAt` | DateTime | |
+
+### NotificationRecipient
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `id` | String | PK, UUID |
+| `notificationId` | String | FK → `Notification.id`, cascade delete |
+| `userId` | String | FK → `User.id`, cascade delete |
+
+Unique on `(notificationId, userId)`. Used when `audience` is `DIRECTED`.
 
 ### NotificationRead
 

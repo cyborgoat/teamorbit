@@ -18,7 +18,7 @@ export const newsContent = [
     tags: ['release', 'team'],
     content: markdown(
       '# A new home for teamwork',
-      '**Team Orbit** brings updates, events, and thoughtful discussions into one place. Start with the *welcome checklist* below.',
+      '**teamorbit** brings updates, events, and thoughtful discussions into one place. Start with the *welcome checklist* below.',
       `[![Orbit launch illustration](${images.orbit} "Open the launch illustration")](${images.orbit})`,
       '## Launch readiness',
       table,

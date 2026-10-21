@@ -38,7 +38,7 @@ function LoginPage() {
     <div className="flex min-h-screen items-center justify-center px-4 py-10">
       <Card className="w-full max-w-md shadow-sm">
         <CardHeader>
-          <CardTitle className="text-2xl">Sign in to Team Orbit</CardTitle>
+          <CardTitle className="text-2xl">Sign in to teamorbit</CardTitle>
           <CardDescription>
             Sign in with an active account, or register a new one for admin
             approval.

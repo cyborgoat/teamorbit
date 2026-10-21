@@ -15,7 +15,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Namespace, Socket as BaseSocket } from 'socket.io';
 import { Logger } from '@nestjs/common';
 import { ActiveUserService } from '../auth/active-user.service';
-import type { Notification } from '@prisma/client';
+import { NotificationAudience, type Notification } from '@prisma/client';
 
 @WebSocketGateway({ cors: { origin: true, credentials: true }, namespace: '/' })
 export class NotificationsGateway
@@ -49,6 +49,7 @@ export class NotificationsGateway
       client.data.userId = payload.sub;
       client.data.expiresAt = payload.exp * 1000;
       await client.join('authenticated');
+      await client.join(`user:${payload.sub}`);
       const check = setInterval(() => {
         void this.authorized(client)
           .then((ok) => {
@@ -72,8 +73,17 @@ export class NotificationsGateway
       !!(await this.users.find(String(client.data.userId)))
     );
   }
-  async broadcastNew(notification: Notification) {
+  async broadcastNew(
+    notification: Notification,
+    recipientIds: string[] = [],
+  ) {
     if (!this.server) return;
+    if (notification.audience === NotificationAudience.DIRECTED) {
+      for (const userId of recipientIds) {
+        this.server.to(`user:${userId}`).emit('notification:new', notification);
+      }
+      return;
+    }
     const clients = this.server.sockets;
     for (const client of clients.values()) {
       if (!client.rooms.has('authenticated')) continue;

@@ -1,6 +1,6 @@
-# Team Orbit web
+# teamorbit web
 
-React test console for the [Team Orbit API](../README.md), built with Vite,
+React test console for the [teamorbit API](../README.md), built with Vite,
 TanStack Router/Query, shadcn/ui, and MDXEditor.
 
 ## Run locally

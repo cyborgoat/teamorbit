@@ -3,7 +3,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 export function createOpenApiDocument(app: INestApplication) {
   const config = new DocumentBuilder()
-    .setTitle('Team Orbit API')
+    .setTitle('teamorbit API')
     .setDescription('Team members, events, announcements, news, and blog')
     .setVersion('1.0')
     .addBearerAuth()

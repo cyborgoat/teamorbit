@@ -31,7 +31,7 @@ async function mockApi(page: Page, initial = superuser) {
     console.error('Browser error:', error.message),
   )
   await page.addInitScript(() =>
-    localStorage.setItem('team-orbit-token', 'test-token'),
+    localStorage.setItem('teamorbit-token', 'test-token'),
   )
   await mockSocket(page)
   await page.route('**/*', async (route) => {
@@ -238,7 +238,7 @@ for (const kind of ['news', 'blog', 'forum']) {
       .toBe(2)
     if (kind === 'news')
       await page.screenshot({
-        path: '/private/tmp/team-orbit-editor.png',
+        path: '/private/tmp/teamorbit-editor.png',
         fullPage: true,
       })
     await page.getByRole('button', { name: 'Publish', exact: true }).click()

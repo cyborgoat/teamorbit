@@ -37,11 +37,12 @@ model User {
   announcements       Announcement[]
   news                News[]
   blogPosts           BlogPost[]
-  notificationReads   NotificationRead[]
-  forumPosts          ForumPost[]
-  forumComments       ForumComment[]
-  forumPostVotes      ForumPostVote[]
-  forumCommentVotes   ForumCommentVote[]
+  notificationReads      NotificationRead[]
+  notificationRecipients NotificationRecipient[]
+  forumPosts             ForumPost[]
+  forumComments          ForumComment[]
+  forumPostVotes         ForumPostVote[]
+  forumCommentVotes      ForumCommentVote[]
 }
 
 model Event {
@@ -92,15 +93,33 @@ model BlogPost {
   updatedAt     DateTime @updatedAt
 }
 
+enum NotificationAudience {
+  GLOBAL
+  DIRECTED
+}
+
 model Notification {
-  id           String   @id @default(uuid())
+  id           String               @id @default(uuid())
+  audience     NotificationAudience @default(GLOBAL)
   type         String
   title        String
   body         String
   resourceType String
   resourceId   String
-  createdAt    DateTime @default(now())
+  createdAt    DateTime             @default(now())
   reads        NotificationRead[]
+  recipients   NotificationRecipient[]
+}
+
+model NotificationRecipient {
+  id             String       @id @default(uuid())
+  notificationId String
+  userId         String
+  notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([notificationId, userId])
+  @@index([userId])
 }
 
 model NotificationRead {

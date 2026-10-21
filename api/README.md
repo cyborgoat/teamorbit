@@ -1,4 +1,4 @@
-# Team Orbit API
+# teamorbit API
 
 NestJS service with Prisma/SQLite, JWT authentication, local image uploads, and Socket.IO notifications.
 

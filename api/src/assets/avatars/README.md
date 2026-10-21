@@ -1,6 +1,6 @@
 # Default bird avatar
 
-`default-raven.png` contains the current quirky, ugly-cute bird portrait, generated with the built-in image generation tool for Team Orbit. The historical filename is retained so existing avatar URLs keep working.
+`default-raven.png` contains the current quirky, ugly-cute bird portrait, generated with the built-in image generation tool for teamorbit.
 
 Final prompt:
 
@@ -8,7 +8,7 @@ Final prompt:
 
 ## Additional preset portraits
 
-Generated with the built-in image generation tool, using the current raven as the style reference. These are bundled product assets and are listed by the public `GET /avatars` endpoint.
+Generated with the built-in image generation tool, using the current raven as the style reference. These are bundled product assets and are listed by the public `GET /api/avatars` endpoint.
 
 ### Frazzled Owl
 

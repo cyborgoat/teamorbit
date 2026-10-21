@@ -1,7 +1,7 @@
-import { createTeamOrbitClient } from '@goatcheese/team-orbit-client'
+import { createTeamOrbitClient } from '@goatcheese/teamorbit-client'
 import { getToken } from './session'
-export { TeamOrbitError as ApiError } from '@goatcheese/team-orbit-client'
-export type { User } from '@goatcheese/team-orbit-client'
+export { TeamOrbitError as ApiError } from '@goatcheese/teamorbit-client'
+export type { User } from '@goatcheese/teamorbit-client'
 export const orbit = createTeamOrbitClient({
   baseUrl: window.location.origin,
   token: () => getToken() ?? undefined,

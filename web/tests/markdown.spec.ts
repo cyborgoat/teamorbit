@@ -44,7 +44,7 @@ async function mockMarkdownApi(
 ) {
   const published: { content: string }[] = []
   await page.addInitScript(() =>
-    localStorage.setItem('team-orbit-token', 'test-token'),
+    localStorage.setItem('teamorbit-token', 'test-token'),
   )
   await mockSocket(page)
   await page.route('**/*', async (route) => {
@@ -300,7 +300,7 @@ test('wide tables, formulas, and code scroll inside a narrow preview', async ({
       .evaluate((node) => node.scrollWidth <= node.clientWidth + 1),
   ).toBe(true)
   await page.screenshot({
-    path: '/private/tmp/team-orbit-markdown-mobile.png',
+    path: '/private/tmp/teamorbit-markdown-mobile.png',
     fullPage: true,
   })
 })

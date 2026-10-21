@@ -80,6 +80,7 @@ export class EventsService {
           },
         }),
       (item) => ({
+        audience: 'GLOBAL' as const,
         type: 'event.created',
         title: 'New event',
         body: item.title,

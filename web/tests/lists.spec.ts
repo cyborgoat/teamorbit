@@ -7,7 +7,7 @@ for (const kind of ['news', 'blog']) {
   }) => {
     await mockSocket(page)
     await page.addInitScript(() =>
-      localStorage.setItem('team-orbit-token', 'list-token'),
+      localStorage.setItem('teamorbit-token', 'list-token'),
     )
     const pages: number[] = []
     await page.route('**/api/**', async (route) => {
@@ -74,7 +74,7 @@ test('failed lists expose retry instead of an empty success state', async ({
 }) => {
   await mockSocket(page)
   await page.addInitScript(() =>
-    localStorage.setItem('team-orbit-token', 'list-token'),
+    localStorage.setItem('teamorbit-token', 'list-token'),
   )
   let failing = true
   await page.route('**/api/**', async (route) => {

@@ -17,7 +17,7 @@ async function mockAuth(page: Page, initialToken = false) {
   }
   if (initialToken)
     await page.addInitScript(() =>
-      localStorage.setItem('team-orbit-token', 'test-token'),
+      localStorage.setItem('teamorbit-token', 'test-token'),
     )
   await mockSocket(page)
   await page.route('**/*', async (route) => {

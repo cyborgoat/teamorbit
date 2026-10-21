@@ -552,16 +552,11 @@ describe('App (e2e)', () => {
           tx.news.create({
             data: { title: 'Rollback', content: 'Body', authorId: author.id },
           }),
-        (item) => ({
-          type: 'news.created',
-          title: 'New',
-          body: 'Body',
-          resourceType: 'news',
-          resourceId: item.id,
-          invalidColumn: true,
-        }),
+        () => {
+          throw new Error('notification payload failed');
+        },
       ),
-    ).rejects.toThrow();
+    ).rejects.toThrow('notification payload failed');
     expect(await prisma.news.count({ where: { title: 'Rollback' } })).toBe(0);
     const broadcast = jest
       .spyOn(app.get(NotificationsGateway), 'broadcastNew')
@@ -581,6 +576,220 @@ describe('App (e2e)', () => {
       ).toBe(1);
     } finally {
       broadcast.mockRestore();
+    }
+  });
+
+  it('scopes directed forum comment notifications to post or parent authors', async () => {
+    const admin = await prisma.user.findUniqueOrThrow({
+      where: { username: adminUsername },
+    });
+    const member = await prisma.user.create({
+      data: {
+        username: `${prefix}-notif-member`,
+        fullName: 'Notif Member',
+        passwordHash: await bcrypt.hash(password, 10),
+        role: 'USER',
+        status: 'ACTIVE',
+      },
+    });
+    createdIds.push(member.id);
+    const other = await prisma.user.create({
+      data: {
+        username: `${prefix}-notif-other`,
+        fullName: 'Notif Other',
+        passwordHash: await bcrypt.hash(password, 10),
+        role: 'USER',
+        status: 'ACTIVE',
+      },
+    });
+    createdIds.push(other.id);
+
+    const login = async (username: string) => {
+      const response = await request(app.getHttpServer())
+        .post('/api/auth/login')
+        .send({ username, password })
+        .expect(201);
+      return bodyOf(response).accessToken;
+    };
+    const adminTok = await login(adminUsername);
+    const memberTok = await login(member.username);
+    const otherTok = await login(other.username);
+
+    const listTypes = async (token: string) => {
+      const res = await request(app.getHttpServer())
+        .get('/api/notifications?limit=100')
+        .auth(token, { type: 'bearer' })
+        .expect(200);
+      return (
+        res.body as {
+          items: { type: string; audience: string; resourceId: string }[];
+        }
+      ).items;
+    };
+
+    const post = await request(app.getHttpServer())
+      .post('/api/forum-posts')
+      .auth(adminTok, { type: 'bearer' })
+      .send({ title: 'Audience post', content: 'Body' })
+      .expect(201);
+    const postId = dataOf(post).id;
+
+    const beforeSelf = await prisma.notification.count({
+      where: { type: 'forum.comment.created', resourceId: postId },
+    });
+    await request(app.getHttpServer())
+      .post(`/api/forum-posts/${postId}/comments`)
+      .auth(adminTok, { type: 'bearer' })
+      .send({ content: 'Self comment' })
+      .expect(201);
+    expect(
+      await prisma.notification.count({
+        where: { type: 'forum.comment.created', resourceId: postId },
+      }),
+    ).toBe(beforeSelf);
+
+    const topLevel = await request(app.getHttpServer())
+      .post(`/api/forum-posts/${postId}/comments`)
+      .auth(memberTok, { type: 'bearer' })
+      .send({ content: 'Top-level for author' })
+      .expect(201);
+    const directed = await prisma.notification.findFirstOrThrow({
+      where: {
+        type: 'forum.comment.created',
+        resourceId: postId,
+        audience: 'DIRECTED',
+      },
+      include: { recipients: true },
+      orderBy: { createdAt: 'desc' },
+    });
+    expect(directed.recipients.map((r) => r.userId)).toEqual([admin.id]);
+
+    const adminItems = await listTypes(adminTok);
+    const memberItems = await listTypes(memberTok);
+    const otherItems = await listTypes(otherTok);
+    expect(
+      adminItems.some(
+        (n) => n.type === 'forum.comment.created' && n.resourceId === postId,
+      ),
+    ).toBe(true);
+    expect(
+      memberItems.some(
+        (n) => n.type === 'forum.comment.created' && n.resourceId === postId,
+      ),
+    ).toBe(false);
+    expect(
+      otherItems.some(
+        (n) => n.type === 'forum.comment.created' && n.resourceId === postId,
+      ),
+    ).toBe(false);
+    expect(
+      otherItems.some(
+        (n) => n.type === 'forum.created' && n.resourceId === postId,
+      ),
+    ).toBe(true);
+
+    const parentId = dataOf(topLevel).id;
+    await request(app.getHttpServer())
+      .post(`/api/forum-posts/${postId}/comments`)
+      .auth(otherTok, { type: 'bearer' })
+      .send({ content: 'Reply to member', parentId })
+      .expect(201);
+    const replyNotif = await prisma.notification.findFirstOrThrow({
+      where: {
+        type: 'forum.comment.created',
+        resourceId: postId,
+        audience: 'DIRECTED',
+        recipients: { some: { userId: member.id } },
+      },
+      include: { recipients: true },
+      orderBy: { createdAt: 'desc' },
+    });
+    expect(replyNotif.recipients.map((r) => r.userId)).toEqual([member.id]);
+
+    const memberAfterReply = await listTypes(memberTok);
+    expect(
+      memberAfterReply.some(
+        (n) => n.type === 'forum.comment.created' && n.resourceId === postId,
+      ),
+    ).toBe(true);
+  });
+
+  it('delivers directed notifications only to recipient sockets', async () => {
+    const admin = await prisma.user.findUniqueOrThrow({
+      where: { username: adminUsername },
+    });
+    const member = await prisma.user.create({
+      data: {
+        username: `${prefix}-socket-directed`,
+        fullName: 'Socket Directed',
+        passwordHash: await bcrypt.hash(password, 10),
+        role: 'USER',
+        status: 'ACTIVE',
+      },
+    });
+    createdIds.push(member.id);
+    const adminTok = await adminToken();
+    const memberLogin = await request(app.getHttpServer())
+      .post('/api/auth/login')
+      .send({ username: member.username, password })
+      .expect(201);
+    const memberTok = bodyOf(memberLogin).accessToken;
+
+    const connect = (token: string) =>
+      io(process.env.PUBLIC_BASE_URL, {
+        auth: { token },
+        transports: ['websocket'],
+        reconnection: false,
+        autoConnect: false,
+      });
+    const adminSocket = connect(adminTok);
+    const memberSocket = connect(memberTok);
+    try {
+      await Promise.all(
+        [adminSocket, memberSocket].map(
+          (socket) =>
+            new Promise<void>((resolve, reject) => {
+              socket.once('connect', resolve);
+              socket.once('connect_error', reject);
+              socket.connect();
+            }),
+        ),
+      );
+
+      const adminDirected = new Promise<{ type: string; audience: string }>(
+        (resolve) => adminSocket.once('notification:new', resolve),
+      );
+      let memberGot = false;
+      memberSocket.on('notification:new', () => {
+        memberGot = true;
+      });
+
+      await app.get(NotificationsService).createWithNotification(
+        async () => ({ id: 'directed-socket-resource' }),
+        () => ({
+          audience: 'DIRECTED' as const,
+          type: 'test.directed',
+          title: 'Directed only',
+          body: 'Body',
+          resourceType: 'test',
+          resourceId: 'directed-socket-resource',
+          recipientIds: [admin.id],
+        }),
+      );
+
+      const delivered = await Promise.race([
+        adminDirected,
+        new Promise<null>((resolve) => setTimeout(() => resolve(null), 2000)),
+      ]);
+      expect(delivered).toMatchObject({
+        type: 'test.directed',
+        audience: 'DIRECTED',
+      });
+      await new Promise((r) => setTimeout(r, 200));
+      expect(memberGot).toBe(false);
+    } finally {
+      adminSocket.close();
+      memberSocket.close();
     }
   });
 

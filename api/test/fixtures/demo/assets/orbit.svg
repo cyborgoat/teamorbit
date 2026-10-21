@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="960" height="480" viewBox="0 0 960 480" role="img" aria-labelledby="title desc">
-  <title id="title">Team Orbit</title><desc id="desc">Three teammates connected by a shared orbit on a pale green background.</desc>
+  <title id="title">teamorbit</title><desc id="desc">Three teammates connected by a shared orbit on a pale green background.</desc>
   <rect width="960" height="480" rx="24" fill="#e0eee8"/>
   <ellipse cx="480" cy="220" rx="290" ry="145" fill="none" stroke="#8fb6a8" stroke-width="3"/>
   <ellipse cx="480" cy="220" rx="165" ry="145" fill="none" stroke="#8fb6a8" stroke-width="3" transform="rotate(35 480 220)"/>

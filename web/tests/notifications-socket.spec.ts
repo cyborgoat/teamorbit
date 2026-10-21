@@ -22,7 +22,7 @@ test('Strict Mode opens one notification connection, receives updates, and recon
     if (message.type() === 'error') errors.push(message.text())
   })
   await page.addInitScript(() =>
-    localStorage.setItem('team-orbit-token', 'test-token'),
+    localStorage.setItem('teamorbit-token', 'test-token'),
   )
   await page.route('**/*', async (route) => {
     const request = route.request()

@@ -12,7 +12,7 @@ import {
 // Stable, valid UUIDs also work with the comment API's parentId validation.
 export function demoId(key: string): string {
   const hash = createHash('sha256')
-    .update(`team-orbit-demo-v1:${key}`)
+    .update(`teamorbit-demo-v1:${key}`)
     .digest('hex');
   return `${hash.slice(0, 8)}-${hash.slice(8, 12)}-4${hash.slice(13, 16)}-8${hash.slice(17, 20)}-${hash.slice(20, 32)}`;
 }
@@ -468,6 +468,7 @@ export async function seedDatabase(
             tx.notification.create({
               data: {
                 id,
+                audience: 'GLOBAL',
                 resourceType: resource.resourceType,
                 resourceId: resource.resourceId,
                 type: `${resource.resourceType}.created`,

@@ -146,6 +146,7 @@ export class ForumService {
           include: { author: { select: authorSelect } },
         }),
       (item) => ({
+        audience: 'GLOBAL' as const,
         type: 'forum.created',
         title: 'New forum post',
         body: item.title,
@@ -190,6 +191,7 @@ export class ForumService {
     });
     if (!post) throw new NotFoundException('Forum post not found');
 
+    let parentAuthorId: string | undefined;
     if (dto.parentId) {
       const parent = await this.prisma.forumComment.findUnique({
         where: { id: dto.parentId },
@@ -200,7 +202,10 @@ export class ForumService {
       if (parent.parentId) {
         throw new BadRequestException('Only one level of replies is allowed');
       }
+      parentAuthorId = parent.authorId;
     }
+
+    const targetUserId = dto.parentId ? parentAuthorId! : post.authorId;
 
     const comment = await this.notifications.createWithNotification(
       (tx) =>
@@ -213,13 +218,18 @@ export class ForumService {
           },
           include: { author: { select: authorSelect } },
         }),
-      () => ({
-        type: 'forum.comment.created',
-        title: 'New forum comment',
-        body: post.title,
-        resourceType: 'forum',
-        resourceId: postId,
-      }),
+      () =>
+        targetUserId === authorId
+          ? null
+          : {
+              audience: 'DIRECTED' as const,
+              type: 'forum.comment.created',
+              title: 'New forum comment',
+              body: post.title,
+              resourceType: 'forum',
+              resourceId: postId,
+              recipientIds: [targetUserId],
+            },
     );
 
     return { ...presentContent(comment), myVote: 0, replies: [] };

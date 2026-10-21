@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Trash2 } from 'lucide-react'
-import type { ForumComment as Comment } from '@goatcheese/team-orbit-client'
+import type { ForumComment as Comment } from '@goatcheese/teamorbit-client'
 import { MarkdownBody } from '@/components/markdown-body'
 import { UserAvatar } from '@/components/user-avatar'
 import { VoteControls } from '@/components/vote-controls'

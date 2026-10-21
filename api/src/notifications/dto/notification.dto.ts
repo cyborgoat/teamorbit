@@ -1,9 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { NotificationAudience } from '@prisma/client';
 import { PageMetaDto } from '../../common/dto/response.dto';
 
 export class NotificationDto {
   @ApiProperty()
   id: string;
+
+  @ApiProperty({ enum: NotificationAudience, example: NotificationAudience.GLOBAL })
+  audience: NotificationAudience;
 
   @ApiProperty({ example: 'forum.created' })
   type: string;

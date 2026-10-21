@@ -1,6 +1,6 @@
 export const DEFAULT_AVATAR_URL = '/avatars/default-raven.png'
 
-import type { AvatarPreset } from '@goatcheese/team-orbit-client'
+import type { AvatarPreset } from '@goatcheese/teamorbit-client'
 export function isSelectedPreset(
   value: string | null | undefined,
   preset: AvatarPreset,

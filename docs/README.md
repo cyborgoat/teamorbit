@@ -1,6 +1,6 @@
 # Documentation
 
-Guides for Team Orbit v1.
+Guides for teamorbit v1.
 
 | Doc | Contents |
 |-----|----------|
@@ -8,6 +8,6 @@ Guides for Team Orbit v1.
 | [Schema](schema.md) | Database models, fields, IDs, relationships, ER diagram |
 | [Features](features.md) | Product capabilities, roles, statuses, and endpoints |
 | [Usage](usage.md) | Setup, username/email login, editors, tests, migrations, backup |
-| [Client SDK](../packages/client/README.md) | `@goatcheese/team-orbit-client`: typed helpers, login methods, optional email, and REST integration |
+| [Client SDK](../packages/client/README.md) | `@goatcheese/teamorbit-client`: typed helpers, login methods, optional email, and REST integration |
 
 Start with the root [README](../README.md) for a quick start, then use these docs for detail.

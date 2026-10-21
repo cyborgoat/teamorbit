@@ -1,8 +1,8 @@
-# team-orbit
+# teamorbit
 
 ## Project Overview
 
-Team Orbit is a backend service for managing teams members, events, announcements, news and blog posts. It is a microservice architecture that allows you to create, manage, and track teams members, events, announcements, news and blog posts.
+teamorbit is a backend service for managing teams members, events, announcements, news and blog posts. It is a microservice architecture that allows you to create, manage, and track teams members, events, announcements, news and blog posts.
 
 ## Features
 
