@@ -1,6 +1,6 @@
 {
   "name": "@goatcheese/teamorbit-client",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Typed client for the teamorbit API",
   "keywords": [
     "teamorbit",
@@ -38,6 +38,9 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./schema": {
+      "types": "./dist/schema.d.ts"
     }
   },
   "scripts": {

@@ -48,9 +48,9 @@ function EventDetailPage() {
         startAt: fromLocalInput(form.startAt),
         endAt: fromLocalInput(form.endAt),
         coverImageUrl: form.coverImageUrl || null,
+        audience,
         ...(canManage(user)
           ? {
-              audience,
               recipientIds:
                 audience === 'INVITE_ONLY' ? form.recipientIds : undefined,
             }

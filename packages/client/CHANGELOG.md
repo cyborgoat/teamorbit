@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.4 — 2026-10-22
+
+- Export `@goatcheese/teamorbit-client/schema` so consumers can import the generated OpenAPI `components` types.
+
 ## 0.2.3 — 2026-10-22
 
 - News and blog OpenAPI schemas share `ArticleDto` / `CreateArticleDto` / `UpdateArticleDto` (replacing `NewsDto` / `BlogPostDto` and related create/update names).
