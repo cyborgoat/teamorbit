@@ -1,13 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import {
-  IsIn,
-  IsInt,
-  IsOptional,
-  IsString,
-  IsUUID,
-  MinLength,
-} from 'class-validator';
+import { IsIn, IsOptional, IsString, IsUUID, MinLength } from 'class-validator';
+import { UserSummaryDto } from '../../common/dto/response.dto';
 import { COMMENT_RESOURCE_TYPES } from '../content-ref.service';
 
 export class CommentListQueryDto {
@@ -49,31 +42,6 @@ export class UpdateCommentDto {
   content: string;
 }
 
-export class VoteDto {
-  @ApiProperty({
-    description: '1 = upvote, -1 = downvote, 0 = clear vote',
-    enum: [1, -1, 0],
-  })
-  @Type(() => Number)
-  @IsInt()
-  @IsIn([1, -1, 0])
-  value: 1 | -1 | 0;
-}
-
-export class CommentAuthorDto {
-  @ApiProperty()
-  id: string;
-
-  @ApiProperty()
-  username: string;
-
-  @ApiProperty()
-  fullName: string;
-
-  @ApiProperty()
-  avatarUrl: string;
-}
-
 export class CommentBaseDto {
   @ApiProperty()
   id: string;
@@ -102,8 +70,8 @@ export class CommentBaseDto {
   @ApiProperty()
   updatedAt: Date;
 
-  @ApiProperty({ type: CommentAuthorDto })
-  author: CommentAuthorDto;
+  @ApiProperty({ type: UserSummaryDto })
+  author: UserSummaryDto;
 }
 
 export class CommentReplyDto extends CommentBaseDto {
@@ -119,12 +87,4 @@ export class CommentDto extends CommentReplyDto {
 export class CommentThreadDto {
   @ApiProperty({ type: [CommentDto] })
   items: CommentDto[];
-}
-
-export class VoteResultDto {
-  @ApiProperty()
-  score: number;
-
-  @ApiProperty({ enum: [1, -1, 0] })
-  myVote: number;
 }

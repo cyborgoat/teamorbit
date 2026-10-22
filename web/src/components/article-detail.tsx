@@ -3,16 +3,17 @@ import { Link } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Pencil } from 'lucide-react'
 import { toast } from 'sonner'
+import {
+  ArticleFormFields,
+  emptyArticleForm,
+  type ArticleFormValues,
+} from '@/components/article-form-fields'
 import { CommentThread } from '@/components/comment-thread'
-import { ImageUpload } from '@/components/image-upload'
 import { ListControls } from '@/components/list-controls'
 import { MarkdownBody } from '@/components/markdown-body'
-import { MarkdownEditor } from '@/components/markdown-editor'
 import { PageHeader } from '@/components/page-header'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { useAuth } from '@/lib/auth'
 import { canModerate } from '@/lib/policies'
 import { orbit } from '@/lib/api'
@@ -36,12 +37,7 @@ export function ArticleDetail({
     refetchOnWindowFocus: false,
   })
   const [editing, setEditing] = useState(false)
-  const [form, setForm] = useState({
-    title: '',
-    content: '',
-    tags: '',
-    coverImageUrl: '',
-  })
+  const [form, setForm] = useState<ArticleFormValues>(emptyArticleForm)
   const [uploading, setUploading] = useState(false)
   const [coverUploading, setCoverUploading] = useState(false)
 
@@ -88,50 +84,13 @@ export function ArticleDetail({
           title={kind === 'news' ? 'Edit news article' : 'Edit blog post'}
           description="Authors and admins can update this article."
         />
-        <div className="space-y-2">
-          <Label htmlFor="article-edit-title">Title</Label>
-          <Input
-            id="article-edit-title"
-            value={form.title}
-            onChange={(event) =>
-              setForm((current) => ({ ...current, title: event.target.value }))
-            }
-            required
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="article-edit-tags">Tags</Label>
-          <Input
-            id="article-edit-tags"
-            placeholder="team, release, ops"
-            value={form.tags}
-            onChange={(event) =>
-              setForm((current) => ({ ...current, tags: event.target.value }))
-            }
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>Content</Label>
-          <MarkdownEditor
-            value={form.content}
-            onChange={(content) =>
-              setForm((current) => ({ ...current, content }))
-            }
-            onUploadingChange={setUploading}
-            required
-            minHeightClass="min-h-80"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>Cover image</Label>
-          <ImageUpload
-            value={form.coverImageUrl}
-            onChange={(coverImageUrl) =>
-              setForm((current) => ({ ...current, coverImageUrl }))
-            }
-            onUploadingChange={setCoverUploading}
-          />
-        </div>
+        <ArticleFormFields
+          form={form}
+          setForm={setForm}
+          idPrefix="article-edit"
+          onContentUploadingChange={setUploading}
+          onCoverUploadingChange={setCoverUploading}
+        />
         <div className="flex justify-end gap-2">
           <Button
             type="button"

@@ -1346,7 +1346,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PaginatedNewsListDto"
+                  "$ref": "#/components/schemas/PaginatedArticleListDto"
                 }
               }
             }
@@ -1379,7 +1379,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateNewsDto"
+                "$ref": "#/components/schemas/CreateArticleDto"
               }
             }
           }
@@ -1390,7 +1390,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/NewsDto"
+                  "$ref": "#/components/schemas/ArticleDto"
                 }
               }
             }
@@ -1435,7 +1435,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/NewsDto"
+                  "$ref": "#/components/schemas/ArticleDto"
                 }
               }
             }
@@ -1477,7 +1477,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateNewsDto"
+                "$ref": "#/components/schemas/UpdateArticleDto"
               }
             }
           }
@@ -1488,7 +1488,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/NewsDto"
+                  "$ref": "#/components/schemas/ArticleDto"
                 }
               }
             }
@@ -1605,7 +1605,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PaginatedBlogPostListDto"
+                  "$ref": "#/components/schemas/PaginatedArticleListDto"
                 }
               }
             }
@@ -1638,7 +1638,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateBlogPostDto"
+                "$ref": "#/components/schemas/CreateArticleDto"
               }
             }
           }
@@ -1649,7 +1649,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BlogPostDto"
+                  "$ref": "#/components/schemas/ArticleDto"
                 }
               }
             }
@@ -1694,7 +1694,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BlogPostDto"
+                  "$ref": "#/components/schemas/ArticleDto"
                 }
               }
             }
@@ -1736,7 +1736,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateBlogPostDto"
+                "$ref": "#/components/schemas/UpdateArticleDto"
               }
             }
           }
@@ -1747,7 +1747,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BlogPostDto"
+                  "$ref": "#/components/schemas/ArticleDto"
                 }
               }
             }
@@ -3373,7 +3373,7 @@
           }
         }
       },
-      "NewsDto": {
+      "ArticleDto": {
         "type": "object",
         "properties": {
           "id": {
@@ -3428,7 +3428,7 @@
           "author"
         ]
       },
-      "PaginatedNewsListDto": {
+      "PaginatedArticleListDto": {
         "type": "object",
         "properties": {
           "total": {
@@ -3443,7 +3443,7 @@
           "items": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/NewsDto"
+              "$ref": "#/components/schemas/ArticleDto"
             }
           }
         },
@@ -3454,7 +3454,7 @@
           "items"
         ]
       },
-      "CreateNewsDto": {
+      "CreateArticleDto": {
         "type": "object",
         "properties": {
           "title": {
@@ -3481,7 +3481,7 @@
           "content"
         ]
       },
-      "UpdateNewsDto": {
+      "UpdateArticleDto": {
         "type": "object",
         "properties": {
           "title": {
@@ -3503,160 +3503,6 @@
             "nullable": true
           }
         }
-      },
-      "BlogPostDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "title": {
-            "type": "string"
-          },
-          "content": {
-            "type": "string",
-            "description": "Markdown content"
-          },
-          "coverImageUrl": {
-            "type": "string",
-            "nullable": true
-          },
-          "authorId": {
-            "type": "string"
-          },
-          "viewCount": {
-            "type": "number",
-            "description": "Times the article detail has been fetched"
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "tags": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "author": {
-            "$ref": "#/components/schemas/UserSummaryDto"
-          }
-        },
-        "required": [
-          "id",
-          "title",
-          "content",
-          "coverImageUrl",
-          "authorId",
-          "viewCount",
-          "createdAt",
-          "updatedAt",
-          "tags",
-          "author"
-        ]
-      },
-      "PaginatedBlogPostListDto": {
-        "type": "object",
-        "properties": {
-          "total": {
-            "type": "number"
-          },
-          "page": {
-            "type": "number"
-          },
-          "limit": {
-            "type": "number"
-          },
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/BlogPostDto"
-            }
-          }
-        },
-        "required": [
-          "total",
-          "page",
-          "limit",
-          "items"
-        ]
-      },
-      "CreateBlogPostDto": {
-        "type": "object",
-        "properties": {
-          "title": {
-            "type": "string",
-            "minLength": 1
-          },
-          "content": {
-            "type": "string",
-            "description": "Markdown content"
-          },
-          "tags": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "coverImageUrl": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "required": [
-          "title",
-          "content"
-        ]
-      },
-      "UpdateBlogPostDto": {
-        "type": "object",
-        "properties": {
-          "title": {
-            "type": "string",
-            "minLength": 1
-          },
-          "content": {
-            "type": "string",
-            "description": "Markdown content"
-          },
-          "tags": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "coverImageUrl": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "CommentAuthorDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "username": {
-            "type": "string"
-          },
-          "fullName": {
-            "type": "string"
-          },
-          "avatarUrl": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "username",
-          "fullName",
-          "avatarUrl"
-        ]
       },
       "CommentReplyDto": {
         "type": "object",
@@ -3700,7 +3546,7 @@
             "type": "string"
           },
           "author": {
-            "$ref": "#/components/schemas/CommentAuthorDto"
+            "$ref": "#/components/schemas/UserSummaryDto"
           },
           "myVote": {
             "type": "number",
@@ -3767,7 +3613,7 @@
             "type": "string"
           },
           "author": {
-            "$ref": "#/components/schemas/CommentAuthorDto"
+            "$ref": "#/components/schemas/UserSummaryDto"
           },
           "myVote": {
             "type": "number",
@@ -3901,7 +3747,7 @@
             "type": "string"
           },
           "author": {
-            "$ref": "#/components/schemas/CommentAuthorDto"
+            "$ref": "#/components/schemas/UserSummaryDto"
           }
         },
         "required": [
@@ -3954,29 +3800,6 @@
           "myVote"
         ]
       },
-      "ForumAuthorDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "username": {
-            "type": "string"
-          },
-          "fullName": {
-            "type": "string"
-          },
-          "avatarUrl": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "username",
-          "fullName",
-          "avatarUrl"
-        ]
-      },
       "ForumPostSummaryDto": {
         "type": "object",
         "properties": {
@@ -4009,7 +3832,7 @@
             "type": "string"
           },
           "author": {
-            "$ref": "#/components/schemas/ForumAuthorDto"
+            "$ref": "#/components/schemas/UserSummaryDto"
           },
           "commentCount": {
             "type": "number"
@@ -4086,7 +3909,7 @@
             "type": "string"
           },
           "author": {
-            "$ref": "#/components/schemas/ForumAuthorDto"
+            "$ref": "#/components/schemas/UserSummaryDto"
           },
           "myVote": {
             "type": "number",
@@ -4169,7 +3992,7 @@
             "type": "string"
           },
           "author": {
-            "$ref": "#/components/schemas/ForumAuthorDto"
+            "$ref": "#/components/schemas/UserSummaryDto"
           },
           "commentCount": {
             "type": "number"
@@ -4244,7 +4067,7 @@
             "type": "string"
           },
           "author": {
-            "$ref": "#/components/schemas/ForumAuthorDto"
+            "$ref": "#/components/schemas/UserSummaryDto"
           }
         },
         "required": [

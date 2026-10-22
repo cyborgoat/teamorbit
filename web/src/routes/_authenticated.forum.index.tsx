@@ -1,8 +1,7 @@
-import { useListPage } from '@/hooks/use-list-page'
 import { ListControls } from '@/components/list-controls'
 import { queryKeys } from '@/lib/query-keys'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { MessageSquare, Plus, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { PageHeader } from '@/components/page-header'
@@ -24,7 +23,12 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { useAuth } from '@/lib/auth'
+import { canModerate } from '@/lib/policies'
+import { useResourceList } from '@/hooks/use-resource-list'
 import { orbit } from '@/lib/api'
+import type { components } from '@goatcheese/teamorbit-client/schema'
+
+type ForumPostSummary = components['schemas']['ForumPostSummaryDto']
 
 export const Route = createFileRoute('/_authenticated/forum/')({
   component: ForumPage,
@@ -33,12 +37,10 @@ export const Route = createFileRoute('/_authenticated/forum/')({
 function ForumPage() {
   const { user } = useAuth()
   const qc = useQueryClient()
-  const pagination = useListPage()
-  const { data, error, refetch, isFetching, isLoading } = useQuery({
-    queryKey: [...queryKeys.forum, pagination.page],
-    queryFn: () =>
-      orbit.forum.listPosts({ page: pagination.page, limit: pagination.limit }),
-  })
+  const { data, error, refetch, isFetching, isLoading, pagination, items } =
+    useResourceList<ForumPostSummary>(queryKeys.forum, (query) =>
+      orbit.forum.listPosts(query),
+    )
   const remove = useMutation({
     mutationFn: (id: string) => orbit.forum.deletePost(id),
     onSuccess: () => {
@@ -47,12 +49,6 @@ function ForumPage() {
     },
     onError: (e: Error) => toast.error(e.message),
   })
-
-  const items = data?.items ?? []
-  const canModerate = (authorId: string) =>
-    user?.id === authorId ||
-    user?.role === 'ADMIN' ||
-    user?.role === 'SUPERUSER'
 
   return (
     <div>
@@ -138,7 +134,7 @@ function ForumPage() {
                     {new Date(item.createdAt).toLocaleDateString()}
                   </TableCell>
                   <TableCell>
-                    {canModerate(item.author.id) ? (
+                    {canModerate(user, item.author.id) ? (
                       <Button
                         variant="ghost"
                         size="icon-sm"

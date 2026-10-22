@@ -101,6 +101,10 @@ Authenticated image upload; returns an absolute public URL like `https://orbit.e
 
 ## HTTP API (summary)
 
+Endpoint details and schemas: [OpenAPI](../openapi/openapi.json) and the
+[client SDK](../packages/client/README.md) are the source of truth. This table
+is a short overview only.
+
 All content and user routes (except register/login) require a Bearer JWT unless noted.
 
 | Area | Methods | Path prefix |

@@ -4,14 +4,16 @@ import { Link, useNavigate } from '@tanstack/react-router'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { MarkdownBody } from '@/components/markdown-body'
 import { toast } from 'sonner'
-import { MarkdownEditor } from '@/components/markdown-editor'
-import { ImageUpload } from '@/components/image-upload'
+import {
+  ArticleFormFields,
+  emptyArticleForm,
+  type ArticleFormValues,
+} from '@/components/article-form-fields'
 import { PageHeader } from '@/components/page-header'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { useAuth } from '@/lib/auth'
 import { orbit } from '@/lib/api'
+import { queryKeys } from '@/lib/query-keys'
 
 export function ContentCreatePage({
   kind,
@@ -21,12 +23,7 @@ export function ContentCreatePage({
   const { user, loading } = useAuth()
   const qc = useQueryClient()
   const navigate = useNavigate()
-  const [form, setForm] = useState({
-    title: '',
-    content: '',
-    tags: '',
-    coverImageUrl: '',
-  })
+  const [form, setForm] = useState<ArticleFormValues>(emptyArticleForm)
   const [uploading, setUploading] = useState(false)
   const [coverUploading, setCoverUploading] = useState(false)
   const isForum = kind === 'forum'
@@ -47,7 +44,9 @@ export function ContentCreatePage({
             coverImageUrl: form.coverImageUrl || null,
           }),
     onSuccess: async () => {
-      await qc.invalidateQueries({ queryKey: [isForum ? 'forum-posts' : kind] })
+      await qc.invalidateQueries({
+        queryKey: queryKeys[isForum ? 'forum' : kind],
+      })
       toast.success('Published')
       await navigate({ to: list })
     },
@@ -75,55 +74,18 @@ export function ContentCreatePage({
           if (!busy && form.content.trim()) create.mutate()
         }}
       >
-        <div className="space-y-2">
-          <Label htmlFor="post-title">Title</Label>
-          <Input
-            id="post-title"
-            value={form.title}
-            onChange={(event) =>
-              setForm((current) => ({ ...current, title: event.target.value }))
-            }
-            required
-          />
-        </div>
-        {!isForum && (
-          <div className="space-y-2">
-            <Label htmlFor="post-tags">Tags</Label>
-            <Input
-              id="post-tags"
-              placeholder="team, release, ops"
-              value={form.tags}
-              onChange={(event) =>
-                setForm((current) => ({ ...current, tags: event.target.value }))
-              }
-            />
-          </div>
-        )}
-        <div className="space-y-2">
-          <Label htmlFor="post-content-input">Content</Label>
-          <MarkdownEditor
-            id="post-content"
-            value={form.content}
-            onChange={(content) =>
-              setForm((current) => ({ ...current, content }))
-            }
-            onUploadingChange={setUploading}
-            required
-            minHeightClass="min-h-80"
-          />
-        </div>
-        {!isForum && (
-          <div className="space-y-2">
-            <Label>Cover image</Label>
-            <ImageUpload
-              value={form.coverImageUrl}
-              onChange={(coverImageUrl) =>
-                setForm((current) => ({ ...current, coverImageUrl }))
-              }
-              onUploadingChange={setCoverUploading}
-            />
-          </div>
-        )}
+        <ArticleFormFields
+          form={form}
+          setForm={setForm}
+          idPrefix="post"
+          titleId="post-title"
+          contentId="post-content"
+          contentLabelId="post-content-input"
+          showTags={!isForum}
+          showCover={!isForum}
+          onContentUploadingChange={setUploading}
+          onCoverUploadingChange={setCoverUploading}
+        />
         <section
           className="space-y-3 rounded-xl border p-5"
           aria-label="Post preview"

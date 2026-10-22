@@ -22,6 +22,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { ErrorDto, OkDto } from '../common/dto/response.dto';
 import { CommentsService } from './comments.service';
+import { VoteDto, VoteResultDto } from '../common/dto/vote.dto';
 import {
   CommentBaseDto,
   CommentDto,
@@ -29,8 +30,6 @@ import {
   CommentThreadDto,
   CreateCommentDto,
   UpdateCommentDto,
-  VoteDto,
-  VoteResultDto,
 } from './dto/comment.dto';
 
 @ApiDefaultResponse({ type: ErrorDto })

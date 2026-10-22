@@ -21,6 +21,7 @@ import { Role } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { PaginationQueryDto } from '../common/dto/pagination.dto';
+import { VoteDto, VoteResultDto } from '../common/dto/vote.dto';
 import {
   CreateForumPostDto,
   ForumPostCreatedDto,
@@ -28,8 +29,6 @@ import {
   ForumPostDto,
   PaginatedForumPostsDto,
   UpdateForumPostDto,
-  VoteDto,
-  VoteResultDto,
 } from './dto/forum.dto';
 import { ForumService } from './forum.service';
 import { ErrorDto, OkDto } from '../common/dto/response.dto';

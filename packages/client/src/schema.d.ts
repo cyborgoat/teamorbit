@@ -717,7 +717,7 @@ export interface components {
             /** @description Invitee user ids when audience is INVITE_ONLY (creator always included) */
             recipientIds?: string[];
         };
-        NewsDto: {
+        ArticleDto: {
             id: string;
             title: string;
             /** @description Markdown content */
@@ -733,67 +733,25 @@ export interface components {
             tags: string[];
             author: components["schemas"]["UserSummaryDto"];
         };
-        PaginatedNewsListDto: {
+        PaginatedArticleListDto: {
             total: number;
             page: number;
             limit: number;
-            items: components["schemas"]["NewsDto"][];
+            items: components["schemas"]["ArticleDto"][];
         };
-        CreateNewsDto: {
+        CreateArticleDto: {
             title: string;
             /** @description Markdown content */
             content: string;
             tags?: string[];
             coverImageUrl?: string | null;
         };
-        UpdateNewsDto: {
+        UpdateArticleDto: {
             title?: string;
             /** @description Markdown content */
             content?: string;
             tags?: string[];
             coverImageUrl?: string | null;
-        };
-        BlogPostDto: {
-            id: string;
-            title: string;
-            /** @description Markdown content */
-            content: string;
-            coverImageUrl: string | null;
-            authorId: string;
-            /** @description Times the article detail has been fetched */
-            viewCount: number;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-            tags: string[];
-            author: components["schemas"]["UserSummaryDto"];
-        };
-        PaginatedBlogPostListDto: {
-            total: number;
-            page: number;
-            limit: number;
-            items: components["schemas"]["BlogPostDto"][];
-        };
-        CreateBlogPostDto: {
-            title: string;
-            /** @description Markdown content */
-            content: string;
-            tags?: string[];
-            coverImageUrl?: string | null;
-        };
-        UpdateBlogPostDto: {
-            title?: string;
-            /** @description Markdown content */
-            content?: string;
-            tags?: string[];
-            coverImageUrl?: string | null;
-        };
-        CommentAuthorDto: {
-            id: string;
-            username: string;
-            fullName: string;
-            avatarUrl: string;
         };
         CommentReplyDto: {
             id: string;
@@ -809,7 +767,7 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
-            author: components["schemas"]["CommentAuthorDto"];
+            author: components["schemas"]["UserSummaryDto"];
             /** @enum {number} */
             myVote: 1 | -1 | 0;
         };
@@ -827,7 +785,7 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
-            author: components["schemas"]["CommentAuthorDto"];
+            author: components["schemas"]["UserSummaryDto"];
             /** @enum {number} */
             myVote: 1 | -1 | 0;
             replies: components["schemas"]["CommentReplyDto"][];
@@ -865,7 +823,7 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
-            author: components["schemas"]["CommentAuthorDto"];
+            author: components["schemas"]["UserSummaryDto"];
         };
         VoteDto: {
             /**
@@ -878,12 +836,6 @@ export interface components {
             score: number;
             /** @enum {number} */
             myVote: 1 | -1 | 0;
-        };
-        ForumAuthorDto: {
-            id: string;
-            username: string;
-            fullName: string;
-            avatarUrl: string;
         };
         ForumPostSummaryDto: {
             id: string;
@@ -898,7 +850,7 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
-            author: components["schemas"]["ForumAuthorDto"];
+            author: components["schemas"]["UserSummaryDto"];
             commentCount: number;
         };
         PaginatedForumPostsDto: {
@@ -920,7 +872,7 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
-            author: components["schemas"]["ForumAuthorDto"];
+            author: components["schemas"]["UserSummaryDto"];
             /**
              * @description Current user vote: 1, -1 or 0
              * @enum {number}
@@ -947,7 +899,7 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
-            author: components["schemas"]["ForumAuthorDto"];
+            author: components["schemas"]["UserSummaryDto"];
             commentCount: number;
             /**
              * @description Current user vote: 1, -1 or 0
@@ -973,7 +925,7 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
-            author: components["schemas"]["ForumAuthorDto"];
+            author: components["schemas"]["UserSummaryDto"];
         };
         UploadResultDto: {
             /** @example /uploads/3f2a...png */
@@ -1885,7 +1837,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedNewsListDto"];
+                    "application/json": components["schemas"]["PaginatedArticleListDto"];
                 };
             };
             default: {
@@ -1907,7 +1859,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CreateNewsDto"];
+                "application/json": components["schemas"]["CreateArticleDto"];
             };
         };
         responses: {
@@ -1916,7 +1868,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["NewsDto"];
+                    "application/json": components["schemas"]["ArticleDto"];
                 };
             };
             default: {
@@ -1945,7 +1897,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["NewsDto"];
+                    "application/json": components["schemas"]["ArticleDto"];
                 };
             };
             default: {
@@ -1998,7 +1950,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["UpdateNewsDto"];
+                "application/json": components["schemas"]["UpdateArticleDto"];
             };
         };
         responses: {
@@ -2007,7 +1959,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["NewsDto"];
+                    "application/json": components["schemas"]["ArticleDto"];
                 };
             };
             default: {
@@ -2039,7 +1991,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedBlogPostListDto"];
+                    "application/json": components["schemas"]["PaginatedArticleListDto"];
                 };
             };
             default: {
@@ -2061,7 +2013,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CreateBlogPostDto"];
+                "application/json": components["schemas"]["CreateArticleDto"];
             };
         };
         responses: {
@@ -2070,7 +2022,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["BlogPostDto"];
+                    "application/json": components["schemas"]["ArticleDto"];
                 };
             };
             default: {
@@ -2099,7 +2051,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["BlogPostDto"];
+                    "application/json": components["schemas"]["ArticleDto"];
                 };
             };
             default: {
@@ -2152,7 +2104,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["UpdateBlogPostDto"];
+                "application/json": components["schemas"]["UpdateArticleDto"];
             };
         };
         responses: {
@@ -2161,7 +2113,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["BlogPostDto"];
+                    "application/json": components["schemas"]["ArticleDto"];
                 };
             };
             default: {

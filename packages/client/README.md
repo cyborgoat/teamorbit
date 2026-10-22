@@ -237,20 +237,20 @@ under `components['schemas']`. List endpoints accept `page`, `limit` (max 100) a
 
 | Method | Path | Auth | Request body | Response |
 | --- | --- | --- | --- | --- |
-| `GET` | `/api/news` | Bearer |  | `PaginatedNewsListDto` |
-| `POST` | `/api/news` | Bearer | `CreateNewsDto` | `NewsDto` |
-| `GET` | `/api/news/{id}` | Bearer |  | `NewsDto` |
-| `PATCH` | `/api/news/{id}` | Bearer | `UpdateNewsDto` | `NewsDto` |
+| `GET` | `/api/news` | Bearer |  | `PaginatedArticleListDto` |
+| `POST` | `/api/news` | Bearer | `CreateArticleDto` | `ArticleDto` |
+| `GET` | `/api/news/{id}` | Bearer |  | `ArticleDto` |
+| `PATCH` | `/api/news/{id}` | Bearer | `UpdateArticleDto` | `ArticleDto` |
 | `DELETE` | `/api/news/{id}` | Bearer |  | `OkDto` |
 
 #### blog-posts
 
 | Method | Path | Auth | Request body | Response |
 | --- | --- | --- | --- | --- |
-| `GET` | `/api/blog-posts` | Bearer |  | `PaginatedBlogPostListDto` |
-| `POST` | `/api/blog-posts` | Bearer | `CreateBlogPostDto` | `BlogPostDto` |
-| `GET` | `/api/blog-posts/{id}` | Bearer |  | `BlogPostDto` |
-| `PATCH` | `/api/blog-posts/{id}` | Bearer | `UpdateBlogPostDto` | `BlogPostDto` |
+| `GET` | `/api/blog-posts` | Bearer |  | `PaginatedArticleListDto` |
+| `POST` | `/api/blog-posts` | Bearer | `CreateArticleDto` | `ArticleDto` |
+| `GET` | `/api/blog-posts/{id}` | Bearer |  | `ArticleDto` |
+| `PATCH` | `/api/blog-posts/{id}` | Bearer | `UpdateArticleDto` | `ArticleDto` |
 | `DELETE` | `/api/blog-posts/{id}` | Bearer |  | `OkDto` |
 
 #### comments

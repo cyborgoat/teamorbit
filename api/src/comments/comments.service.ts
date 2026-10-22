@@ -11,7 +11,8 @@ import {
   ContentRefService,
   type CommentResourceType,
 } from './content-ref.service';
-import { CreateCommentDto, UpdateCommentDto, VoteDto } from './dto/comment.dto';
+import { VoteDto } from '../common/dto/vote.dto';
+import { CreateCommentDto, UpdateCommentDto } from './dto/comment.dto';
 
 @Injectable()
 export class CommentsService {

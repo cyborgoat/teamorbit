@@ -6,11 +6,8 @@ import { paginate } from '../common/utils';
 import { CommentsService } from '../comments/comments.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
-import {
-  CreateForumPostDto,
-  UpdateForumPostDto,
-  VoteDto,
-} from './dto/forum.dto';
+import { VoteDto } from '../common/dto/vote.dto';
+import { CreateForumPostDto, UpdateForumPostDto } from './dto/forum.dto';
 
 @Injectable()
 export class ForumService {

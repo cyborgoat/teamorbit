@@ -22,10 +22,6 @@ export type ContentRef = {
 export class ContentRefService {
   constructor(private prisma: PrismaService) {}
 
-  isResourceType(value: string): value is CommentResourceType {
-    return (COMMENT_RESOURCE_TYPES as readonly string[]).includes(value);
-  }
-
   async resolve(
     resourceType: CommentResourceType,
     resourceId: string,

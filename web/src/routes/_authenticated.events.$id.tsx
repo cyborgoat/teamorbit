@@ -4,32 +4,24 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Pencil } from 'lucide-react'
 import { toast } from 'sonner'
 import { CommentThread } from '@/components/comment-thread'
-import { ImageUpload } from '@/components/image-upload'
+import {
+  emptyEventForm,
+  EventFormFields,
+  type EventFormValues,
+} from '@/components/event-form-fields'
 import { ListControls } from '@/components/list-controls'
 import { PageHeader } from '@/components/page-header'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import { useAuth } from '@/lib/auth'
 import { canManage, canModerate } from '@/lib/policies'
+import { fromLocalInput, toLocalInput } from '@/lib/event-datetime'
 import { orbit } from '@/lib/api'
 import { queryKeys } from '@/lib/query-keys'
 
 export const Route = createFileRoute('/_authenticated/events/$id')({
   component: EventDetailPage,
 })
-
-function toLocalInput(value: string) {
-  const date = new Date(value)
-  const pad = (n: number) => String(n).padStart(2, '0')
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`
-}
-
-function fromLocalInput(value: string) {
-  return new Date(value).toISOString()
-}
 
 function EventDetailPage() {
   const { id } = Route.useParams()
@@ -40,23 +32,8 @@ function EventDetailPage() {
     queryFn: () => orbit.events.get(id),
   })
   const [editing, setEditing] = useState(false)
-  const [form, setForm] = useState({
-    title: '',
-    description: '',
-    location: '',
-    startAt: '',
-    endAt: '',
-    coverImageUrl: '',
-    audience: 'GLOBAL' as 'GLOBAL' | 'INVITE_ONLY',
-    recipientIds: [] as string[],
-  })
+  const [form, setForm] = useState<EventFormValues>(emptyEventForm)
   const [coverUploading, setCoverUploading] = useState(false)
-
-  const usersQuery = useQuery({
-    queryKey: [...queryKeys.users, 'active-picker'],
-    queryFn: () => orbit.users.list({ page: 1, limit: 100, status: 'ACTIVE' }),
-    enabled: canManage(user) && editing && form.audience === 'INVITE_ONLY',
-  })
 
   const update = useMutation({
     mutationFn: () => {
@@ -112,125 +89,16 @@ function EventDetailPage() {
           title="Edit event"
           description="Authors and admins can update this event."
         />
-        <div className="space-y-2">
-          <Label htmlFor="ev-edit-title">Title</Label>
-          <Input
-            id="ev-edit-title"
-            value={form.title}
-            onChange={(e) => setForm({ ...form, title: e.target.value })}
-            required
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="ev-edit-location">Location</Label>
-          <Input
-            id="ev-edit-location"
-            value={form.location}
-            onChange={(e) => setForm({ ...form, location: e.target.value })}
-            required
-          />
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor="ev-edit-start">Starts</Label>
-            <Input
-              id="ev-edit-start"
-              type="datetime-local"
-              value={form.startAt}
-              onChange={(e) => setForm({ ...form, startAt: e.target.value })}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="ev-edit-end">Ends</Label>
-            <Input
-              id="ev-edit-end"
-              type="datetime-local"
-              value={form.endAt}
-              onChange={(e) => setForm({ ...form, endAt: e.target.value })}
-              required
-            />
-          </div>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="ev-edit-desc">Description</Label>
-          <Textarea
-            id="ev-edit-desc"
-            value={form.description}
-            onChange={(e) => setForm({ ...form, description: e.target.value })}
-            required
-            rows={5}
-          />
-        </div>
-        {canManage(user) ? (
-          <fieldset className="space-y-2">
-            <legend className="text-sm font-medium">Audience</legend>
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="radio"
-                name="ev-edit-audience"
-                checked={form.audience === 'GLOBAL'}
-                onChange={() =>
-                  setForm({ ...form, audience: 'GLOBAL', recipientIds: [] })
-                }
-              />
-              Global
-            </label>
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="radio"
-                name="ev-edit-audience"
-                checked={form.audience === 'INVITE_ONLY'}
-                onChange={() => setForm({ ...form, audience: 'INVITE_ONLY' })}
-              />
-              Invite-only
-            </label>
-          </fieldset>
-        ) : null}
-        {canManage(user) && form.audience === 'INVITE_ONLY' ? (
-          <div className="space-y-2">
-            <Label>Invitees</Label>
-            <p className="text-xs text-muted-foreground">
-              You are always included as the creator.
-            </p>
-            <div className="max-h-40 space-y-1 overflow-y-auto rounded-md border p-2">
-              {usersQuery.isLoading ? (
-                <p className="text-sm text-muted-foreground">Loading members…</p>
-              ) : (
-                (usersQuery.data?.items ?? [])
-                  .filter((member) => member.id !== data.createdBy.id)
-                  .map((member) => (
-                    <label
-                      key={member.id}
-                      className="flex items-center gap-2 text-sm"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={form.recipientIds.includes(member.id)}
-                        onChange={() =>
-                          setForm((prev) => ({
-                            ...prev,
-                            recipientIds: prev.recipientIds.includes(member.id)
-                              ? prev.recipientIds.filter((x) => x !== member.id)
-                              : [...prev.recipientIds, member.id],
-                          }))
-                        }
-                      />
-                      {member.fullName}
-                    </label>
-                  ))
-              )}
-            </div>
-          </div>
-        ) : null}
-        <div className="space-y-2">
-          <Label>Cover image</Label>
-          <ImageUpload
-            value={form.coverImageUrl}
-            onChange={(coverImageUrl) => setForm({ ...form, coverImageUrl })}
-            onUploadingChange={setCoverUploading}
-          />
-        </div>
+        <EventFormFields
+          form={form}
+          setForm={setForm}
+          user={user}
+          idPrefix="ev-edit"
+          descriptionRows={5}
+          creatorId={data.createdBy.id}
+          coverUploadingChange={setCoverUploading}
+          inviteesEnabled={canManage(user) && editing}
+        />
         <div className="flex justify-end gap-2">
           <Button
             type="button"

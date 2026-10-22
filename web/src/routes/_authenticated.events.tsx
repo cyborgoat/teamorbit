@@ -2,13 +2,18 @@ import { useAuth } from '@/lib/auth'
 import { canManage, canModerate } from '@/lib/policies'
 import { useResourceList } from '@/hooks/use-resource-list'
 import { ListControls } from '@/components/list-controls'
+import {
+  emptyEventForm,
+  EventFormFields,
+  type EventFormValues,
+} from '@/components/event-form-fields'
 import { queryKeys } from '@/lib/query-keys'
+import { fromLocalInput } from '@/lib/event-datetime'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { CalendarDays, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { ImageUpload } from '@/components/image-upload'
 import { PageHeader } from '@/components/page-header'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -28,8 +33,6 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/components/ui/empty'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import {
   Table,
   TableBody,
@@ -38,28 +41,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Textarea } from '@/components/ui/textarea'
 import { orbit } from '@/lib/api'
 import type { Event } from '@goatcheese/teamorbit-client'
 
 export const Route = createFileRoute('/_authenticated/events')({
   component: EventsPage,
 })
-
-function fromLocalInput(value: string) {
-  return new Date(value).toISOString()
-}
-
-const emptyForm = {
-  title: '',
-  description: '',
-  startAt: '',
-  endAt: '',
-  location: '',
-  coverImageUrl: '',
-  audience: 'GLOBAL' as 'GLOBAL' | 'INVITE_ONLY',
-  recipientIds: [] as string[],
-}
 
 function EventsPage() {
   const { user } = useAuth()
@@ -69,15 +56,7 @@ function EventsPage() {
       orbit.events.list(query),
     )
   const [open, setOpen] = useState(false)
-  const [form, setForm] = useState(emptyForm)
-
-  const usersQuery = useQuery({
-    queryKey: [...queryKeys.users, 'active-picker'],
-    queryFn: () =>
-      orbit.users.list({ page: 1, limit: 100, status: 'ACTIVE' }),
-    // Member directory is admin-only; members publish global events.
-    enabled: canManage(user) && open && form.audience === 'INVITE_ONLY',
-  })
+  const [form, setForm] = useState<EventFormValues>(emptyEventForm)
 
   const create = useMutation({
     mutationFn: () => {
@@ -98,7 +77,7 @@ function EventsPage() {
       })
     },
     onSuccess: () => {
-      setForm(emptyForm)
+      setForm(emptyEventForm())
       setOpen(false)
       qc.invalidateQueries({ queryKey: queryKeys.events })
       toast.success('Event created')
@@ -114,16 +93,6 @@ function EventsPage() {
     },
     onError: (e: Error) => toast.error(e.message),
   })
-
-  const toggleRecipient = (id: string) => {
-    if (id === user?.id) return
-    setForm((prev) => ({
-      ...prev,
-      recipientIds: prev.recipientIds.includes(id)
-        ? prev.recipientIds.filter((x) => x !== id)
-        : [...prev.recipientIds, id],
-    }))
-  }
 
   return (
     <div>
@@ -154,152 +123,14 @@ function EventsPage() {
                       timestamps.
                     </DialogDescription>
                   </DialogHeader>
-                  <div className="space-y-2">
-                    <Label htmlFor="ev-title">Title</Label>
-                    <Input
-                      id="ev-title"
-                      value={form.title}
-                      onChange={(e) =>
-                        setForm({ ...form, title: e.target.value })
-                      }
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="ev-location">Location</Label>
-                    <Input
-                      id="ev-location"
-                      value={form.location}
-                      onChange={(e) =>
-                        setForm({ ...form, location: e.target.value })
-                      }
-                      required
-                    />
-                  </div>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="ev-start">Starts</Label>
-                      <Input
-                        id="ev-start"
-                        type="datetime-local"
-                        value={form.startAt}
-                        onChange={(e) =>
-                          setForm({ ...form, startAt: e.target.value })
-                        }
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="ev-end">Ends</Label>
-                      <Input
-                        id="ev-end"
-                        type="datetime-local"
-                        value={form.endAt}
-                        onChange={(e) =>
-                          setForm({ ...form, endAt: e.target.value })
-                        }
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="ev-desc">Description</Label>
-                    <Textarea
-                      id="ev-desc"
-                      value={form.description}
-                      onChange={(e) =>
-                        setForm({ ...form, description: e.target.value })
-                      }
-                      required
-                    />
-                  </div>
-                  {canManage(user) ? (
-                    <fieldset className="space-y-2">
-                      <legend className="text-sm font-medium">Audience</legend>
-                      <label className="flex items-center gap-2 text-sm">
-                        <input
-                          type="radio"
-                          name="ev-audience"
-                          checked={form.audience === 'GLOBAL'}
-                          onChange={() =>
-                            setForm({
-                              ...form,
-                              audience: 'GLOBAL',
-                              recipientIds: [],
-                            })
-                          }
-                        />
-                        Global
-                      </label>
-                      <label className="flex items-center gap-2 text-sm">
-                        <input
-                          type="radio"
-                          name="ev-audience"
-                          checked={form.audience === 'INVITE_ONLY'}
-                          onChange={() =>
-                            setForm({ ...form, audience: 'INVITE_ONLY' })
-                          }
-                        />
-                        Invite-only
-                      </label>
-                    </fieldset>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">
-                      Events you create are global (visible to everyone).
-                    </p>
-                  )}
-                  {canManage(user) && form.audience === 'INVITE_ONLY' ? (
-                    <div className="space-y-2">
-                      <Label>Invitees</Label>
-                      <p className="text-xs text-muted-foreground">
-                        You are always included as the creator.
-                      </p>
-                      <div className="max-h-40 space-y-1 overflow-y-auto rounded-md border p-2">
-                        {usersQuery.isLoading ? (
-                          <p className="text-sm text-muted-foreground">
-                            Loading members…
-                          </p>
-                        ) : (
-                          (usersQuery.data?.items ?? []).map((member) => {
-                            const isCreator = member.id === user?.id
-                            const checked =
-                              isCreator ||
-                              form.recipientIds.includes(member.id)
-                            return (
-                              <label
-                                key={member.id}
-                                className="flex items-center gap-2 text-sm"
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={checked}
-                                  disabled={isCreator}
-                                  onChange={() => toggleRecipient(member.id)}
-                                />
-                                <span>
-                                  {member.fullName}
-                                  <span className="text-muted-foreground">
-                                    {' '}
-                                    @{member.username}
-                                    {isCreator ? ' (you)' : ''}
-                                  </span>
-                                </span>
-                              </label>
-                            )
-                          })
-                        )}
-                      </div>
-                    </div>
-                  ) : null}
-                  <div className="space-y-2">
-                    <Label>Cover image</Label>
-                    <ImageUpload
-                      value={form.coverImageUrl}
-                      onChange={(url) =>
-                        setForm({ ...form, coverImageUrl: url })
-                      }
-                    />
-                  </div>
+                  <EventFormFields
+                    form={form}
+                    setForm={setForm}
+                    user={user}
+                    idPrefix="ev"
+                    showAudienceHint
+                    inviteesEnabled={canManage(user) && open}
+                  />
                   <DialogFooter>
                     <Button
                       type="button"
@@ -380,7 +211,9 @@ function EventsPage() {
                   </TableCell>
                   <TableCell>
                     <Badge variant="secondary">
-                      {item.audience === 'INVITE_ONLY' ? 'Invite-only' : 'Global'}
+                      {item.audience === 'INVITE_ONLY'
+                        ? 'Invite-only'
+                        : 'Global'}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
