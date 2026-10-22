@@ -43,7 +43,7 @@ Soft delete sets status to `DELETED` rather than removing the row.
 
 ### Announcements
 
-Short team notices (`title`, `description`, author). Creating one emits a notification.
+Short team notices (`title`, `description`, author). Creating one emits a notification. Admins create; authors and admins can edit/delete. Regular members cannot publish announcements.
 
 ### Events
 
@@ -52,17 +52,17 @@ Scheduled items with `startAt`, `endAt`, `location`, optional `coverImageUrl`, a
 | Audience | Visibility | Create notification |
 |----------|------------|---------------------|
 | `GLOBAL` (default) | All authenticated users | Global |
-| `SELECTED` | Invitees only (creator always included) | Directed to invitees |
+| `INVITE_ONLY` | Chosen invitees only (creator always included) | Directed to invitees |
 
-Admins create/update/delete; list and detail respect audience (non-invitees get a 404 for selected events).
+Any signed-in member can create global events; authors and admins can edit/delete. Invite-only events are Admin+ in the console (member directory is admin-gated). List and detail respect audience (non-invitees get a 404 for invite-only events).
 
 ### News (markdown)
 
-Articles with markdown `content`, `tags[]`, optional cover, and a `viewCount` incremented on each detail GET. Creating one emits a notification.
+Articles with markdown `content`, `tags[]`, optional cover, and a `viewCount` incremented on each detail GET. Admins create; authors and admins can edit/delete. Creating one emits a notification.
 
 ### Blog posts (markdown)
 
-Same content model as news, kept as a separate resource for clearer product and API testing.
+Same content model as news. Any signed-in member can publish; authors and admins can edit/delete.
 
 ### Forum
 
@@ -95,7 +95,7 @@ Authenticated image upload; returns an absolute public URL like `https://orbit.e
 ### Notifications
 
 - **Global** (`audience: GLOBAL`): announcements, global events, news, blog posts, forum posts — visible to all users
-- **Directed** (`audience: DIRECTED`): selected-event creates (invitees); comments on any content type — top-level notifies the content author; replies notify the parent comment author (self-notifications are skipped)
+- **Directed** (`audience: DIRECTED`): invite-only event creates (invitees); comments on any content type — top-level notifies the content author; replies notify the parent comment author (self-notifications are skipped)
 - Live toast via Socket.io `notification:new` (global to all authenticated sockets; directed to recipient user rooms)
 - List (optional `status=unread|read|dismissed`), mark-read, mark-unread, mark-all-read, per-user dismiss, and restore over REST (dismiss hides for one user only)
 
@@ -131,18 +131,18 @@ Interactive OpenAPI docs: http://localhost:3000/docs
 | `/register` | Self-signup with optional email (PENDING) |
 | `/` | Home shortcuts (authenticated) |
 | `/announcements` | List + create dialog |
-| `/announcements/$id` | Detail + comments |
-| `/events` | List + create (audience, invitees, datetime-local, cover) |
-| `/events/$id` | Detail + audience/invitees + comments |
+| `/announcements/$id` | Detail, author/admin edit, comments |
+| `/events` | List + create (global / invite-only, datetime-local, cover) |
+| `/events/$id` | Detail, author/admin edit, audience/invitees, comments |
 | `/news` | News list and permitted deletion |
 | `/news/new` | Dedicated news creation page (Admin+) |
-| `/news/$id` | Detail + comments |
+| `/news/$id` | Detail, author/admin edit, comments |
 | `/blog` | Blog list and permitted deletion |
-| `/blog/new` | Dedicated blog creation page (Admin+) |
-| `/blog/$id` | Detail + comments |
+| `/blog/new` | Dedicated blog creation page (any member) |
+| `/blog/$id` | Detail, author/admin edit, comments |
 | `/forum` | Forum list |
 | `/forum/new` | Dedicated forum creation page |
-| `/forum/$postId` | Post detail, post votes, comments |
+| `/forum/$postId` | Post detail, votes, author/admin edit, comments |
 | `/users` | Create user (Admin+), status and permitted role changes |
 | `/settings` | Self-service profile + change password |
 | `/notifications` | Unread / read / dismissed groups + mark read/unread, dismiss, restore, mark all read |

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ArticleService } from '../common/article-service';
+import type { Actor } from '../common/policies';
 import { CreateNewsDto, UpdateNewsDto } from './dto/news.dto';
 
 @Injectable()
@@ -18,11 +19,11 @@ export class NewsService {
     return this.articles.create('news', dto, authorId);
   }
 
-  update(id: string, dto: UpdateNewsDto) {
-    return this.articles.update('news', id, dto);
+  update(id: string, dto: UpdateNewsDto, actor: Actor) {
+    return this.articles.update('news', id, dto, actor);
   }
 
-  remove(id: string) {
-    return this.articles.remove('news', id);
+  remove(id: string, actor: Actor) {
+    return this.articles.remove('news', id, actor);
   }
 }

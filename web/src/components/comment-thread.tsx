@@ -67,6 +67,15 @@ export function CommentThread({
     },
     onError,
   })
+  const updateComment = useMutation({
+    mutationFn: ({ id, content }: { id: string; content: string }) =>
+      orbit.comments.update(id, { content }),
+    onSuccess: () => {
+      invalidate()
+      toast.success('Comment updated')
+    },
+    onError,
+  })
 
   const items = data?.items ?? []
 
@@ -99,11 +108,13 @@ export function CommentThread({
             key={comment.id}
             comment={comment}
             actions={{
-              pending: addComment.isPending,
+              pending: addComment.isPending || updateComment.isPending,
               voting: voteComment.isPending,
               canModerate: (id) => canModerate(user, id),
               onVote: (id, value) => voteComment.mutate({ id, value }),
               onRemove: (id) => removeComment.mutate(id),
+              onUpdate: (id, content) =>
+                updateComment.mutateAsync({ id, content }),
             }}
             onReply={(content) =>
               addComment.mutateAsync({ content, parentId: comment.id })

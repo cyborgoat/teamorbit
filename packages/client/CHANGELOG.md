@@ -7,7 +7,7 @@
 
 ## 0.2.1 — 2026-10-21
 
-- Events support `audience` (`GLOBAL` | `SELECTED`) and `recipientIds` / `recipients` for invite-only visibility and directed create notifications.
+- Events support `audience` (`GLOBAL` | `INVITE_ONLY`) and `recipientIds` / `recipients` for invitees and directed create notifications.
 
 ## 0.2.0 — 2026-10-21
 

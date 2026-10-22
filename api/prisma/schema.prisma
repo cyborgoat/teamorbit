@@ -49,7 +49,7 @@ model User {
 
 enum EventAudience {
   GLOBAL
-  SELECTED
+  INVITE_ONLY
 }
 
 model Event {

@@ -3214,7 +3214,7 @@
           "audience": {
             "enum": [
               "GLOBAL",
-              "SELECTED"
+              "INVITE_ONLY"
             ],
             "type": "string"
           },
@@ -3233,6 +3233,7 @@
             "$ref": "#/components/schemas/UserSummaryDto"
           },
           "recipients": {
+            "description": "Invitees when audience is INVITE_ONLY; empty for GLOBAL",
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/UserSummaryDto"
@@ -3307,12 +3308,14 @@
           "audience": {
             "enum": [
               "GLOBAL",
-              "SELECTED"
+              "INVITE_ONLY"
             ],
             "type": "string",
-            "default": "GLOBAL"
+            "default": "GLOBAL",
+            "description": "GLOBAL (all members) or INVITE_ONLY (recipientIds)"
           },
           "recipientIds": {
+            "description": "Invitee user ids when audience is INVITE_ONLY (creator always included)",
             "type": "array",
             "items": {
               "type": "string",
@@ -3354,12 +3357,14 @@
           "audience": {
             "enum": [
               "GLOBAL",
-              "SELECTED"
+              "INVITE_ONLY"
             ],
             "type": "string",
-            "default": "GLOBAL"
+            "default": "GLOBAL",
+            "description": "GLOBAL (all members) or INVITE_ONLY (recipientIds)"
           },
           "recipientIds": {
+            "description": "Invitee user ids when audience is INVITE_ONLY (creator always included)",
             "type": "array",
             "items": {
               "type": "string",

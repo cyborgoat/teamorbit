@@ -80,8 +80,10 @@ Members can add or remove email from Settings; username login remains available.
 
 - **Users:** admins can promote USER to ADMIN; superusers can assign every role.
   Open web sessions refresh permissions within 30 seconds while active or on tab focus.
-- **Editors:** `/news/new`, `/blog/new`, and `/forum/new` provide dedicated
+- **Editors:** `/news/new` (Admin+), `/blog/new`, and `/forum/new` provide dedicated
   creation pages with an MDXEditor toolbar, Markdown source mode, and preview.
+  Any member can publish blog posts and global events; news and announcements
+  stay Admin+.
 - **Images:** paste image files into rich text mode or use the image toolbar
   button. Comments and replies support the same editor inline. Each upload is
   limited to 5 MB; the API stores files on disk and URLs in Markdown.

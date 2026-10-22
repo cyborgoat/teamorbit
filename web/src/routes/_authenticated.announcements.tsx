@@ -1,5 +1,5 @@
 import { useAuth } from '@/lib/auth'
-import { canManage } from '@/lib/policies'
+import { canManage, canModerate } from '@/lib/policies'
 import { useResourceList } from '@/hooks/use-resource-list'
 import { ListControls } from '@/components/list-controls'
 import { queryKeys } from '@/lib/query-keys'
@@ -195,7 +195,7 @@ function AnnouncementsPage() {
                     {new Date(item.createdAt).toLocaleString()}
                   </TableCell>
                   <TableCell>
-                    {canManage(user) && (
+                    {canModerate(user, item.author.id) && (
                       <Button
                         variant="ghost"
                         size="icon-sm"

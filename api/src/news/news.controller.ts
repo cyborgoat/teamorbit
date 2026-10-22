@@ -59,16 +59,21 @@ export class NewsController {
   }
 
   @Patch(':id')
-  @Roles(Role.ADMIN, Role.SUPERUSER)
   @ApiOkResponse({ type: NewsDto })
-  update(@Param('id') id: string, @Body() dto: UpdateNewsDto) {
-    return this.news.update(id, dto);
+  update(
+    @Param('id') id: string,
+    @Body() dto: UpdateNewsDto,
+    @CurrentUser() user: { id: string; role: Role },
+  ) {
+    return this.news.update(id, dto, user);
   }
 
   @Delete(':id')
-  @Roles(Role.ADMIN, Role.SUPERUSER)
   @ApiOkResponse({ type: OkDto })
-  remove(@Param('id') id: string) {
-    return this.news.remove(id);
+  remove(
+    @Param('id') id: string,
+    @CurrentUser() user: { id: string; role: Role },
+  ) {
+    return this.news.remove(id, user);
   }
 }

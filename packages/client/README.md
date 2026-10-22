@@ -162,8 +162,8 @@ Network failures still reject the promise. Use this when you want to branch on e
 
 | Role | Can do |
 | --- | --- |
-| `USER` | Read events, announcements, news, blog posts, forum and notifications; post, comment and vote in the forum; edit or delete their own forum posts and comments; manage their own profile. |
-| `ADMIN` | Everything a `USER` can, plus manage users, promote USER to ADMIN, create/update/delete events, announcements, news and blog posts, and moderate the forum. Cannot change existing ADMIN or SUPERUSER roles. |
+| `USER` | Read team content and notifications; publish blog posts and global events; post, comment and vote in the forum; edit or delete their own content; manage their own profile. Cannot create news or announcements. |
+| `ADMIN` | Everything a `USER` can, plus manage users, promote USER to ADMIN, create news and announcements, create invite-only events, and moderate any content. Cannot change existing ADMIN or SUPERUSER roles. |
 | `SUPERUSER` | Everything an `ADMIN` can, plus create and modify superusers. |
 
 New accounts from `POST /api/auth/register` start as `PENDING` and **cannot log in** until an

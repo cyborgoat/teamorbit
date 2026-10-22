@@ -49,6 +49,15 @@ function ForumPostPage() {
     },
     onError,
   })
+  const updatePost = useMutation({
+    mutationFn: (body: { title: string; content: string }) =>
+      orbit.forum.updatePost(postId, body),
+    onSuccess: () => {
+      invalidate()
+      toast.success('Post updated')
+    },
+    onError,
+  })
   if (isLoading)
     return <p className="text-sm text-muted-foreground">Loading…</p>
   if (error)
@@ -63,7 +72,8 @@ function ForumPostPage() {
         pending={votePost.isPending}
         onVote={(value) => votePost.mutate(value)}
         onDelete={() => removePost.mutate()}
-        canDelete={canModerate(user, post.author.id)}
+        onSave={(body) => updatePost.mutateAsync(body)}
+        canModerate={canModerate(user, post.author.id)}
       />
       <CommentThread resourceType="forum" resourceId={postId} />
     </div>

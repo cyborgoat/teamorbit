@@ -62,16 +62,21 @@ export class AnnouncementsController {
   }
 
   @Patch(':id')
-  @Roles(Role.ADMIN, Role.SUPERUSER)
   @ApiOkResponse({ type: AnnouncementDto })
-  update(@Param('id') id: string, @Body() dto: UpdateAnnouncementDto) {
-    return this.announcements.update(id, dto);
+  update(
+    @Param('id') id: string,
+    @Body() dto: UpdateAnnouncementDto,
+    @CurrentUser() user: { id: string; role: Role },
+  ) {
+    return this.announcements.update(id, dto, user);
   }
 
   @Delete(':id')
-  @Roles(Role.ADMIN, Role.SUPERUSER)
   @ApiOkResponse({ type: OkDto })
-  remove(@Param('id') id: string) {
-    return this.announcements.remove(id);
+  remove(
+    @Param('id') id: string,
+    @CurrentUser() user: { id: string; role: Role },
+  ) {
+    return this.announcements.remove(id, user);
   }
 }

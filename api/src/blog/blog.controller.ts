@@ -19,9 +19,7 @@ import {
 import { Role } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { Roles } from '../common/decorators/roles.decorator';
 import { ArticleQueryDto } from '../common/dto/pagination.dto';
-import { RolesGuard } from '../common/guards/roles.guard';
 import { BlogService } from './blog.service';
 import {
   BlogPostDto,
@@ -34,7 +32,7 @@ import { OkDto, ErrorDto } from '../common/dto/response.dto';
 @ApiDefaultResponse({ type: ErrorDto })
 @ApiTags('blog-posts')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard)
 @Controller('blog-posts')
 export class BlogController {
   constructor(private blog: BlogService) {}
@@ -52,23 +50,27 @@ export class BlogController {
   }
 
   @Post()
-  @Roles(Role.ADMIN, Role.SUPERUSER)
   @ApiCreatedResponse({ type: BlogPostDto })
   create(@Body() dto: CreateBlogPostDto, @CurrentUser() user: { id: string }) {
     return this.blog.create(dto, user.id);
   }
 
   @Patch(':id')
-  @Roles(Role.ADMIN, Role.SUPERUSER)
   @ApiOkResponse({ type: BlogPostDto })
-  update(@Param('id') id: string, @Body() dto: UpdateBlogPostDto) {
-    return this.blog.update(id, dto);
+  update(
+    @Param('id') id: string,
+    @Body() dto: UpdateBlogPostDto,
+    @CurrentUser() user: { id: string; role: Role },
+  ) {
+    return this.blog.update(id, dto, user);
   }
 
   @Delete(':id')
-  @Roles(Role.ADMIN, Role.SUPERUSER)
   @ApiOkResponse({ type: OkDto })
-  remove(@Param('id') id: string) {
-    return this.blog.remove(id);
+  remove(
+    @Param('id') id: string,
+    @CurrentUser() user: { id: string; role: Role },
+  ) {
+    return this.blog.remove(id, user);
   }
 }

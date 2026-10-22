@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ArticleService } from '../common/article-service';
+import type { Actor } from '../common/policies';
 import { CreateBlogPostDto, UpdateBlogPostDto } from './dto/blog.dto';
 
 @Injectable()
@@ -18,11 +19,11 @@ export class BlogService {
     return this.articles.create('blog', dto, authorId);
   }
 
-  update(id: string, dto: UpdateBlogPostDto) {
-    return this.articles.update('blog', id, dto);
+  update(id: string, dto: UpdateBlogPostDto, actor: Actor) {
+    return this.articles.update('blog', id, dto, actor);
   }
 
-  remove(id: string) {
-    return this.articles.remove('blog', id);
+  remove(id: string, actor: Actor) {
+    return this.articles.remove('blog', id, actor);
   }
 }

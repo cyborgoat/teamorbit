@@ -39,12 +39,20 @@ export class CreateEventDto {
   @MediaInput()
   coverImageUrl?: string | null;
 
-  @ApiPropertyOptional({ enum: EventAudience, default: EventAudience.GLOBAL })
+  @ApiPropertyOptional({
+    enum: EventAudience,
+    default: EventAudience.GLOBAL,
+    description: 'GLOBAL (all members) or INVITE_ONLY (recipientIds)',
+  })
   @IsOptional()
   @IsEnum(EventAudience)
   audience?: EventAudience;
 
-  @ApiPropertyOptional({ type: [String] })
+  @ApiPropertyOptional({
+    type: [String],
+    description:
+      'Invitee user ids when audience is INVITE_ONLY (creator always included)',
+  })
   @IsOptional()
   @IsArray()
   @IsUUID('4', { each: true })
@@ -92,7 +100,10 @@ export class EventDto extends EventRecordDto {
   @ApiProperty({ type: UserSummaryDto })
   createdBy: UserSummaryDto;
 
-  @ApiProperty({ type: [UserSummaryDto] })
+  @ApiProperty({
+    type: [UserSummaryDto],
+    description: 'Invitees when audience is INVITE_ONLY; empty for GLOBAL',
+  })
   recipients: UserSummaryDto[];
 }
 

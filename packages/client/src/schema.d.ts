@@ -669,13 +669,14 @@ export interface components {
             location: string;
             coverImageUrl: string | null;
             /** @enum {string} */
-            audience: "GLOBAL" | "SELECTED";
+            audience: "GLOBAL" | "INVITE_ONLY";
             createdById: string;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
             createdBy: components["schemas"]["UserSummaryDto"];
+            /** @description Invitees when audience is INVITE_ONLY; empty for GLOBAL */
             recipients: components["schemas"]["UserSummaryDto"][];
         };
         PaginatedEventsDto: {
@@ -692,10 +693,12 @@ export interface components {
             location: string;
             coverImageUrl?: string | null;
             /**
+             * @description GLOBAL (all members) or INVITE_ONLY (recipientIds)
              * @default GLOBAL
              * @enum {string}
              */
-            audience: "GLOBAL" | "SELECTED";
+            audience: "GLOBAL" | "INVITE_ONLY";
+            /** @description Invitee user ids when audience is INVITE_ONLY (creator always included) */
             recipientIds?: string[];
         };
         UpdateEventDto: {
@@ -706,10 +709,12 @@ export interface components {
             location?: string;
             coverImageUrl?: string | null;
             /**
+             * @description GLOBAL (all members) or INVITE_ONLY (recipientIds)
              * @default GLOBAL
              * @enum {string}
              */
-            audience: "GLOBAL" | "SELECTED";
+            audience: "GLOBAL" | "INVITE_ONLY";
+            /** @description Invitee user ids when audience is INVITE_ONLY (creator always included) */
             recipientIds?: string[];
         };
         NewsDto: {

@@ -1,4 +1,4 @@
-import { canManage } from '@/lib/policies'
+import { canManage, canModerate } from '@/lib/policies'
 import { useListPage } from '@/hooks/use-list-page'
 import { ListControls } from '@/components/list-controls'
 import { queryKeys } from '@/lib/query-keys'
@@ -57,7 +57,7 @@ export function ArticleList({ kind }: { kind: 'news' | 'blog' }) {
         title={kind === 'blog' ? 'Blog' : 'News'}
         description="Read and manage team articles."
         actions={
-          canManage(user) ? (
+          kind === 'blog' || canManage(user) ? (
             <Button asChild>
               <Link to={kind === 'blog' ? '/blog/new' : '/news/new'}>
                 <Plus data-icon="inline-start" />
@@ -130,7 +130,7 @@ export function ArticleList({ kind }: { kind: 'news' | 'blog' }) {
                     {new Date(item.createdAt).toLocaleDateString()}
                   </TableCell>
                   <TableCell>
-                    {canManage(user) && (
+                    {canModerate(user, item.author.id) && (
                       <Button
                         variant="ghost"
                         size="icon-sm"

@@ -30,7 +30,9 @@ export function ContentCreatePage({
   const [uploading, setUploading] = useState(false)
   const [coverUploading, setCoverUploading] = useState(false)
   const isForum = kind === 'forum'
-  const allowed = !!user && (isForum || canManage(user))
+  const isBlog = kind === 'blog'
+  // News stays Admin+; blog and forum are open to any signed-in member.
+  const allowed = !!user && (isForum || isBlog || canManage(user))
   const list = `/${kind}` as '/news' | '/blog' | '/forum'
   const create = useMutation({
     mutationFn: async () =>

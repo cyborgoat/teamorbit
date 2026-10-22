@@ -1,5 +1,5 @@
 import { useAuth } from '@/lib/auth'
-import { canManage } from '@/lib/policies'
+import { canManage, canModerate } from '@/lib/policies'
 import { useResourceList } from '@/hooks/use-resource-list'
 import { ListControls } from '@/components/list-controls'
 import { queryKeys } from '@/lib/query-keys'
@@ -57,7 +57,7 @@ const emptyForm = {
   endAt: '',
   location: '',
   coverImageUrl: '',
-  audience: 'GLOBAL' as 'GLOBAL' | 'SELECTED',
+  audience: 'GLOBAL' as 'GLOBAL' | 'INVITE_ONLY',
   recipientIds: [] as string[],
 }
 
@@ -75,22 +75,28 @@ function EventsPage() {
     queryKey: [...queryKeys.users, 'active-picker'],
     queryFn: () =>
       orbit.users.list({ page: 1, limit: 100, status: 'ACTIVE' }),
-    enabled: canManage(user) && open && form.audience === 'SELECTED',
+    // Member directory is admin-only; members publish global events.
+    enabled: canManage(user) && open && form.audience === 'INVITE_ONLY',
   })
 
   const create = useMutation({
-    mutationFn: () =>
-      orbit.events.create({
+    mutationFn: () => {
+      const audience =
+        canManage(user) && form.audience === 'INVITE_ONLY'
+          ? 'INVITE_ONLY'
+          : 'GLOBAL'
+      return orbit.events.create({
         title: form.title,
         description: form.description,
         location: form.location,
         startAt: fromLocalInput(form.startAt),
         endAt: fromLocalInput(form.endAt),
         coverImageUrl: form.coverImageUrl || undefined,
-        audience: form.audience,
+        audience,
         recipientIds:
-          form.audience === 'SELECTED' ? form.recipientIds : undefined,
-      }),
+          audience === 'INVITE_ONLY' ? form.recipientIds : undefined,
+      })
+    },
     onSuccess: () => {
       setForm(emptyForm)
       setOpen(false)
@@ -125,7 +131,7 @@ function EventsPage() {
         title="Events"
         description="Team schedule with local date/time pickers and optional cover images."
         actions={
-          canManage(user) && (
+          user && (
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
                 <Button>
@@ -207,36 +213,42 @@ function EventsPage() {
                       required
                     />
                   </div>
-                  <fieldset className="space-y-2">
-                    <legend className="text-sm font-medium">Audience</legend>
-                    <label className="flex items-center gap-2 text-sm">
-                      <input
-                        type="radio"
-                        name="ev-audience"
-                        checked={form.audience === 'GLOBAL'}
-                        onChange={() =>
-                          setForm({
-                            ...form,
-                            audience: 'GLOBAL',
-                            recipientIds: [],
-                          })
-                        }
-                      />
-                      Entire team
-                    </label>
-                    <label className="flex items-center gap-2 text-sm">
-                      <input
-                        type="radio"
-                        name="ev-audience"
-                        checked={form.audience === 'SELECTED'}
-                        onChange={() =>
-                          setForm({ ...form, audience: 'SELECTED' })
-                        }
-                      />
-                      Selected users
-                    </label>
-                  </fieldset>
-                  {form.audience === 'SELECTED' ? (
+                  {canManage(user) ? (
+                    <fieldset className="space-y-2">
+                      <legend className="text-sm font-medium">Audience</legend>
+                      <label className="flex items-center gap-2 text-sm">
+                        <input
+                          type="radio"
+                          name="ev-audience"
+                          checked={form.audience === 'GLOBAL'}
+                          onChange={() =>
+                            setForm({
+                              ...form,
+                              audience: 'GLOBAL',
+                              recipientIds: [],
+                            })
+                          }
+                        />
+                        Global
+                      </label>
+                      <label className="flex items-center gap-2 text-sm">
+                        <input
+                          type="radio"
+                          name="ev-audience"
+                          checked={form.audience === 'INVITE_ONLY'}
+                          onChange={() =>
+                            setForm({ ...form, audience: 'INVITE_ONLY' })
+                          }
+                        />
+                        Invite-only
+                      </label>
+                    </fieldset>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      Events you create are global (visible to everyone).
+                    </p>
+                  )}
+                  {canManage(user) && form.audience === 'INVITE_ONLY' ? (
                     <div className="space-y-2">
                       <Label>Invitees</Label>
                       <p className="text-xs text-muted-foreground">
@@ -368,7 +380,7 @@ function EventsPage() {
                   </TableCell>
                   <TableCell>
                     <Badge variant="secondary">
-                      {item.audience === 'SELECTED' ? 'Invitees' : 'Team'}
+                      {item.audience === 'INVITE_ONLY' ? 'Invite-only' : 'Global'}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
@@ -379,7 +391,7 @@ function EventsPage() {
                   </TableCell>
                   <TableCell>{item.location}</TableCell>
                   <TableCell>
-                    {canManage(user) && (
+                    {canModerate(user, item.createdBy.id) && (
                       <Button
                         variant="ghost"
                         size="icon-sm"

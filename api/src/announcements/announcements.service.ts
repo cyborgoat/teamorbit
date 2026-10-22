@@ -1,5 +1,6 @@
 import { globalCreatedNotification } from '../common/content-crud';
 import { authorSelect, presentContent } from '../common/media';
+import { assertCanModerate, type Actor } from '../common/policies';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { paginate } from '../common/utils';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -76,8 +77,13 @@ export class AnnouncementsService {
     return presentContent(item);
   }
 
-  async update(id: string, dto: UpdateAnnouncementDto) {
-    await this.findOne(id);
+  async update(id: string, dto: UpdateAnnouncementDto, actor: Actor) {
+    const existing = await this.prisma.announcement.findUnique({
+      where: { id },
+      select: { authorId: true },
+    });
+    if (!existing) throw new NotFoundException('Announcement not found');
+    assertCanModerate(actor, existing.authorId);
     return this.prisma
       .mediaWrite((tx) =>
         tx.announcement.update({
@@ -93,8 +99,13 @@ export class AnnouncementsService {
       .then(presentContent);
   }
 
-  async remove(id: string) {
-    await this.findOne(id);
+  async remove(id: string, actor: Actor) {
+    const existing = await this.prisma.announcement.findUnique({
+      where: { id },
+      select: { authorId: true },
+    });
+    if (!existing) throw new NotFoundException('Announcement not found');
+    assertCanModerate(actor, existing.authorId);
     await this.prisma.$transaction([
       this.prisma.comment.deleteMany({
         where: { resourceType: 'announcement', resourceId: id },

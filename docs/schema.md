@@ -16,7 +16,7 @@ Source of truth: [`api/prisma/schema.prisma`](../api/prisma/schema.prisma). Data
 | `Role` | `SUPERUSER`, `ADMIN`, `USER` |
 | `UserStatus` | `ACTIVE`, `INACTIVE`, `PENDING`, `SUSPENDED`, `DELETED` |
 | `NotificationAudience` | `GLOBAL`, `DIRECTED` |
-| `EventAudience` | `GLOBAL`, `SELECTED` |
+| `EventAudience` | `GLOBAL`, `INVITE_ONLY` |
 
 ## Entity relationships
 
@@ -45,7 +45,7 @@ erDiagram
   Notification ||--o{ NotificationDismissal : "hidden for"
 ```
 
-`Notification` and `Comment` point at source content loosely through `resourceType` + `resourceId` (no foreign key). `GLOBAL` notifications have no recipient rows; `DIRECTED` ones list intended users in `NotificationRecipient`. Per-user dismissals hide a notification from one inbox only. `SELECTED` events list invitees in `EventRecipient` (creator always included); `GLOBAL` events have no recipient rows.
+`Notification` and `Comment` point at source content loosely through `resourceType` + `resourceId` (no foreign key). `GLOBAL` notifications have no recipient rows; `DIRECTED` ones list intended users in `NotificationRecipient`. Per-user dismissals hide a notification from one inbox only. `INVITE_ONLY` events list invitees in `EventRecipient` (creator always included); `GLOBAL` events have no recipient rows.
 
 ## Models
 
@@ -75,7 +75,7 @@ Username is required and is the default login identifier.
 | `title`, `description`, `location` | String | |
 | `startAt`, `endAt` | DateTime | |
 | `coverImageUrl` | String? | |
-| `audience` | EventAudience | `GLOBAL` (default) or `SELECTED` |
+| `audience` | EventAudience | `GLOBAL` (default) or `INVITE_ONLY` |
 | `createdById` | String | FK → `User.id` |
 | `createdAt`, `updatedAt` | DateTime | |
 
@@ -88,7 +88,7 @@ Username is required and is the default login identifier.
 | `userId` | String | FK → `User.id` |
 | | | Unique on `(eventId, userId)` |
 
-Used only when `Event.audience` is `SELECTED`. Visibility and create notifications are limited to these users (creator always present).
+Used only when `Event.audience` is `INVITE_ONLY`. Visibility and create notifications are limited to these users (creator always present).
 
 ### Announcement
 

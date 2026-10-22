@@ -279,7 +279,7 @@ export async function seedDatabase(
               data: {
                 id,
                 ...data,
-                audience: selected ? 'SELECTED' : 'GLOBAL',
+                audience: selected ? 'INVITE_ONLY' : 'GLOBAL',
                 createdById,
                 createdAt: date(-28 + index),
                 startAt: date(day),

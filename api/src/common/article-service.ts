@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { paginate } from './utils';
 import { authorSelect, presentContent } from './media';
+import { assertCanModerate, type Actor } from './policies';
 import { tagWrite } from './tags';
 import { globalCreatedNotification } from './content-crud';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -95,20 +96,6 @@ export class ArticleService {
     };
   }
 
-  private async assertExists(kind: ArticleKind, id: string) {
-    const found =
-      kind === 'news'
-        ? await this.prisma.news.findUnique({
-            where: { id },
-            select: { id: true },
-          })
-        : await this.prisma.blogPost.findUnique({
-            where: { id },
-            select: { id: true },
-          });
-    if (!found) throw new NotFoundException(config[kind].notFound);
-  }
-
   async findOne(kind: ArticleKind, id: string) {
     const include = {
       tags: true,
@@ -183,8 +170,20 @@ export class ArticleService {
       tags?: string[];
       coverImageUrl?: string | null;
     },
+    actor: Actor,
   ) {
-    await this.assertExists(kind, id);
+    const existing =
+      kind === 'news'
+        ? await this.prisma.news.findUnique({
+            where: { id },
+            select: { authorId: true },
+          })
+        : await this.prisma.blogPost.findUnique({
+            where: { id },
+            select: { authorId: true },
+          });
+    if (!existing) throw new NotFoundException(config[kind].notFound);
+    assertCanModerate(actor, existing.authorId);
     const data = {
       title: dto.title,
       content: dto.content,
@@ -208,8 +207,19 @@ export class ArticleService {
     return this.map(item);
   }
 
-  async remove(kind: ArticleKind, id: string) {
-    await this.assertExists(kind, id);
+  async remove(kind: ArticleKind, id: string, actor: Actor) {
+    const existing =
+      kind === 'news'
+        ? await this.prisma.news.findUnique({
+            where: { id },
+            select: { authorId: true },
+          })
+        : await this.prisma.blogPost.findUnique({
+            where: { id },
+            select: { authorId: true },
+          });
+    if (!existing) throw new NotFoundException(config[kind].notFound);
+    assertCanModerate(actor, existing.authorId);
     if (kind === 'news') {
       await this.prisma.$transaction([
         this.prisma.comment.deleteMany({

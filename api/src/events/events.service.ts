@@ -2,6 +2,7 @@ import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { EventAudience, NotificationAudience, Prisma } from '@prisma/client';
 import { globalCreatedNotification } from '../common/content-crud';
 import { authorSelect, presentContent, presentUser } from '../common/media';
+import { assertCanModerate, type Actor } from '../common/policies';
 import { Injectable } from '@nestjs/common';
 import { paginate } from '../common/utils';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -39,7 +40,7 @@ export class EventsService {
     return {
       ...rest,
       recipients:
-        item.audience === EventAudience.SELECTED
+        item.audience === EventAudience.INVITE_ONLY
           ? recipients.map((row) => presentUser(row.user))
           : [],
     };
@@ -114,7 +115,7 @@ export class EventsService {
     this.validateDates(dto.startAt, dto.endAt);
     const audience = dto.audience ?? EventAudience.GLOBAL;
     const recipientIds =
-      audience === EventAudience.SELECTED
+      audience === EventAudience.INVITE_ONLY
         ? await this.resolveRecipientIds(dto.recipientIds, createdById)
         : [];
 
@@ -130,7 +131,7 @@ export class EventsService {
             coverImageUrl: dto.coverImageUrl,
             audience,
             createdById,
-            ...(audience === EventAudience.SELECTED
+            ...(audience === EventAudience.INVITE_ONLY
               ? {
                   recipients: {
                     create: recipientIds.map((userId) => ({ userId })),
@@ -162,8 +163,14 @@ export class EventsService {
     return this.presentEvent(item);
   }
 
-  async update(id: string, dto: UpdateEventDto, userId: string) {
-    const existing = await this.findOne(id, userId);
+  async update(id: string, dto: UpdateEventDto, actor: Actor) {
+    const existingRow = await this.prisma.event.findUnique({
+      where: { id },
+      include: eventInclude,
+    });
+    if (!existingRow) throw new NotFoundException('Event not found');
+    assertCanModerate(actor, existingRow.createdById);
+    const existing = this.presentEvent(existingRow);
     this.validateDates(
       dto.startAt ?? existing.startAt,
       dto.endAt ?? existing.endAt,
@@ -175,7 +182,7 @@ export class EventsService {
     let recipientIds: string[] | undefined;
     if (touchingAudience) {
       recipientIds =
-        audience === EventAudience.SELECTED
+        audience === EventAudience.INVITE_ONLY
           ? await this.resolveRecipientIds(
               dto.recipientIds ?? existing.recipients.map((r) => r.id),
               existing.createdById,
@@ -187,7 +194,7 @@ export class EventsService {
     const item = await this.prisma.mediaWrite(async (tx) => {
       if (touchingAudience) {
         await tx.eventRecipient.deleteMany({ where: { eventId: id } });
-        if (audience === EventAudience.SELECTED && recipientIds?.length) {
+        if (audience === EventAudience.INVITE_ONLY && recipientIds?.length) {
           await tx.eventRecipient.createMany({
             data: recipientIds.map((recipientId) => ({
               eventId: id,
@@ -210,8 +217,13 @@ export class EventsService {
     return this.presentEvent(item);
   }
 
-  async remove(id: string, userId: string) {
-    await this.findOne(id, userId);
+  async remove(id: string, actor: Actor) {
+    const existing = await this.prisma.event.findUnique({
+      where: { id },
+      select: { createdById: true },
+    });
+    if (!existing) throw new NotFoundException('Event not found');
+    assertCanModerate(actor, existing.createdById);
     await this.prisma.$transaction([
       this.prisma.comment.deleteMany({
         where: { resourceType: 'event', resourceId: id },

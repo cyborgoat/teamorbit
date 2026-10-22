@@ -19,9 +19,7 @@ import {
 import { Role } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { Roles } from '../common/decorators/roles.decorator';
 import { PaginationQueryDto } from '../common/dto/pagination.dto';
-import { RolesGuard } from '../common/guards/roles.guard';
 import {
   CreateEventDto,
   EventDto,
@@ -34,7 +32,7 @@ import { OkDto, ErrorDto } from '../common/dto/response.dto';
 @ApiDefaultResponse({ type: ErrorDto })
 @ApiTags('events')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard)
 @Controller('events')
 export class EventsController {
   constructor(private events: EventsService) {}
@@ -55,27 +53,27 @@ export class EventsController {
   }
 
   @Post()
-  @Roles(Role.ADMIN, Role.SUPERUSER)
   @ApiCreatedResponse({ type: EventDto })
   create(@Body() dto: CreateEventDto, @CurrentUser() user: { id: string }) {
     return this.events.create(dto, user.id);
   }
 
   @Patch(':id')
-  @Roles(Role.ADMIN, Role.SUPERUSER)
   @ApiOkResponse({ type: EventDto })
   update(
     @Param('id') id: string,
     @Body() dto: UpdateEventDto,
-    @CurrentUser() user: { id: string },
+    @CurrentUser() user: { id: string; role: Role },
   ) {
-    return this.events.update(id, dto, user.id);
+    return this.events.update(id, dto, user);
   }
 
   @Delete(':id')
-  @Roles(Role.ADMIN, Role.SUPERUSER)
   @ApiOkResponse({ type: OkDto })
-  remove(@Param('id') id: string, @CurrentUser() user: { id: string }) {
-    return this.events.remove(id, user.id);
+  remove(
+    @Param('id') id: string,
+    @CurrentUser() user: { id: string; role: Role },
+  ) {
+    return this.events.remove(id, user);
   }
 }

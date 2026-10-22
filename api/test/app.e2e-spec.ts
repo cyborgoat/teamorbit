@@ -501,7 +501,7 @@ describe('App (e2e)', () => {
       .expect(400);
   });
 
-  it('scopes selected events to invitees and directs create notifications', async () => {
+  it('scopes invite-only events to invitees and directs create notifications', async () => {
     const admin = await prisma.user.findUniqueOrThrow({
       where: { username: adminUsername },
     });
@@ -547,7 +547,7 @@ describe('App (e2e)', () => {
         location: 'Room B',
         startAt: '2026-12-01T10:00:00Z',
         endAt: '2026-12-01T11:00:00Z',
-        audience: 'SELECTED',
+        audience: 'INVITE_ONLY',
         recipientIds: [invitee.id],
       })
       .expect(201);
@@ -556,7 +556,7 @@ describe('App (e2e)', () => {
       audience: string;
       recipients: { id: string }[];
     };
-    expect(body.audience).toBe('SELECTED');
+    expect(body.audience).toBe('INVITE_ONLY');
     expect(body.recipients.map((r) => r.id).sort()).toEqual(
       [admin.id, invitee.id].sort(),
     );
@@ -614,6 +614,127 @@ describe('App (e2e)', () => {
         (n) => n.type === 'event.created' && n.resourceId === body.id,
       ),
     ).toBe(false);
+  });
+
+  it('lets members publish blogs and events but not news or announcements', async () => {
+    const member = await prisma.user.create({
+      data: {
+        username: `${prefix}-publish-member`,
+        fullName: 'Publish Member',
+        passwordHash: await bcrypt.hash(password, 10),
+        role: 'USER',
+        status: 'ACTIVE',
+      },
+    });
+    createdIds.push(member.id);
+    const memberTok = bodyOf(
+      await request(app.getHttpServer())
+        .post('/api/auth/login')
+        .send({ username: member.username, password })
+        .expect(201),
+    ).accessToken;
+
+    await request(app.getHttpServer())
+      .post('/api/blog-posts')
+      .auth(memberTok, { type: 'bearer' })
+      .send({ title: 'Member blog', content: 'Hello', tags: ['team'] })
+      .expect(201);
+    await request(app.getHttpServer())
+      .post('/api/events')
+      .auth(memberTok, { type: 'bearer' })
+      .send({
+        title: 'Member event',
+        description: 'Meetup',
+        location: 'Room',
+        startAt: '2026-12-01T10:00:00Z',
+        endAt: '2026-12-01T11:00:00Z',
+      })
+      .expect(201);
+    await request(app.getHttpServer())
+      .post('/api/news')
+      .auth(memberTok, { type: 'bearer' })
+      .send({ title: 'Nope', content: 'Denied', tags: [] })
+      .expect(403);
+    await request(app.getHttpServer())
+      .post('/api/announcements')
+      .auth(memberTok, { type: 'bearer' })
+      .send({ title: 'Nope', description: 'Denied' })
+      .expect(403);
+  });
+
+  it('lets authors and admins update content while blocking other members', async () => {
+    const adminTok = await adminToken();
+    const member = await prisma.user.create({
+      data: {
+        username: `${prefix}-edit-member`,
+        fullName: 'Edit Member',
+        passwordHash: await bcrypt.hash(password, 10),
+        role: 'USER',
+        status: 'ACTIVE',
+      },
+    });
+    createdIds.push(member.id);
+    const memberTok = bodyOf(
+      await request(app.getHttpServer())
+        .post('/api/auth/login')
+        .send({ username: member.username, password })
+        .expect(201),
+    ).accessToken;
+
+    const news = await request(app.getHttpServer())
+      .post('/api/news')
+      .auth(adminTok, { type: 'bearer' })
+      .send({ title: 'Owned news', content: 'Original', tags: [] })
+      .expect(201);
+    await request(app.getHttpServer())
+      .patch(`/api/news/${dataOf(news).id}`)
+      .auth(adminTok, { type: 'bearer' })
+      .send({ title: 'Owned news updated' })
+      .expect(200)
+      .expect((res) => expect(dataOf(res).title).toBe('Owned news updated'));
+    await request(app.getHttpServer())
+      .patch(`/api/news/${dataOf(news).id}`)
+      .auth(memberTok, { type: 'bearer' })
+      .send({ title: 'Hijacked' })
+      .expect(403);
+
+    const post = await request(app.getHttpServer())
+      .post('/api/forum-posts')
+      .auth(memberTok, { type: 'bearer' })
+      .send({ title: 'Member post', content: 'Hello' })
+      .expect(201);
+    await request(app.getHttpServer())
+      .patch(`/api/forum-posts/${dataOf(post).id}`)
+      .auth(memberTok, { type: 'bearer' })
+      .send({ content: 'Hello edited' })
+      .expect(200)
+      .expect((res) => expect(dataOf(res).content).toBe('Hello edited'));
+    await request(app.getHttpServer())
+      .patch(`/api/forum-posts/${dataOf(post).id}`)
+      .auth(adminTok, { type: 'bearer' })
+      .send({ title: 'Moderated title' })
+      .expect(200)
+      .expect((res) => expect(dataOf(res).title).toBe('Moderated title'));
+
+    const comment = await request(app.getHttpServer())
+      .post('/api/comments')
+      .auth(memberTok, { type: 'bearer' })
+      .send({
+        resourceType: 'forum',
+        resourceId: dataOf(post).id,
+        content: 'Mine',
+      })
+      .expect(201);
+    await request(app.getHttpServer())
+      .patch(`/api/comments/${dataOf(comment).id}`)
+      .auth(memberTok, { type: 'bearer' })
+      .send({ content: 'Mine edited' })
+      .expect(200);
+    await request(app.getHttpServer())
+      .patch(`/api/comments/${dataOf(comment).id}`)
+      .auth(adminTok, { type: 'bearer' })
+      .send({ content: 'Admin edit' })
+      .expect(200);
   });
 
   it('increments viewCount on news, blog, and forum detail reads', async () => {
