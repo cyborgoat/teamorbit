@@ -13,8 +13,10 @@ export type Role = User['role'];
 export type UserStatus = User['status'];
 export type Event = Schemas['EventDto'];
 export type Announcement = Schemas['AnnouncementDto'];
-export type News = Schemas['NewsDto'];
-export type BlogPost = Schemas['BlogPostDto'];
+/** News and blog share the same article schema in OpenAPI. */
+export type Article = Schemas['ArticleDto'];
+export type News = Article;
+export type BlogPost = Article;
 export type ForumPost = Schemas['ForumPostDetailDto'];
 export type Comment = Schemas['CommentDto'];
 /** @deprecated Use `Comment` */
