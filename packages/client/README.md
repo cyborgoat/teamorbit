@@ -118,8 +118,8 @@ const imageUrl = new URL(url, 'https://orbit.example.com').href;
 await orbit.forum.createPost({ title: 'Team photo', content: `![Team photo](${imageUrl})` });
 ```
 
-Friendly types are exported too: `User`, `Role`, `UserStatus`, `LoginMethod`, `Event`, `Announcement`, `News`,
-`BlogPost`, `ForumPost`, `ForumComment`, `Notification`.
+Friendly types are exported too: `User`, `Role`, `UserStatus`, `LoginMethod`, `Event`, `Announcement`, `Article`,
+`News`, `BlogPost`, `ForumPost`, `ForumComment`, `Notification`. (`News` and `BlogPost` alias `Article`.)
 
 For example, an authorized admin can promote a member without changing other fields:
 

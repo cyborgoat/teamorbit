@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.3 — 2026-10-22
+
+- News and blog OpenAPI schemas share `ArticleDto` / `CreateArticleDto` / `UpdateArticleDto` (replacing `NewsDto` / `BlogPostDto` and related create/update names).
+- Friendly types: `Article`, with `News` and `BlogPost` kept as aliases.
+
 ## 0.2.2 — 2026-10-21
 
 - News, blog posts, and forum posts include `viewCount`, incremented on each detail GET.
