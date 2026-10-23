@@ -252,7 +252,7 @@ test('presets are selectable, persist after reload, and can be reset to the rave
   await page.goto('/settings')
   await expect(
     page.getByRole('group', { name: 'Preset avatars' }).getByRole('button'),
-  ).toHaveCount(5)
+  ).toHaveCount(catalogue.length)
   const owl = page.getByRole('button', { name: 'Select Frazzled Owl avatar' })
   await owl.click()
   await expect(owl).toHaveAttribute('aria-pressed', 'true')
@@ -274,7 +274,7 @@ test('presets are selectable, persist after reload, and can be reset to the rave
             ).length,
         ),
     )
-    .toBe(5)
+    .toBe(catalogue.length)
   await page.screenshot({
     path: '/private/tmp/teamorbit-avatar-presets.png',
     fullPage: true,
@@ -336,7 +336,7 @@ test('admins can assign a preset and an external link to another user', async ({
     .click()
   let dialog = page.getByRole('dialog')
   await dialog
-    .getByRole('button', { name: 'Select Cranky Duck avatar' })
+    .getByRole('button', { name: 'Select Scheming Fox avatar' })
     .click()
   await dialog.getByRole('button', { name: 'Save avatar' }).click()
   await expect.poll(() => state.members[1].avatarUrl).toBe(catalogue[3].url)

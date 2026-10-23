@@ -119,7 +119,7 @@ export function AvatarPicker({
         </div>
       </div>
       <div className="space-y-2">
-        <p className="text-sm font-medium">Bird portraits</p>
+        <p className="text-sm font-medium">Character portraits</p>
         {presets.isPending && (
           <p className="text-xs text-muted-foreground">Loading portraits…</p>
         )}
@@ -137,7 +137,7 @@ export function AvatarPicker({
           </div>
         )}
         <div
-          className="grid grid-cols-3 gap-2 sm:grid-cols-5"
+          className="grid grid-cols-3 gap-2 sm:grid-cols-4"
           role="group"
           aria-label="Preset avatars"
         >

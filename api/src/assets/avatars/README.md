@@ -1,5 +1,7 @@
 # Default bird avatar
 
+For the current eight-character catalogue and the six new animal/fantasy portraits, see [CREATURES.md](CREATURES.md). Only the raven and owl remain selectable birds; other bird files below are retained for existing saved URLs.
+
 `default-raven.png` contains the current quirky, ugly-cute bird portrait, generated with the built-in image generation tool for teamorbit.
 
 Final prompt:

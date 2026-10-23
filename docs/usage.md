@@ -93,7 +93,7 @@ The reset deletes the configured database's records. Do not use it on a database
 
 Sign in with username/password, or select email login when an address is attached. Self-registration creates a pending account. Administrators activate it in Users. Members edit profile, optional email, password, and avatar in Settings.
 
-Avatars support five bird presets, uploads, an external HTTP(S) image URL, and default reset. `avatarUrl: null` restores the default raven; responses contain its absolute effective URL. Covers can likewise be removed using `null`.
+Avatars support eight animal and fantasy creature presets (two birds), uploads, an external HTTP(S) image URL, and default reset. `avatarUrl: null` restores the default raven; responses contain its absolute effective URL. Covers can likewise be removed using `null`.
 
 Upload images through `POST /api/uploads`, authenticated, with multipart field `file` (maximum 5 MB). Use the absolute returned `url` for Markdown. Generated URLs use `PUBLIC_BASE_URL`; external images remain external.
 
