@@ -190,7 +190,9 @@ export class EventsService {
           : [];
     }
 
-    const { audience: _a, recipientIds: _r, ...fields } = dto;
+    const fields = { ...dto };
+    delete fields.audience;
+    delete fields.recipientIds;
     const item = await this.prisma.mediaWrite(async (tx) => {
       if (touchingAudience) {
         await tx.eventRecipient.deleteMany({ where: { eventId: id } });

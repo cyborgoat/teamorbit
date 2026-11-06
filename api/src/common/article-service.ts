@@ -112,8 +112,7 @@ export class ArticleService {
             where: { id },
             data: { viewCount: { increment: 1 } },
           });
-    if (updated.count === 0)
-      throw new NotFoundException(config[kind].notFound);
+    if (updated.count === 0) throw new NotFoundException(config[kind].notFound);
     const item =
       kind === 'news'
         ? await this.prisma.news.findUnique({ where: { id }, include })

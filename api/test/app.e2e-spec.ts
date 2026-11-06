@@ -593,9 +593,7 @@ describe('App (e2e)', () => {
           body: string;
         }[];
       }
-    ).items.find(
-      (n) => n.type === 'event.created' && n.resourceId === body.id,
-    );
+    ).items.find((n) => n.type === 'event.created' && n.resourceId === body.id);
     expect(inviteeHit).toMatchObject({
       audience: 'DIRECTED',
       body: 'Invite-only planning',

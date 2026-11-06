@@ -269,7 +269,13 @@ export async function seedDatabase(
         const createdById = author(index);
         const selected = index >= 4;
         const inviteeIds = selected
-          ? [...new Set([createdById, participant(index + 1), participant(index + 2)])]
+          ? [
+              ...new Set([
+                createdById,
+                participant(index + 1),
+                participant(index + 2),
+              ]),
+            ]
           : [];
         await missing(
           'Event',
