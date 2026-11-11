@@ -116,9 +116,9 @@ describe('App (e2e)', () => {
     };
     expect(items).toHaveLength(8);
     expect(new Set(items.map((item) => item.id)).size).toBe(8);
-    expect(items.filter((item) => item.isDefault).map((item) => item.id)).toEqual([
-      'baby-bird',
-    ]);
+    expect(
+      items.filter((item) => item.isDefault).map((item) => item.id),
+    ).toEqual(['baby-bird']);
     for (const preset of items) {
       expect(preset.url).toMatch(/^https?:\/\//);
       const image = await request(app.getHttpServer())
@@ -156,9 +156,7 @@ describe('App (e2e)', () => {
       .send({ username: member.username, password })
       .expect(201);
     const token = bodyOf(login).accessToken;
-    expect(bodyOf(login).user.avatarUrl).toMatch(
-      /\/avatars\/baby-bird\.png$/,
-    );
+    expect(bodyOf(login).user.avatarUrl).toMatch(/\/avatars\/baby-bird\.png$/);
     await request(app.getHttpServer())
       .patch('/api/auth/me')
       .auth(token, { type: 'bearer' })
