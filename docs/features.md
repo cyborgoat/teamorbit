@@ -15,7 +15,7 @@ profile settings can add or remove it.
 | Password | bcrypt-hashed |
 | Role | `SUPERUSER`, `ADMIN`, `USER` |
 | Status | `ACTIVE`, `INACTIVE`, `PENDING`, `SUSPENDED`, `DELETED` |
-| Avatar URL | Eight animal and fantasy creature presets (two birds), custom upload, external HTTP/HTTPS image link, or default reset |
+| Avatar URL | Eight animal presets (two birds), custom upload, external HTTP/HTTPS image link, or reset to the quirky Baby Bird default |
 
 **Ways to add members**
 

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.0 — 2026-11-11
+
+- Add `notifications.deleteDismissed(id)` and `notifications.deleteAllDismissed()` for permanently deleting dismissed notifications.
+- Add typed `sortBy` and `order` parameters to user, announcement, event, news, blog, and forum list queries.
+- Add typed user role and event audience filters.
+
+- Document dynamic avatar preset discovery, URL-based selection, and default reset. The API now offers eight presets, including Innocent Raccoon, Smart Fox, Curious Red Panda, and a quirkier Baby Bird default; previous portrait URLs remain available for saved avatars. These avatar updates require no client API or type changes.
+
 ## 0.2.4 — 2026-10-22
 
 - Export `@goatcheese/teamorbit-client/schema` so consumers can import the generated OpenAPI `components` types.

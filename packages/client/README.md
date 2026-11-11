@@ -83,6 +83,36 @@ Raw `POST /api/auth/login` requests use either `{ username, password }` or
 Unknown users and wrong passwords return 401. Self-registration keeps the
 existing admin activation requirement.
 
+## Avatars
+
+`orbit.avatars.list()` is public and returns the current presets with `id`, `name`,
+absolute `url`, and `isDefault`. Populate pickers from this response rather than
+hardcoding preset IDs, URLs, or counts; the catalogue can change independently of
+the client package.
+
+The current eight presets are Grumpy Raven, Innocent Raccoon, Smart Fox, Offended
+Toad, Curious Red Panda, Sunny Corgi, Content Capybara, and Baby Bird (the default).
+Baby Bird has a quirky, scruffy appearance. Previous portrait URLs remain available
+for saved avatars, including presets removed from the picker.
+
+```ts
+const { items: presets } = await orbit.avatars.list(); // no login required
+
+// After signing in, save a selection using its URL.
+const selected = presets.find((preset) => preset.id === 'innocent-raccoon');
+if (selected) await orbit.auth.updateMe({ avatarUrl: selected.url });
+
+// Reset to the default. Omit avatarUrl to leave the current avatar unchanged.
+await orbit.auth.updateMe({ avatarUrl: null });
+
+// Authorized admins can also update another member's avatar.
+await orbit.users.update(memberId, { avatarUrl: null });
+```
+
+Profile and user responses include the absolute effective `avatarUrl`, including
+the default when no custom avatar is set. Custom uploads and external HTTP(S)
+image URLs use the same `avatarUrl` field.
+
 ## Helpers
 
 Every helper returns the parsed response body and **throws** a `TeamOrbitError` on non-2xx.
@@ -96,6 +126,7 @@ All params, bodies and responses are typed from the OpenAPI spec.
 | `orbit.forum` | `listPosts`, `getPost`, `createPost`, `updatePost`, `deletePost`, `votePost(id, value)` |
 | `orbit.notifications` | `list(query?)`, `markRead(id)`, `markUnread(id)`, `markAllRead()`, `delete(id)`, `restore(id)`, `deleteDismissed(id)`, `deleteAllDismissed()` |
 | `orbit.uploads` | `upload(file, filename?)` |
+| `orbit.avatars` | `list()` (public preset catalogue) |
 | `orbit.health()` | |
 
 ```ts
@@ -119,7 +150,7 @@ await orbit.forum.createPost({ title: 'Team photo', content: `![Team photo](${im
 ```
 
 Friendly types are exported too: `User`, `Role`, `UserStatus`, `LoginMethod`, `Event`, `Announcement`, `Article`,
-`News`, `BlogPost`, `ForumPost`, `ForumComment`, `Notification`. (`News` and `BlogPost` alias `Article`.)
+`News`, `BlogPost`, `ForumPost`, `ForumComment`, `Notification`, `AvatarPreset`. (`News` and `BlogPost` alias `Article`.)
 
 For example, an authorized admin can promote a member without changing other fields:
 

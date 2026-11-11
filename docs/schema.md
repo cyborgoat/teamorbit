@@ -60,7 +60,7 @@ erDiagram
 | `passwordHash` | String | Never returned by the API |
 | `role` | Role | Default `USER` |
 | `status` | UserStatus | Default `PENDING` |
-| `avatarUrl` | String? | Custom avatar; null uses the animal default in API responses |
+| `avatarUrl` | String? | Custom avatar; null uses Baby Bird by default. API responses return the absolute effective URL |
 | `createdAt`, `updatedAt` | DateTime | |
 
 Missing email is stored as SQL `NULL` and returned as `email: null`, allowing

@@ -95,6 +95,8 @@ Sign in with username/password, or select email login when an address is attache
 
 Avatars support eight animal presets (two birds), uploads, an external HTTP(S) image URL, and default reset. `avatarUrl: null` restores the default baby bird; responses contain its absolute effective URL. Covers can likewise be removed using `null`.
 
+The presets are Grumpy Raven, Innocent Raccoon, Smart Fox, Offended Toad, Curious Red Panda, Sunny Corgi, Content Capybara, and a quirky Baby Bird. Removed presets and previous portrait URLs remain available for existing saved avatars. API clients should discover the current catalogue through public `GET /api/avatars` (`orbit.avatars.list()` in the [client package](../packages/client/README.md#avatars)) and save the selected preset's `url` as `avatarUrl`.
+
 Upload images through `POST /api/uploads`, authenticated, with multipart field `file` (maximum 5 MB). Use the absolute returned `url` for Markdown. Generated URLs use `PUBLIC_BASE_URL`; external images remain external.
 
 News/blog/forum editors support source mode, rich-text image paste, and previews. Read-only rendering follows GFM with an explicit KaTeX math extension. Keep formula drafts in source mode. Code fences remain literal; HTML is not executed.
