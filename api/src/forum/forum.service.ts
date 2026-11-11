@@ -1,3 +1,4 @@
+import { buildOrderBy, type SortOrder } from '../common/dto/pagination.dto';
 import { globalCreatedNotification } from '../common/content-crud';
 import { assertCanModerate, type Actor } from '../common/policies';
 import { authorSelect, presentContent, presentUser } from '../common/media';
@@ -17,7 +18,12 @@ export class ForumService {
     private comments: CommentsService,
   ) {}
 
-  async findAll(page = 1, limit = 20, q?: string) {
+  async findAll(
+    page = 1,
+    limit = 20,
+    q?: string,
+    sort: { sortBy?: string; order?: SortOrder } = {},
+  ) {
     const { skip, take } = paginate(page, limit);
     const where = q
       ? {
@@ -29,7 +35,10 @@ export class ForumService {
         where,
         skip,
         take,
-        orderBy: [{ score: 'desc' }, { createdAt: 'desc' }, { id: 'desc' }],
+        orderBy:
+          sort.sortBy || sort.order
+            ? buildOrderBy(sort.sortBy, sort.order, [{ score: 'desc' }])
+            : [{ score: 'desc' }, { createdAt: 'desc' }, { id: 'desc' }],
         include: {
           author: { select: authorSelect },
         },

@@ -1,3 +1,4 @@
+import { buildOrderBy, type SortOrder } from './dto/pagination.dto';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { paginate } from './utils';
 import { authorSelect, presentContent } from './media';
@@ -52,8 +53,12 @@ export class ArticleService {
     limit = 20,
     q?: string,
     tag?: string,
+    sort: { sortBy?: string; order?: SortOrder } = {},
   ) {
     const { skip, take } = paginate(page, limit);
+    const orderBy = buildOrderBy(sort.sortBy, sort.order, [
+      { createdAt: 'desc' },
+    ]);
     const where = {
       ...(q
         ? {
@@ -73,7 +78,7 @@ export class ArticleService {
               where,
               skip,
               take,
-              orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+              orderBy,
               include,
             }),
             this.prisma.news.count({ where }),
@@ -83,7 +88,7 @@ export class ArticleService {
               where,
               skip,
               take,
-              orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+              orderBy,
               include,
             }),
             this.prisma.blogPost.count({ where }),

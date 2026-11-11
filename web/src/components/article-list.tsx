@@ -1,9 +1,10 @@
 import { canManage, canModerate } from '@/lib/policies'
-import { useListPage } from '@/hooks/use-list-page'
+import { useResourceList } from '@/hooks/use-resource-list'
+import { ListToolbar } from '@/components/list-toolbar'
 import { ListControls } from '@/components/list-controls'
 import { queryKeys } from '@/lib/query-keys'
 import { Link } from '@tanstack/react-router'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Newspaper, Plus, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { PageHeader } from '@/components/page-header'
@@ -30,15 +31,29 @@ import { orbit } from '@/lib/api'
 export function ArticleList({ kind }: { kind: 'news' | 'blog' }) {
   const { user } = useAuth()
   const qc = useQueryClient()
-  const pagination = useListPage()
-  const { data, error, refetch, isFetching, isLoading } = useQuery({
-    queryKey: [...queryKeys[kind], pagination.page],
-    queryFn: () =>
-      orbit[kind === 'blog' ? 'blogPosts' : 'news'].list({
-        page: pagination.page,
-        limit: pagination.limit,
-      }),
-  })
+  const {
+    data,
+    error,
+    refetch,
+    isFetching,
+    isLoading,
+    pagination,
+    items,
+    filtered,
+    toolbar,
+  } = useResourceList(
+    queryKeys[kind],
+    (query) => orbit[kind === 'blog' ? 'blogPosts' : 'news'].list(query),
+    {
+      sortFields: [
+        { value: 'createdAt', label: 'Created' },
+        { value: 'title', label: 'Title' },
+        { value: 'viewCount', label: 'Views' },
+      ],
+      defaultSort: 'createdAt',
+      defaultOrder: 'desc',
+    },
+  )
   const remove = useMutation({
     mutationFn: (id: string) =>
       orbit[kind === 'blog' ? 'blogPosts' : 'news'].delete(id),
@@ -48,8 +63,6 @@ export function ArticleList({ kind }: { kind: 'news' | 'blog' }) {
     },
     onError: (e: Error) => toast.error(e.message),
   })
-
-  const items = data?.items ?? []
 
   return (
     <div>
@@ -68,6 +81,8 @@ export function ArticleList({ kind }: { kind: 'news' | 'blog' }) {
         }
       />
 
+      <ListToolbar {...toolbar} placeholder="Search articles" />
+
       <ListControls
         {...pagination}
         total={data?.total}
@@ -83,9 +98,13 @@ export function ArticleList({ kind }: { kind: 'news' | 'blog' }) {
             <EmptyMedia variant="icon">
               <Newspaper />
             </EmptyMedia>
-            <EmptyTitle>No articles yet</EmptyTitle>
+            <EmptyTitle>
+              {filtered ? 'No results found' : 'No articles yet'}
+            </EmptyTitle>
             <EmptyDescription>
-              Publish an article to share with your team.
+              {filtered
+                ? 'Nothing matches the current search or filters.'
+                : 'Publish an article to share with your team.'}
             </EmptyDescription>
           </EmptyHeader>
         </Empty>
@@ -125,7 +144,9 @@ export function ArticleList({ kind }: { kind: 'news' | 'blog' }) {
                       ))}
                     </div>
                   </TableCell>
-                  <TableCell className="tabular-nums">{item.viewCount}</TableCell>
+                  <TableCell className="tabular-nums">
+                    {item.viewCount}
+                  </TableCell>
                   <TableCell className="text-muted-foreground">
                     {new Date(item.createdAt).toLocaleDateString()}
                   </TableCell>

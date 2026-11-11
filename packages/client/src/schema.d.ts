@@ -1166,7 +1166,10 @@ export interface operations {
     UsersController_findAll: {
         parameters: {
             query?: {
+                sortBy?: "createdAt" | "fullName" | "username" | "role" | "status";
+                order?: "asc" | "desc";
                 status?: "ACTIVE" | "INACTIVE" | "PENDING" | "SUSPENDED" | "DELETED";
+                role?: "SUPERUSER" | "ADMIN" | "USER";
                 page?: number;
                 limit?: number;
                 q?: string;
@@ -1340,6 +1343,8 @@ export interface operations {
     AnnouncementsController_findAll: {
         parameters: {
             query?: {
+                sortBy?: "createdAt" | "title";
+                order?: "asc" | "desc";
                 page?: number;
                 limit?: number;
                 q?: string;
@@ -1668,6 +1673,9 @@ export interface operations {
     EventsController_findAll: {
         parameters: {
             query?: {
+                sortBy?: "startAt" | "createdAt" | "title";
+                order?: "asc" | "desc";
+                audience?: "GLOBAL" | "INVITE_ONLY";
                 page?: number;
                 limit?: number;
                 q?: string;
@@ -1821,10 +1829,12 @@ export interface operations {
     NewsController_findAll: {
         parameters: {
             query?: {
+                sortBy?: "createdAt" | "title" | "viewCount";
+                order?: "asc" | "desc";
+                tag?: string;
                 page?: number;
                 limit?: number;
                 q?: string;
-                tag?: string;
             };
             header?: never;
             path?: never;
@@ -1975,10 +1985,12 @@ export interface operations {
     BlogController_findAll: {
         parameters: {
             query?: {
+                sortBy?: "createdAt" | "title" | "viewCount";
+                order?: "asc" | "desc";
+                tag?: string;
                 page?: number;
                 limit?: number;
                 q?: string;
-                tag?: string;
             };
             header?: never;
             path?: never;
@@ -2285,6 +2297,8 @@ export interface operations {
     ForumController_findAll: {
         parameters: {
             query?: {
+                sortBy?: "score" | "createdAt" | "title" | "viewCount";
+                order?: "asc" | "desc";
                 page?: number;
                 limit?: number;
                 q?: string;

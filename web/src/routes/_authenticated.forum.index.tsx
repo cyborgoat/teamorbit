@@ -1,4 +1,5 @@
 import { ListControls } from '@/components/list-controls'
+import { ListToolbar } from '@/components/list-toolbar'
 import { queryKeys } from '@/lib/query-keys'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -26,9 +27,6 @@ import { useAuth } from '@/lib/auth'
 import { canModerate } from '@/lib/policies'
 import { useResourceList } from '@/hooks/use-resource-list'
 import { orbit } from '@/lib/api'
-import type { components } from '@goatcheese/teamorbit-client/schema'
-
-type ForumPostSummary = components['schemas']['ForumPostSummaryDto']
 
 export const Route = createFileRoute('/_authenticated/forum/')({
   component: ForumPage,
@@ -37,10 +35,30 @@ export const Route = createFileRoute('/_authenticated/forum/')({
 function ForumPage() {
   const { user } = useAuth()
   const qc = useQueryClient()
-  const { data, error, refetch, isFetching, isLoading, pagination, items } =
-    useResourceList<ForumPostSummary>(queryKeys.forum, (query) =>
-      orbit.forum.listPosts(query),
-    )
+  const {
+    data,
+    error,
+    refetch,
+    isFetching,
+    isLoading,
+    pagination,
+    items,
+    filtered,
+    toolbar,
+  } = useResourceList(
+    queryKeys.forum,
+    (query) => orbit.forum.listPosts(query),
+    {
+      sortFields: [
+        { value: 'score', label: 'Score' },
+        { value: 'createdAt', label: 'Created' },
+        { value: 'title', label: 'Title' },
+        { value: 'viewCount', label: 'Views' },
+      ],
+      defaultSort: 'score',
+      defaultOrder: 'desc',
+    },
+  )
   const remove = useMutation({
     mutationFn: (id: string) => orbit.forum.deletePost(id),
     onSuccess: () => {
@@ -65,6 +83,8 @@ function ForumPage() {
         }
       />
 
+      <ListToolbar {...toolbar} placeholder="Search posts" />
+
       <ListControls
         {...pagination}
         total={data?.total}
@@ -80,9 +100,13 @@ function ForumPage() {
             <EmptyMedia variant="icon">
               <MessageSquare />
             </EmptyMedia>
-            <EmptyTitle>No forum posts yet</EmptyTitle>
+            <EmptyTitle>
+              {filtered ? 'No results found' : 'No forum posts yet'}
+            </EmptyTitle>
             <EmptyDescription>
-              Start a discussion — any signed-in member can post.
+              {filtered
+                ? 'Nothing matches the current search or filters.'
+                : 'Start a discussion — any signed-in member can post.'}
             </EmptyDescription>
           </EmptyHeader>
         </Empty>
@@ -119,7 +143,9 @@ function ForumPage() {
                   <TableCell className="tabular-nums">
                     {item.commentCount}
                   </TableCell>
-                  <TableCell className="tabular-nums">{item.viewCount}</TableCell>
+                  <TableCell className="tabular-nums">
+                    {item.viewCount}
+                  </TableCell>
                   <TableCell className="text-muted-foreground">
                     <div className="flex items-center gap-2">
                       <UserAvatar

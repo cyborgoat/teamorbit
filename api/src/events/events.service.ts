@@ -1,3 +1,4 @@
+import { buildOrderBy, type SortOrder } from '../common/dto/pagination.dto';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { EventAudience, NotificationAudience, Prisma } from '@prisma/client';
 import { globalCreatedNotification } from '../common/content-crud';
@@ -65,7 +66,17 @@ export class EventsService {
     return unique;
   }
 
-  async findAll(userId: string, page = 1, limit = 20, q?: string) {
+  async findAll(
+    userId: string,
+    page = 1,
+    limit = 20,
+    q?: string,
+    opts: {
+      sortBy?: string;
+      order?: SortOrder;
+      audience?: EventAudience;
+    } = {},
+  ) {
     const { skip, take } = paginate(page, limit);
     const search = q
       ? {
@@ -77,14 +88,18 @@ export class EventsService {
         }
       : {};
     const where: Prisma.EventWhereInput = {
-      AND: [this.visibleWhere(userId), search],
+      AND: [
+        this.visibleWhere(userId),
+        search,
+        opts.audience ? { audience: opts.audience } : {},
+      ],
     };
     const [items, total] = await Promise.all([
       this.prisma.event.findMany({
         where,
         skip,
         take,
-        orderBy: [{ startAt: 'asc' }, { id: 'asc' }],
+        orderBy: buildOrderBy(opts.sortBy, opts.order, [{ startAt: 'asc' }]),
         include: eventInclude,
       }),
       this.prisma.event.count({ where }),

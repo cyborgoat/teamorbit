@@ -2,6 +2,7 @@ import { useAuth } from '@/lib/auth'
 import { canManage, canModerate } from '@/lib/policies'
 import { useResourceList } from '@/hooks/use-resource-list'
 import { ListControls } from '@/components/list-controls'
+import { ListToolbar } from '@/components/list-toolbar'
 import { queryKeys } from '@/lib/query-keys'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -38,7 +39,6 @@ import {
 } from '@/components/ui/table'
 import { Textarea } from '@/components/ui/textarea'
 import { orbit } from '@/lib/api'
-import type { Announcement } from '@goatcheese/teamorbit-client'
 
 export const Route = createFileRoute('/_authenticated/announcements')({
   component: AnnouncementsPage,
@@ -47,10 +47,28 @@ export const Route = createFileRoute('/_authenticated/announcements')({
 function AnnouncementsPage() {
   const { user } = useAuth()
   const qc = useQueryClient()
-  const { data, error, refetch, isFetching, isLoading, pagination, items } =
-    useResourceList<Announcement>(queryKeys.announcements, (query) =>
-      orbit.announcements.list(query),
-    )
+  const {
+    data,
+    error,
+    refetch,
+    isFetching,
+    isLoading,
+    pagination,
+    items,
+    filtered,
+    toolbar,
+  } = useResourceList(
+    queryKeys.announcements,
+    (query) => orbit.announcements.list(query),
+    {
+      sortFields: [
+        { value: 'createdAt', label: 'Created' },
+        { value: 'title', label: 'Title' },
+      ],
+      defaultSort: 'createdAt',
+      defaultOrder: 'desc',
+    },
+  )
   const [open, setOpen] = useState(false)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -141,6 +159,8 @@ function AnnouncementsPage() {
         }
       />
 
+      <ListToolbar {...toolbar} placeholder="Search announcements" />
+
       <ListControls
         {...pagination}
         total={data?.total}
@@ -156,9 +176,13 @@ function AnnouncementsPage() {
             <EmptyMedia variant="icon">
               <Megaphone />
             </EmptyMedia>
-            <EmptyTitle>No announcements yet</EmptyTitle>
+            <EmptyTitle>
+              {filtered ? 'No results found' : 'No announcements yet'}
+            </EmptyTitle>
             <EmptyDescription>
-              Publish the first notice for the team.
+              {filtered
+                ? 'Nothing matches the current search or filters.'
+                : 'Publish the first notice for the team.'}
             </EmptyDescription>
           </EmptyHeader>
         </Empty>

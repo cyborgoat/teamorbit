@@ -40,7 +40,10 @@ export class BlogController {
   @Get()
   @ApiOkResponse({ type: PaginatedBlogPostListDto })
   findAll(@Query() query: ArticleQueryDto) {
-    return this.blog.findAll(query.page, query.limit, query.q, query.tag);
+    return this.blog.findAll(query.page, query.limit, query.q, query.tag, {
+      sortBy: query.sortBy,
+      order: query.order,
+    });
   }
 
   @Get(':id')

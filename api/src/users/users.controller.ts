@@ -43,7 +43,12 @@ export class UsersController {
   @Roles(Role.ADMIN, Role.SUPERUSER)
   @ApiOkResponse({ type: PaginatedUsersDto })
   findAll(@Query() query: UsersQueryDto) {
-    return this.users.findAll(query.page, query.limit, query.q, query.status);
+    return this.users.findAll(query.page, query.limit, query.q, {
+      status: query.status,
+      role: query.role,
+      sortBy: query.sortBy,
+      order: query.order,
+    });
   }
 
   @Get(':id')

@@ -1,3 +1,4 @@
+import type { SortOrder } from '../common/dto/pagination.dto';
 import { Injectable } from '@nestjs/common';
 import { ArticleService } from '../common/article-service';
 import type { Actor } from '../common/policies';
@@ -7,8 +8,14 @@ import { CreateBlogPostDto, UpdateBlogPostDto } from './dto/blog.dto';
 export class BlogService {
   constructor(private articles: ArticleService) {}
 
-  findAll(page = 1, limit = 20, q?: string, tag?: string) {
-    return this.articles.findAll('blog', page, limit, q, tag);
+  findAll(
+    page = 1,
+    limit = 20,
+    q?: string,
+    tag?: string,
+    sort: { sortBy?: string; order?: SortOrder } = {},
+  ) {
+    return this.articles.findAll('blog', page, limit, q, tag, sort);
   }
 
   findOne(id: string) {

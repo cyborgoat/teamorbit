@@ -20,7 +20,7 @@ import { Role } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
-import { PaginationQueryDto } from '../common/dto/pagination.dto';
+import { AnnouncementQueryDto } from '../common/dto/pagination.dto';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { AnnouncementsService } from './announcements.service';
 import {
@@ -41,8 +41,11 @@ export class AnnouncementsController {
 
   @Get()
   @ApiOkResponse({ type: PaginatedAnnouncementsDto })
-  findAll(@Query() query: PaginationQueryDto) {
-    return this.announcements.findAll(query.page, query.limit, query.q);
+  findAll(@Query() query: AnnouncementQueryDto) {
+    return this.announcements.findAll(query.page, query.limit, query.q, {
+      sortBy: query.sortBy,
+      order: query.order,
+    });
   }
 
   @Get(':id')

@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { Role, UserStatus } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import type { UserSortField } from '../common/dto/pagination.dto';
 import { paginate } from '../common/utils';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
@@ -15,10 +16,22 @@ import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(page = 1, limit = 20, q?: string, status?: UserStatus) {
+  async findAll(
+    page = 1,
+    limit = 20,
+    q?: string,
+    opts: {
+      status?: UserStatus;
+      role?: Role;
+      sortBy?: UserSortField;
+      order?: 'asc' | 'desc';
+    } = {},
+  ) {
+    const { status, role, sortBy = 'createdAt', order = 'desc' } = opts;
     const { skip, take } = paginate(page, limit);
     const where = {
-      ...(status ? { status: status } : {}),
+      ...(status ? { status } : {}),
+      ...(role ? { role } : {}),
       ...(q
         ? {
             OR: [
@@ -35,7 +48,7 @@ export class UsersService {
         select: userSelect,
         skip,
         take,
-        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+        orderBy: [{ [sortBy]: order }, { id: order }],
       }),
       this.prisma.user.count({ where }),
     ]);

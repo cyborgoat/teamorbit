@@ -19,7 +19,7 @@ import {
 import { Role } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { PaginationQueryDto } from '../common/dto/pagination.dto';
+import { EventsQueryDto } from '../common/dto/pagination.dto';
 import {
   CreateEventDto,
   EventDto,
@@ -39,11 +39,12 @@ export class EventsController {
 
   @Get()
   @ApiOkResponse({ type: PaginatedEventsDto })
-  findAll(
-    @Query() query: PaginationQueryDto,
-    @CurrentUser() user: { id: string },
-  ) {
-    return this.events.findAll(user.id, query.page, query.limit, query.q);
+  findAll(@Query() query: EventsQueryDto, @CurrentUser() user: { id: string }) {
+    return this.events.findAll(user.id, query.page, query.limit, query.q, {
+      sortBy: query.sortBy,
+      order: query.order,
+      audience: query.audience,
+    });
   }
 
   @Get(':id')

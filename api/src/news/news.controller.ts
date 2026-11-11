@@ -42,7 +42,10 @@ export class NewsController {
   @Get()
   @ApiOkResponse({ type: PaginatedNewsListDto })
   findAll(@Query() query: ArticleQueryDto) {
-    return this.news.findAll(query.page, query.limit, query.q, query.tag);
+    return this.news.findAll(query.page, query.limit, query.q, query.tag, {
+      sortBy: query.sortBy,
+      order: query.order,
+    });
   }
 
   @Get(':id')

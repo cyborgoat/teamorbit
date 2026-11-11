@@ -1,3 +1,4 @@
+import { buildOrderBy, type SortOrder } from '../common/dto/pagination.dto';
 import { globalCreatedNotification } from '../common/content-crud';
 import { authorSelect, presentContent } from '../common/media';
 import { assertCanModerate, type Actor } from '../common/policies';
@@ -17,7 +18,12 @@ export class AnnouncementsService {
     private notifications: NotificationsService,
   ) {}
 
-  async findAll(page = 1, limit = 20, q?: string) {
+  async findAll(
+    page = 1,
+    limit = 20,
+    q?: string,
+    sort: { sortBy?: string; order?: SortOrder } = {},
+  ) {
     const { skip, take } = paginate(page, limit);
     const where = q
       ? {
@@ -29,7 +35,7 @@ export class AnnouncementsService {
         where,
         skip,
         take,
-        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+        orderBy: buildOrderBy(sort.sortBy, sort.order, [{ createdAt: 'desc' }]),
         include: {
           author: {
             select: authorSelect,

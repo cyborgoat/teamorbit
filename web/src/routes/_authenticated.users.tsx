@@ -1,11 +1,17 @@
 import { canManage as canManageMembers } from '@/lib/policies'
-import { useListPage } from '@/hooks/use-list-page'
+import { useListParams } from '@/hooks/use-list-params'
+import { FilterPill, ListToolbar } from '@/components/list-toolbar'
 import { ListControls } from '@/components/list-controls'
 import type { Role, UserStatus } from '@goatcheese/teamorbit-client'
 import { queryKeys } from '@/lib/query-keys'
 import type { User as Item } from '@goatcheese/teamorbit-client'
 import { createFileRoute } from '@tanstack/react-router'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query'
 import { Plus, Users } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -14,6 +20,7 @@ import { AvatarPicker } from '@/components/avatar-picker'
 import { AvatarSettingsDialog } from '@/components/avatar-settings-dialog'
 import { UserAvatar } from '@/components/user-avatar'
 import { Badge } from '@/components/ui/badge'
+import { PillSelect, statusVariant } from '@/components/pill-select'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -63,34 +70,50 @@ const statuses = [
   'DELETED',
 ] as const
 const roles = ['USER', 'ADMIN', 'SUPERUSER'] as const
-
-function statusVariant(status: string) {
-  switch (status) {
-    case 'ACTIVE':
-      return 'default' as const
-    case 'PENDING':
-      return 'secondary' as const
-    case 'SUSPENDED':
-    case 'DELETED':
-      return 'destructive' as const
-    default:
-      return 'outline' as const
-  }
-}
+const sortFields = [
+  { value: 'createdAt', label: 'Created' },
+  { value: 'fullName', label: 'Name' },
+  { value: 'username', label: 'Username' },
+  { value: 'role', label: 'Role' },
+  { value: 'status', label: 'Status' },
+] as const
+type SortField = (typeof sortFields)[number]['value']
 
 function UsersPage() {
   const { user, refreshUser } = useAuth()
   const qc = useQueryClient()
   const canManage = canManageMembers(user)
-  const pagination = useListPage()
+  const [roleFilter, setRoleFilter] = useState<Role | 'ALL'>('ALL')
+  const [statusFilter, setStatusFilter] = useState<UserStatus | 'ALL'>('ALL')
+  const params = useListParams<SortField>('createdAt', 'desc')
+  const { page, setPage, limit, q, sortBy, order } = params
+
+  const filtered = q !== '' || roleFilter !== 'ALL' || statusFilter !== 'ALL'
   const { data, error, refetch, isFetching, isLoading } = useQuery({
-    queryKey: [...queryKeys.users, pagination.page],
+    queryKey: [
+      ...queryKeys.users,
+      page,
+      q,
+      roleFilter,
+      statusFilter,
+      sortBy,
+      order,
+    ],
     queryFn: ({ signal }) =>
       orbit.users.list(
-        { page: pagination.page, limit: pagination.limit },
+        {
+          page,
+          limit,
+          q: q || undefined,
+          role: roleFilter === 'ALL' ? undefined : roleFilter,
+          status: statusFilter === 'ALL' ? undefined : statusFilter,
+          sortBy,
+          order,
+        },
         { signal },
       ),
     enabled: canManage,
+    placeholderData: keepPreviousData,
   })
 
   const [open, setOpen] = useState(false)
@@ -307,8 +330,54 @@ function UsersPage() {
         </p>
       ) : null}
 
+      <ListToolbar
+        search={params.search}
+        onSearch={params.setSearch}
+        placeholder="Search name, username or email"
+        filters={
+          <>
+            <FilterPill
+              label="Role"
+              value={roleFilter}
+              options={[{ value: 'ALL', label: 'All' }, ...roles]}
+              onChange={(v) => {
+                setRoleFilter(v)
+                setPage(1)
+              }}
+            />
+            <FilterPill
+              label="Status"
+              value={statusFilter}
+              options={[{ value: 'ALL', label: 'All' }, ...statuses]}
+              onChange={(v) => {
+                setStatusFilter(v)
+                setPage(1)
+              }}
+            />
+          </>
+        }
+        sort={{
+          options: sortFields,
+          value: sortBy as SortField,
+          order,
+          onChange: params.setSortBy,
+          onToggleOrder: params.toggleOrder,
+        }}
+        onClear={
+          filtered
+            ? () => {
+                params.reset()
+                setRoleFilter('ALL')
+                setStatusFilter('ALL')
+              }
+            : null
+        }
+      />
+
       <ListControls
-        {...pagination}
+        page={page}
+        setPage={setPage}
+        limit={limit}
         total={data?.total}
         error={error}
         retry={refetch}
@@ -324,7 +393,9 @@ function UsersPage() {
             </EmptyMedia>
             <EmptyTitle>No users found</EmptyTitle>
             <EmptyDescription>
-              Create the first member from this panel.
+              {filtered
+                ? 'No members match the current filters.'
+                : 'Create the first member from this panel.'}
             </EmptyDescription>
           </EmptyHeader>
         </Empty>
@@ -373,64 +444,37 @@ function UsersPage() {
                   <TableCell>
                     {user?.role === 'SUPERUSER' ||
                     (user?.role === 'ADMIN' && u.role === 'USER') ? (
-                      <Select
+                      <PillSelect
                         value={u.role}
+                        options={roleOptions}
+                        variant="outline"
+                        aria-label={`Role for ${u.fullName}`}
                         disabled={
                           updateRole.isPending &&
                           updateRole.variables?.id === u.id
                         }
-                        onValueChange={(role) => {
-                          if (role && role !== u.role)
-                            updateRole.mutate({ id: u.id, role: role as Role })
-                        }}
-                      >
-                        <SelectTrigger
-                          size="sm"
-                          className="w-36"
-                          aria-label={`Role for ${u.fullName}`}
-                        >
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {roleOptions.map((role) => (
-                            <SelectItem key={role} value={role}>
-                              {role}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        onChange={(role) =>
+                          updateRole.mutate({ id: u.id, role })
+                        }
+                      />
                     ) : (
                       <Badge variant="outline">{u.role}</Badge>
                     )}
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Badge variant={statusVariant(u.status)}>
-                        {u.status}
-                      </Badge>
-                      <Select
-                        value={u.status}
-                        onValueChange={(status) => {
-                          if (status && status !== u.status) {
-                            updateStatus.mutate({
-                              id: u.id,
-                              status: status as UserStatus,
-                            })
-                          }
-                        }}
-                      >
-                        <SelectTrigger size="sm" className="w-36">
-                          <SelectValue placeholder="Change" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {statuses.map((status) => (
-                            <SelectItem key={status} value={status}>
-                              {status}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    <PillSelect
+                      value={u.status}
+                      options={statuses}
+                      variant={statusVariant(u.status)}
+                      aria-label={`Status for ${u.fullName}`}
+                      disabled={
+                        updateStatus.isPending &&
+                        updateStatus.variables?.id === u.id
+                      }
+                      onChange={(status) =>
+                        updateStatus.mutate({ id: u.id, status })
+                      }
+                    />
                   </TableCell>
                 </TableRow>
               ))}

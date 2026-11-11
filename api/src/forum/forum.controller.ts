@@ -20,7 +20,7 @@ import {
 import { Role } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { PaginationQueryDto } from '../common/dto/pagination.dto';
+import { ForumQueryDto } from '../common/dto/pagination.dto';
 import { VoteDto, VoteResultDto } from '../common/dto/vote.dto';
 import {
   CreateForumPostDto,
@@ -43,8 +43,11 @@ export class ForumController {
 
   @Get('forum-posts')
   @ApiOkResponse({ type: PaginatedForumPostsDto })
-  findAll(@Query() query: PaginationQueryDto) {
-    return this.forum.findAll(query.page, query.limit, query.q);
+  findAll(@Query() query: ForumQueryDto) {
+    return this.forum.findAll(query.page, query.limit, query.q, {
+      sortBy: query.sortBy,
+      order: query.order,
+    });
   }
 
   @Get('forum-posts/:id')

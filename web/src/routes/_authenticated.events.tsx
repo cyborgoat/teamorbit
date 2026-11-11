@@ -2,6 +2,7 @@ import { useAuth } from '@/lib/auth'
 import { canManage, canModerate } from '@/lib/policies'
 import { useResourceList } from '@/hooks/use-resource-list'
 import { ListControls } from '@/components/list-controls'
+import { FilterPill, ListToolbar } from '@/components/list-toolbar'
 import {
   emptyEventForm,
   EventFormFields,
@@ -42,7 +43,6 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { orbit } from '@/lib/api'
-import type { Event } from '@goatcheese/teamorbit-client'
 
 export const Route = createFileRoute('/_authenticated/events')({
   component: EventsPage,
@@ -51,10 +51,31 @@ export const Route = createFileRoute('/_authenticated/events')({
 function EventsPage() {
   const { user } = useAuth()
   const qc = useQueryClient()
-  const { data, error, refetch, isFetching, isLoading, pagination, items } =
-    useResourceList<Event>(queryKeys.events, (query) =>
-      orbit.events.list(query),
-    )
+  const [audience, setAudience] = useState<'ALL' | 'GLOBAL' | 'INVITE_ONLY'>(
+    'ALL',
+  )
+  const {
+    data,
+    error,
+    refetch,
+    isFetching,
+    isLoading,
+    pagination,
+    items,
+    filtered,
+    toolbar,
+  } = useResourceList(queryKeys.events, (query) => orbit.events.list(query), {
+    sortFields: [
+      { value: 'startAt', label: 'Start time' },
+      { value: 'createdAt', label: 'Created' },
+      { value: 'title', label: 'Title' },
+    ],
+    defaultSort: 'startAt',
+    defaultOrder: 'asc',
+    extra: { audience: audience === 'ALL' ? undefined : audience },
+    extraActive: audience !== 'ALL',
+    onClear: () => setAudience('ALL'),
+  })
   const [open, setOpen] = useState(false)
   const [form, setForm] = useState<EventFormValues>(emptyEventForm)
 
@@ -150,6 +171,26 @@ function EventsPage() {
         }
       />
 
+      <ListToolbar
+        {...toolbar}
+        placeholder="Search events"
+        filters={
+          <FilterPill
+            label="Audience"
+            value={audience}
+            options={[
+              { value: 'ALL', label: 'All' },
+              { value: 'GLOBAL', label: 'Everyone' },
+              { value: 'INVITE_ONLY', label: 'Invite only' },
+            ]}
+            onChange={(v) => {
+              setAudience(v)
+              pagination.setPage(1)
+            }}
+          />
+        }
+      />
+
       <ListControls
         {...pagination}
         total={data?.total}
@@ -165,9 +206,13 @@ function EventsPage() {
             <EmptyMedia variant="icon">
               <CalendarDays />
             </EmptyMedia>
-            <EmptyTitle>No events scheduled</EmptyTitle>
+            <EmptyTitle>
+              {filtered ? 'No results found' : 'No events scheduled'}
+            </EmptyTitle>
             <EmptyDescription>
-              Add an event with start/end times and a location.
+              {filtered
+                ? 'Nothing matches the current search or filters.'
+                : 'Add an event with start/end times and a location.'}
             </EmptyDescription>
           </EmptyHeader>
         </Empty>
