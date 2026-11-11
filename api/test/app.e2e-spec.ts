@@ -100,7 +100,7 @@ describe('App (e2e)', () => {
 
   it('serves the default animal avatar publicly to other apps', async () => {
     await request(app.getHttpServer())
-      .get('/avatars/content-capybara.png')
+      .get('/avatars/baby-bird.png')
       .set('Origin', 'http://localhost:1420')
       .expect(200)
       .expect('Content-Type', /image\/png/)
@@ -114,10 +114,10 @@ describe('App (e2e)', () => {
     const { items } = response.body as {
       items: { id: string; name: string; url: string; isDefault: boolean }[];
     };
-    expect(items).toHaveLength(12);
-    expect(new Set(items.map((item) => item.id)).size).toBe(12);
+    expect(items).toHaveLength(8);
+    expect(new Set(items.map((item) => item.id)).size).toBe(8);
     expect(items.filter((item) => item.isDefault).map((item) => item.id)).toEqual([
-      'content-capybara',
+      'baby-bird',
     ]);
     for (const preset of items) {
       expect(preset.url).toMatch(/^https?:\/\//);
@@ -141,7 +141,7 @@ describe('App (e2e)', () => {
     const member = bodyOf(registered);
     createdIds.push(member.id);
     expect(member.avatarUrl).toMatch(
-      /^https?:\/\/[^\s]+\/avatars\/content-capybara\.png$/,
+      /^https?:\/\/[^\s]+\/avatars\/baby-bird\.png$/,
     );
     expect(
       (await prisma.user.findUniqueOrThrow({ where: { id: member.id } }))
@@ -157,7 +157,7 @@ describe('App (e2e)', () => {
       .expect(201);
     const token = bodyOf(login).accessToken;
     expect(bodyOf(login).user.avatarUrl).toMatch(
-      /\/avatars\/content-capybara\.png$/,
+      /\/avatars\/baby-bird\.png$/,
     );
     await request(app.getHttpServer())
       .patch('/api/auth/me')
@@ -182,7 +182,7 @@ describe('App (e2e)', () => {
       .send({ avatarUrl: null })
       .expect(200)
       .expect((res) =>
-        expect(bodyOf(res).avatarUrl).toMatch(/\/avatars\/content-capybara\.png$/),
+        expect(bodyOf(res).avatarUrl).toMatch(/\/avatars\/baby-bird\.png$/),
       );
     const adminLogin = await request(app.getHttpServer())
       .post('/api/auth/login')
@@ -205,7 +205,7 @@ describe('App (e2e)', () => {
       .send({ avatarUrl: null })
       .expect(200)
       .expect((res) =>
-        expect(bodyOf(res).avatarUrl).toMatch(/\/avatars\/content-capybara\.png$/),
+        expect(bodyOf(res).avatarUrl).toMatch(/\/avatars\/baby-bird\.png$/),
       );
     await request(app.getHttpServer())
       .patch(`/api/users/${member.id}`)

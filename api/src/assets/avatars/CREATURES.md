@@ -1,6 +1,6 @@
 # Animal and fantasy creature portraits
 
-The current preset catalogue offers twelve portraits: Grumpy Raven, Frazzled Owl, six other animal/fantasy characters, and four cheerful animals. Legacy pigeon, duck, and vulture files remain available for saved avatar URLs but are no longer offered in the picker.
+The current picker offers eight portraits: Baby Bird (the default), Grumpy Raven, Innocent Raccoon, Smart Fox, Offended Toad, Curious Red Panda, Sunny Corgi, and Content Capybara. Removed presets and previous portrait files remain available for saved avatar URLs. The original generation prompts below are retained as asset history; see the current portrait updates at the end.
 
 The six additions were generated with the built-in image generation tool, using `default-raven.png` as a style reference. Each was generated separately with the following final prompt:
 
@@ -68,3 +68,39 @@ File: `sunny-corgi.png`
 File: `content-capybara.png`
 
 > Use case: stylized-concept. Asset type: ONE square profile avatar for TeamOrbit. Generate one new original a contented cinnamon-brown capybara with a big rounded rectangular muzzle, small round ears, coarse painterly fur, gently smiling mouth and peacefully happy half-closed eyes. Match the reference only for rendering language: Blizzard-inspired fantasy-game portrait, chunky sculpted hand-painted 3D forms, expressive slightly asymmetrical eyebrows, rich tactile fur brushwork, warm golden key light and subtle cool blue rim light. This new character must feel HAPPY, CUTE, welcoming and funny, with gentle rounded shapes and readable expression. Head-and-shoulders portrait in slight three-quarter pose with eye contact. Whole head and ears fit within central circular-crop safe zone with generous padding; face readable at 32px. Opaque muted desaturated sage background, subtle vignette, square image. ONE animal only. No text, logos, borders, props, armor, clothing, existing franchise characters, extra limbs, aggressive expressions or angry brows. The reference is style and framing only, not an edit target; create the specified species.
+
+## Baby Bird (default)
+
+File: `baby-bird.png`
+
+Generated with the built-in image generation tool, using `happy-red-panda.png` as a style reference.
+
+> Use case: stylized-concept. Asset type: ONE square default profile avatar for TeamOrbit. Create an original extremely cute happy baby bird hatchling, a round fluffy little sky-blue songbird with a buttery cream face and chest, tiny rounded golden-orange beak, big warm dark expressive eyes with soft catchlights, a three-feather tousled crest and little folded wings. Sweet curious expression, a joyful slightly open beak, gentle head tilt. Match the reference ONLY for polished rendering language: Blizzard-inspired fantasy-game portrait, chunky sculpted hand-painted 3D forms, detailed tactile feather brushwork, warm golden key light and subtle cool blue rim light. The reference is a style reference, NOT an edit target: create a BIRD, no fur, mammal ears, muzzle or teeth. Head and shoulders/upper body portrait, slight three-quarter view with eye contact. Round silhouette and face readable at 32px. Entire head and crest comfortably within a central circular-crop safe zone, generous margin. Opaque muted desaturated sage background with subtle vignette, square canvas. ONE bird only. No text, logos, border, clothing, armor, props, egg shell, existing franchise characters or extra limbs. Cute and welcoming, never angry or grumpy.
+
+## Current portrait updates
+
+Edited individually with the built-in image generation tool. The current files and final prompts are:
+
+### innocent-raccoon
+
+File: `innocent-raccoon.png`; edit target: `smug-raccoon.png`.
+
+> Use case: precise-object-edit. Asset type: one square TeamOrbit preset avatar. Input image: edit target. Make this raccoon look innocent: relaxed raised eyebrows, open gentle amber eyes, small sheepish closed-mouth smile. Remove smug smirk and narrowed suspicious eyes. Preserve species, color palette, textured sculpted hand-painted 3D rendering, warm key light and cool rim light, muted sage vignette background, and head-and-shoulders composition. Keep full head and ears/crest inside circular-crop safe area with padding. One character only, no text, props, clothing, borders or logos.
+
+### smart-fox
+
+File: `smart-fox.png`; edit target: `scheming-fox.png`.
+
+> Use case: precise-object-edit. Asset type: one square TeamOrbit preset avatar. Input image: edit target. Make this fox look smart and thoughtful, with attentive bright golden eyes, one gently raised eyebrow and a subtle friendly knowing smile. Remove malicious scheming scowl, narrowed eyes and snarling fang expression. Preserve species, color palette, textured sculpted hand-painted 3D rendering, warm key light and cool rim light, muted sage vignette background, and head-and-shoulders composition. Keep full head and ears/crest inside circular-crop safe area with padding. One character only, no text, props, clothing, borders or logos.
+
+### curious-red-panda
+
+File: `curious-red-panda.png`; edit target: `happy-red-panda.png`.
+
+> Use case: precise-object-edit. Asset type: one square TeamOrbit preset avatar. Input image: edit target. Make this red panda look curious: a pronounced inquisitive head tilt, one lifted eyebrow, attentive amber eyes and small slightly parted mouth, replacing the broad happy open grin. Preserve species, color palette, textured sculpted hand-painted 3D rendering, warm key light and cool rim light, muted sage vignette background, and head-and-shoulders composition. Keep full head and ears/crest inside circular-crop safe area with padding. One character only, no text, props, clothing, borders or logos.
+
+### quirky-baby-bird
+
+File: `baby-bird.png`; edit target: `baby-bird.png`.
+
+> Use case: precise-object-edit. Asset type: one square TeamOrbit preset avatar. Input image: edit target. Make this baby bird much quirkier and comically awkward: wildly uneven scruffy crest feathers, asymmetrical feather eyebrows with one raised high, one eye slightly more open than the other, a cocked head and goofy tiny crooked open-beak smile. Keep it endearing, welcoming and recognizably the same blue and cream baby bird; avoid generic symmetrical big-eyed cuteness. No teeth. Preserve species, color palette, textured sculpted hand-painted 3D rendering, warm key light and cool rim light, muted sage vignette background, and head-and-shoulders composition. Keep full head and ears/crest inside circular-crop safe area with padding. One character only, no text, props, clothing, borders or logos.

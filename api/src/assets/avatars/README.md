@@ -1,8 +1,8 @@
 # Default bird avatar
 
-For the current twelve-character catalogue, including the four happy animal portraits, see [CREATURES.md](CREATURES.md). Only the raven and owl remain selectable birds; other bird files below are retained for existing saved URLs.
+For the current eight-character catalogue, see [CREATURES.md](CREATURES.md). Baby Bird and Grumpy Raven are selectable birds; other bird files below are retained for existing saved URLs.
 
-`content-capybara.png` is the default avatar for new accounts and default resets.
+`baby-bird.png` is the default avatar for new accounts and default resets.
 
 `default-raven.png` contains the selectable quirky, ugly-cute bird portrait, generated with the built-in image generation tool for teamorbit.
 

@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises'
 import { test, expect, type Page } from '@playwright/test'
 import { avatarPresets } from '../../api/src/avatars/presets'
 
-const defaultAvatar = 'http://localhost:3000/avatars/content-capybara.png'
+const defaultAvatar = 'http://localhost:3000/avatars/baby-bird.png'
 const catalogue = avatarPresets.map(({ path, ...preset }) => ({
   ...preset,
   url: `http://localhost:3000${path}`,
@@ -242,10 +242,10 @@ test('broken custom avatars display the animal fallback', async ({ page }) => {
   await page.goto('/settings')
   await expect(
     page.getByRole('img', { name: "Team Member's avatar" }).last(),
-  ).toHaveAttribute('src', '/avatars/content-capybara.png')
+  ).toHaveAttribute('src', '/avatars/baby-bird.png')
 })
 
-test('presets are selectable, persist after reload, and can be reset to the capybara', async ({
+test('presets are selectable, persist after reload, and can be reset to the baby bird', async ({
   page,
 }) => {
   const state = await mockAvatars(page)
@@ -253,13 +253,13 @@ test('presets are selectable, persist after reload, and can be reset to the capy
   await expect(
     page.getByRole('group', { name: 'Preset avatars' }).getByRole('button'),
   ).toHaveCount(catalogue.length)
-  const owl = page.getByRole('button', { name: 'Select Frazzled Owl avatar' })
-  await owl.click()
-  await expect(owl).toHaveAttribute('aria-pressed', 'true')
+  const raccoon = page.getByRole('button', { name: 'Select Innocent Raccoon avatar' })
+  await raccoon.click()
+  await expect(raccoon).toHaveAttribute('aria-pressed', 'true')
   await page.getByRole('button', { name: 'Save profile', exact: true }).click()
   await expect.poll(() => state.profile.avatarUrl).toBe(catalogue[1].url)
   await page.reload()
-  await expect(owl).toHaveAttribute('aria-pressed', 'true')
+  await expect(raccoon).toHaveAttribute('aria-pressed', 'true')
   await expect
     .poll(() =>
       page
@@ -289,7 +289,7 @@ test('presets are selectable, persist after reload, and can be reset to the capy
     path: '/private/tmp/teamorbit-avatar-presets-mobile.png',
     fullPage: true,
   })
-  await page.getByRole('button', { name: 'Select Content Capybara avatar' }).click()
+  await page.getByRole('button', { name: 'Select Baby Bird avatar' }).click()
   await page.getByRole('button', { name: 'Save profile', exact: true }).click()
   await expect.poll(() => state.profile.avatarUrl).toBeNull()
 })
@@ -336,10 +336,10 @@ test('admins can assign a preset and an external link to another user', async ({
     .click()
   let dialog = page.getByRole('dialog')
   await dialog
-    .getByRole('button', { name: 'Select Scheming Fox avatar' })
+    .getByRole('button', { name: 'Select Smart Fox avatar' })
     .click()
   await dialog.getByRole('button', { name: 'Save avatar' }).click()
-  await expect.poll(() => state.members[1].avatarUrl).toBe(catalogue[3].url)
+  await expect.poll(() => state.members[1].avatarUrl).toBe(catalogue[2].url)
   await page
     .getByRole('button', { name: 'Edit avatar for Other Member' })
     .click()

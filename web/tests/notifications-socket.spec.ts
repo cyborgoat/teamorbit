@@ -27,7 +27,7 @@ test('Strict Mode opens one notification connection, receives updates, and recon
   await page.route('**/*', async (route) => {
     const request = route.request()
     const path = new URL(request.url()).pathname.replace(/^\/api(?=\/)/, '')
-    if (path === '/avatars/content-capybara.png')
+    if (path === '/avatars/baby-bird.png')
       return route.fulfill({
         contentType: 'image/svg+xml',
         body: '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"/>',

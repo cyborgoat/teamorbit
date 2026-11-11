@@ -28,13 +28,13 @@ async function mockAuth(page: Page, initialToken = false) {
       return route.fulfill({ json: { items: [] } })
     if (
       new URL(request.url()).pathname.replace(/^\/api(?=\/)/, '') ===
-      '/avatars/content-capybara.png'
+      '/avatars/baby-bird.png'
     )
       return route.fulfill({
         contentType: 'image/png',
         body: await readFile(
           new URL(
-            '../../api/src/assets/avatars/content-capybara.png',
+            '../../api/src/assets/avatars/baby-bird.png',
             import.meta.url,
           ),
         ),

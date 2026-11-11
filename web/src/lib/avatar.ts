@@ -1,4 +1,4 @@
-export const DEFAULT_AVATAR_URL = '/avatars/content-capybara.png'
+export const DEFAULT_AVATAR_URL = '/avatars/baby-bird.png'
 
 import type { AvatarPreset } from '@goatcheese/teamorbit-client'
 export function isSelectedPreset(

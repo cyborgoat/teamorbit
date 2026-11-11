@@ -1,4 +1,4 @@
-export const DEFAULT_AVATAR_PATH = '/avatars/content-capybara.png';
+export const DEFAULT_AVATAR_PATH = '/avatars/baby-bird.png';
 
 // Curated product assets, shared by the API and every client; no demo data.
 export const avatarPresets = [
@@ -9,21 +9,15 @@ export const avatarPresets = [
     isDefault: false,
   },
   {
-    id: 'frazzled-owl',
-    name: 'Frazzled Owl',
-    path: '/avatars/frazzled-owl.png',
+    id: 'innocent-raccoon',
+    name: 'Innocent Raccoon',
+    path: '/avatars/innocent-raccoon.png',
     isDefault: false,
   },
   {
-    id: 'smug-raccoon',
-    name: 'Smug Raccoon',
-    path: '/avatars/smug-raccoon.png',
-    isDefault: false,
-  },
-  {
-    id: 'scheming-fox',
-    name: 'Scheming Fox',
-    path: '/avatars/scheming-fox.png',
+    id: 'smart-fox',
+    name: 'Smart Fox',
+    path: '/avatars/smart-fox.png',
     isDefault: false,
   },
   {
@@ -33,33 +27,9 @@ export const avatarPresets = [
     isDefault: false,
   },
   {
-    id: 'tiny-dragon',
-    name: 'Tiny Dragon',
-    path: '/avatars/tiny-dragon.png',
-    isDefault: false,
-  },
-  {
-    id: 'frazzled-goblin',
-    name: 'Frazzled Goblin',
-    path: '/avatars/frazzled-goblin.png',
-    isDefault: false,
-  },
-  {
-    id: 'sleepy-yeti',
-    name: 'Sleepy Yeti',
-    path: '/avatars/sleepy-yeti.png',
-    isDefault: false,
-  },
-  {
-    id: 'happy-red-panda',
-    name: 'Happy Red Panda',
-    path: '/avatars/happy-red-panda.png',
-    isDefault: false,
-  },
-  {
-    id: 'playful-otter',
-    name: 'Playful Otter',
-    path: '/avatars/playful-otter.png',
+    id: 'curious-red-panda',
+    name: 'Curious Red Panda',
+    path: '/avatars/curious-red-panda.png',
     isDefault: false,
   },
   {
@@ -71,6 +41,12 @@ export const avatarPresets = [
   {
     id: 'content-capybara',
     name: 'Content Capybara',
+    path: '/avatars/content-capybara.png',
+    isDefault: false,
+  },
+  {
+    id: 'baby-bird',
+    name: 'Baby Bird',
     path: DEFAULT_AVATAR_PATH,
     isDefault: true,
   },
