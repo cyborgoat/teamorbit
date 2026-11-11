@@ -30,7 +30,8 @@ export class UsersService {
     const { status, role, sortBy = 'createdAt', order = 'desc' } = opts;
     const { skip, take } = paginate(page, limit);
     const where = {
-      ...(status ? { status } : {}),
+      // Soft-deleted users are hidden unless explicitly filtered for.
+      status: status ?? { not: UserStatus.DELETED },
       ...(role ? { role } : {}),
       ...(q
         ? {

@@ -74,7 +74,9 @@ export function PillSelect<T extends string>({
         )}
       >
         {prefix ? <span className="opacity-70">{prefix}</span> : null}
-        <SelectValue>{items.find((o) => o.value === value)?.label}</SelectValue>
+        <SelectValue>
+          {items.find((o) => o.value === value)?.label ?? value}
+        </SelectValue>
         <ChevronDownIcon className="size-3 opacity-70" />
       </SelectPrimitive.Trigger>
       <SelectContent position="popper" align="start">

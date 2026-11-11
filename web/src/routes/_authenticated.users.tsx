@@ -12,7 +12,7 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query'
-import { Plus, Users } from 'lucide-react'
+import { Plus, Trash2, Users } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { PageHeader } from '@/components/page-header'
@@ -70,6 +70,8 @@ const statuses = [
   'DELETED',
 ] as const
 const roles = ['USER', 'ADMIN', 'SUPERUSER'] as const
+// DELETED is only reachable through the Delete action (soft delete).
+const assignableStatuses = statuses.filter((s) => s !== 'DELETED')
 const sortFields = [
   { value: 'createdAt', label: 'Created' },
   { value: 'fullName', label: 'Name' },
@@ -160,6 +162,17 @@ function UsersPage() {
       if (updated.id === user?.id) await refreshUser()
       await qc.invalidateQueries({ queryKey: queryKeys.users })
       toast.success('User role updated')
+    },
+    onError: (e: Error) => toast.error(e.message),
+  })
+
+  const [deleteTarget, setDeleteTarget] = useState<Item | null>(null)
+  const deleteUser = useMutation({
+    mutationFn: (id: string) => orbit.users.delete(id),
+    onSuccess: () => {
+      setDeleteTarget(null)
+      qc.invalidateQueries({ queryKey: queryKeys.users })
+      toast.success('User deleted')
     },
     onError: (e: Error) => toast.error(e.message),
   })
@@ -286,7 +299,7 @@ function UsersPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {statuses.map((status) => (
+                        {assignableStatuses.map((status) => (
                           <SelectItem key={status} value={status}>
                             {status}
                           </SelectItem>
@@ -408,6 +421,7 @@ function UsersPage() {
                 <TableHead>Email</TableHead>
                 <TableHead>Role</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead className="w-20" />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -464,7 +478,7 @@ function UsersPage() {
                   <TableCell>
                     <PillSelect
                       value={u.status}
-                      options={statuses}
+                      options={assignableStatuses}
                       variant={statusVariant(u.status)}
                       aria-label={`Status for ${u.fullName}`}
                       disabled={
@@ -476,12 +490,60 @@ function UsersPage() {
                       }
                     />
                   </TableCell>
+                  <TableCell>
+                    {u.status !== 'DELETED' &&
+                    u.id !== user?.id &&
+                    (user?.role === 'SUPERUSER' || u.role !== 'SUPERUSER') ? (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label={`Delete ${u.fullName}`}
+                        onClick={() => setDeleteTarget(u)}
+                      >
+                        <Trash2 />
+                      </Button>
+                    ) : null}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </div>
       )}
+      <Dialog
+        open={deleteTarget !== null}
+        onOpenChange={(o) => {
+          if (!o && !deleteUser.isPending) setDeleteTarget(null)
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Delete user?</DialogTitle>
+            <DialogDescription>
+              {deleteTarget?.fullName} (@{deleteTarget?.username}) will no
+              longer be able to sign in and is hidden from this list. Their
+              existing posts and comments are kept. You can restore them by
+              filtering Status: DELETED and setting a new status.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteTarget(null)}
+              disabled={deleteUser.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={deleteUser.isPending}
+              onClick={() => deleteTarget && deleteUser.mutate(deleteTarget.id)}
+            >
+              {deleteUser.isPending ? 'Deleting…' : 'Delete user'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       {avatarMember && (
         <AvatarSettingsDialog
           key={avatarMember.id}
