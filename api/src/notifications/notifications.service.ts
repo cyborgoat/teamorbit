@@ -44,7 +44,10 @@ export class NotificationsService {
   ): Prisma.NotificationWhereInput {
     if (status === NotificationListStatus.DISMISSED) {
       return {
-        AND: [this.audienceWhere(userId), { dismissals: { some: { userId } } }],
+        AND: [
+          this.audienceWhere(userId),
+          { dismissals: { some: { userId, deletedAt: null } } },
+        ],
       };
     }
     const inbox = this.visibleWhere(userId);
@@ -208,10 +211,38 @@ export class NotificationsService {
     return { ok: true as const };
   }
 
+  async deleteDismissedForUser(userId: string, notificationId: string) {
+    const result = await this.prisma.notificationDismissal.updateMany({
+      where: {
+        userId,
+        notificationId,
+        deletedAt: null,
+        notification: this.audienceWhere(userId),
+      },
+      data: { deletedAt: new Date() },
+    });
+    if (result.count === 0) {
+      throw new NotFoundException('Dismissed notification not found');
+    }
+    return { ok: true as const };
+  }
+
+  async deleteAllDismissedForUser(userId: string) {
+    const result = await this.prisma.notificationDismissal.updateMany({
+      where: {
+        userId,
+        deletedAt: null,
+        notification: this.audienceWhere(userId),
+      },
+      data: { deletedAt: new Date() },
+    });
+    return { ok: true as const, deleted: result.count };
+  }
+
   async restoreForUser(userId: string, notificationId: string) {
     await this.requireAccessible(userId, notificationId);
     const result = await this.prisma.notificationDismissal.deleteMany({
-      where: { userId, notificationId },
+      where: { userId, notificationId, deletedAt: null },
     });
     if (result.count === 0) {
       throw new NotFoundException('Notification not found');

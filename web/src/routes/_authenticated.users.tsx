@@ -267,14 +267,18 @@ function UsersPage() {
                 ))}
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label>Role</Label>
+                    <Label htmlFor="create-role">Role</Label>
                     <Select
+                      items={roleOptions.map((role) => ({
+                        label: role,
+                        value: role,
+                      }))}
                       value={form.role}
                       onValueChange={(role) => {
                         if (role) setForm({ ...form, role: role as Role })
                       }}
                     >
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger id="create-role" className="w-full">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -287,15 +291,19 @@ function UsersPage() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Status</Label>
+                    <Label htmlFor="create-status">Status</Label>
                     <Select
+                      items={assignableStatuses.map((status) => ({
+                        label: status,
+                        value: status,
+                      }))}
                       value={form.status}
                       onValueChange={(status) => {
                         if (status)
                           setForm({ ...form, status: status as UserStatus })
                       }}
                     >
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger id="create-status" className="w-full">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>

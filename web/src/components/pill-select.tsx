@@ -1,4 +1,4 @@
-import { Select as SelectPrimitive } from 'radix-ui'
+import { Select as SelectPrimitive } from '@base-ui/react/select'
 import { ChevronDownIcon } from 'lucide-react'
 import type { VariantProps } from 'class-variance-authority'
 import { badgeVariants } from '@/components/ui/badge'
@@ -58,6 +58,7 @@ export function PillSelect<T extends string>({
   )
   return (
     <Select
+      items={items}
       value={value}
       disabled={disabled}
       onValueChange={(v) => {
@@ -69,7 +70,7 @@ export function PillSelect<T extends string>({
         aria-label={ariaLabel}
         className={cn(
           badgeVariants({ variant }),
-          'cursor-pointer gap-1 pr-1.5 outline-none hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50 data-[state=open]:ring-[3px] data-[state=open]:ring-ring/50',
+          'cursor-pointer gap-1 pr-1.5 outline-none hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50 data-popup-open:ring-[3px] data-popup-open:ring-ring/50',
           className,
         )}
       >
@@ -79,7 +80,7 @@ export function PillSelect<T extends string>({
         </SelectValue>
         <ChevronDownIcon className="size-3 opacity-70" />
       </SelectPrimitive.Trigger>
-      <SelectContent position="popper" align="start">
+      <SelectContent alignItemWithTrigger={false} align="start">
         {items.map((o) => (
           <SelectItem key={o.value} value={o.value}>
             {o.label}

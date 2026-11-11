@@ -1,6 +1,7 @@
 import { UploadCleanupService } from '../src/uploads/upload-cleanup.service';
 import type { CleanupPreviewDto } from '../src/uploads/dto/upload-cleanup.dto';
 import { ConfigService } from '@nestjs/config';
+import { NotificationListStatus } from '../src/notifications/dto/notification.dto';
 import { NotificationsService } from '../src/notifications/notifications.service';
 import { NotificationsGateway } from '../src/notifications/notifications.gateway';
 import { JwtService } from '@nestjs/jwt';
@@ -99,23 +100,25 @@ describe('App (e2e)', () => {
 
   it('serves the default animal avatar publicly to other apps', async () => {
     await request(app.getHttpServer())
-      .get('/avatars/default-raven.png')
+      .get('/avatars/content-capybara.png')
       .set('Origin', 'http://localhost:1420')
       .expect(200)
       .expect('Content-Type', /image\/png/)
       .expect('Access-Control-Allow-Origin', 'http://localhost:1420');
   });
 
-  it('lists five public avatar presets with working absolute image URLs', async () => {
+  it('lists public avatar presets with working absolute image URLs', async () => {
     const response = await request(app.getHttpServer())
       .get('/api/avatars')
       .expect(200);
     const { items } = response.body as {
       items: { id: string; name: string; url: string; isDefault: boolean }[];
     };
-    expect(items).toHaveLength(5);
-    expect(new Set(items.map((item) => item.id)).size).toBe(5);
-    expect(items.filter((item) => item.isDefault)).toHaveLength(1);
+    expect(items).toHaveLength(12);
+    expect(new Set(items.map((item) => item.id)).size).toBe(12);
+    expect(items.filter((item) => item.isDefault).map((item) => item.id)).toEqual([
+      'content-capybara',
+    ]);
     for (const preset of items) {
       expect(preset.url).toMatch(/^https?:\/\//);
       const image = await request(app.getHttpServer())
@@ -138,7 +141,7 @@ describe('App (e2e)', () => {
     const member = bodyOf(registered);
     createdIds.push(member.id);
     expect(member.avatarUrl).toMatch(
-      /^https?:\/\/[^\s]+\/avatars\/default-raven\.png$/,
+      /^https?:\/\/[^\s]+\/avatars\/content-capybara\.png$/,
     );
     expect(
       (await prisma.user.findUniqueOrThrow({ where: { id: member.id } }))
@@ -154,7 +157,7 @@ describe('App (e2e)', () => {
       .expect(201);
     const token = bodyOf(login).accessToken;
     expect(bodyOf(login).user.avatarUrl).toMatch(
-      /\/avatars\/default-raven\.png$/,
+      /\/avatars\/content-capybara\.png$/,
     );
     await request(app.getHttpServer())
       .patch('/api/auth/me')
@@ -179,7 +182,7 @@ describe('App (e2e)', () => {
       .send({ avatarUrl: null })
       .expect(200)
       .expect((res) =>
-        expect(bodyOf(res).avatarUrl).toMatch(/\/avatars\/default-raven\.png$/),
+        expect(bodyOf(res).avatarUrl).toMatch(/\/avatars\/content-capybara\.png$/),
       );
     const adminLogin = await request(app.getHttpServer())
       .post('/api/auth/login')
@@ -202,7 +205,7 @@ describe('App (e2e)', () => {
       .send({ avatarUrl: null })
       .expect(200)
       .expect((res) =>
-        expect(bodyOf(res).avatarUrl).toMatch(/\/avatars\/default-raven\.png$/),
+        expect(bodyOf(res).avatarUrl).toMatch(/\/avatars\/content-capybara\.png$/),
       );
     await request(app.getHttpServer())
       .patch(`/api/users/${member.id}`)
@@ -1279,6 +1282,108 @@ describe('App (e2e)', () => {
         where: { resourceId: dataOf(news).id },
       }),
     ).toBe(1);
+  });
+
+  it('permanently deletes dismissed notifications only for the current user, including all pages', async () => {
+    const token = await adminToken();
+    const admin = await prisma.user.findUniqueOrThrow({
+      where: { username: adminUsername },
+    });
+    const other = await prisma.user.create({
+      data: {
+        username: `${prefix}-delete-other`,
+        fullName: 'Other recipient',
+        passwordHash: 'unused',
+        status: 'ACTIVE',
+      },
+    });
+    const notifications = await Promise.all(
+      Array.from({ length: 23 }, (_, i) =>
+        prisma.notification.create({
+          data: {
+            type: 'test',
+            title: `Delete ${i}`,
+            body: prefix,
+            resourceType: 'test',
+            resourceId: `${prefix}-${i}`,
+            dismissals: {
+              create: [{ userId: admin.id }, { userId: other.id }],
+            },
+          },
+        }),
+      ),
+    );
+    const active = await prisma.notification.create({
+      data: {
+        type: 'test',
+        title: 'Keep active',
+        body: prefix,
+        resourceType: 'test',
+        resourceId: prefix,
+      },
+    });
+    const id = notifications[0].id;
+    await request(app.getHttpServer())
+      .delete(`/api/notifications/${active.id}/dismissed`)
+      .auth(token, { type: 'bearer' })
+      .expect(404);
+    await request(app.getHttpServer())
+      .delete(`/api/notifications/${id}/dismissed`)
+      .auth(token, { type: 'bearer' })
+      .expect(200)
+      .expect({ ok: true });
+    await request(app.getHttpServer())
+      .post(`/api/notifications/${id}/restore`)
+      .auth(token, { type: 'bearer' })
+      .expect(404);
+    await request(app.getHttpServer())
+      .post(`/api/notifications/${id}/read`)
+      .auth(token, { type: 'bearer' })
+      .expect(404);
+    await request(app.getHttpServer())
+      .delete('/api/notifications/dismissed')
+      .auth(token, { type: 'bearer' })
+      .expect(200)
+      .expect({ ok: true, deleted: 22 });
+    await request(app.getHttpServer())
+      .delete('/api/notifications/dismissed')
+      .auth(token, { type: 'bearer' })
+      .expect(200)
+      .expect({ ok: true, deleted: 0 });
+    const service = app.get(NotificationsService);
+    expect(
+      (
+        await service.listForUser(
+          admin.id,
+          1,
+          100,
+          NotificationListStatus.DISMISSED,
+        )
+      ).total,
+    ).toBe(0);
+    expect(
+      (await service.listForUser(admin.id, 1, 100)).items.map((n) => n.id),
+    ).toContain(active.id);
+    expect(
+      (await service.listForUser(admin.id, 1, 100)).items.map((n) => n.id),
+    ).not.toContain(id);
+    expect(
+      (
+        await service.listForUser(
+          other.id,
+          1,
+          100,
+          NotificationListStatus.DISMISSED,
+        )
+      ).total,
+    ).toBe(23);
+    await service.restoreForUser(other.id, id);
+    expect(
+      (await service.listForUser(other.id, 1, 100)).items.map((n) => n.id),
+    ).toContain(id);
+    expect(await prisma.notification.count({ where: { body: prefix } })).toBe(
+      24,
+    );
   });
 
   it('marks all notifications read and dismisses one without affecting other users', async () => {

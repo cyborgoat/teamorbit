@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises'
 import { test, expect, type Page } from '@playwright/test'
 import { avatarPresets } from '../../api/src/avatars/presets'
 
-const defaultAvatar = 'http://localhost:3000/avatars/default-raven.png'
+const defaultAvatar = 'http://localhost:3000/avatars/content-capybara.png'
 const catalogue = avatarPresets.map(({ path, ...preset }) => ({
   ...preset,
   url: `http://localhost:3000${path}`,
@@ -242,10 +242,10 @@ test('broken custom avatars display the animal fallback', async ({ page }) => {
   await page.goto('/settings')
   await expect(
     page.getByRole('img', { name: "Team Member's avatar" }).last(),
-  ).toHaveAttribute('src', '/avatars/default-raven.png')
+  ).toHaveAttribute('src', '/avatars/content-capybara.png')
 })
 
-test('presets are selectable, persist after reload, and can be reset to the raven', async ({
+test('presets are selectable, persist after reload, and can be reset to the capybara', async ({
   page,
 }) => {
   const state = await mockAvatars(page)
@@ -289,7 +289,7 @@ test('presets are selectable, persist after reload, and can be reset to the rave
     path: '/private/tmp/teamorbit-avatar-presets-mobile.png',
     fullPage: true,
   })
-  await page.getByRole('button', { name: 'Select Grumpy Raven avatar' }).click()
+  await page.getByRole('button', { name: 'Select Content Capybara avatar' }).click()
   await page.getByRole('button', { name: 'Save profile', exact: true }).click()
   await expect.poll(() => state.profile.avatarUrl).toBeNull()
 })

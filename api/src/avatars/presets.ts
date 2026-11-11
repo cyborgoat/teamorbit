@@ -1,12 +1,12 @@
-export const DEFAULT_AVATAR_PATH = '/avatars/default-raven.png';
+export const DEFAULT_AVATAR_PATH = '/avatars/content-capybara.png';
 
 // Curated product assets, shared by the API and every client; no demo data.
 export const avatarPresets = [
   {
     id: 'grumpy-raven',
     name: 'Grumpy Raven',
-    path: DEFAULT_AVATAR_PATH,
-    isDefault: true,
+    path: '/avatars/default-raven.png',
+    isDefault: false,
   },
   {
     id: 'frazzled-owl',
@@ -49,5 +49,29 @@ export const avatarPresets = [
     name: 'Sleepy Yeti',
     path: '/avatars/sleepy-yeti.png',
     isDefault: false,
+  },
+  {
+    id: 'happy-red-panda',
+    name: 'Happy Red Panda',
+    path: '/avatars/happy-red-panda.png',
+    isDefault: false,
+  },
+  {
+    id: 'playful-otter',
+    name: 'Playful Otter',
+    path: '/avatars/playful-otter.png',
+    isDefault: false,
+  },
+  {
+    id: 'sunny-corgi',
+    name: 'Sunny Corgi',
+    path: '/avatars/sunny-corgi.png',
+    isDefault: false,
+  },
+  {
+    id: 'content-capybara',
+    name: 'Content Capybara',
+    path: DEFAULT_AVATAR_PATH,
+    isDefault: true,
   },
 ] as const;

@@ -161,6 +161,7 @@ model NotificationDismissal {
   userId         String
   notificationId String
   dismissedAt    DateTime     @default(now())
+  deletedAt      DateTime?
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
 

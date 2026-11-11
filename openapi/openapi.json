@@ -1068,6 +1068,87 @@
         ]
       }
     },
+    "/api/notifications/dismissed": {
+      "delete": {
+        "operationId": "NotificationsController_deleteAllDismissed",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteAllDismissedDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/notifications/{id}/dismissed": {
+      "delete": {
+        "operationId": "NotificationsController_deleteDismissed",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
     "/api/notifications/{id}": {
       "delete": {
         "operationId": "NotificationsController_dismiss",
@@ -3361,6 +3442,23 @@
           "userId",
           "notificationId",
           "readAt"
+        ]
+      },
+      "DeleteAllDismissedDto": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "example": true
+          },
+          "deleted": {
+            "type": "number",
+            "description": "Number of dismissed notifications deleted"
+          }
+        },
+        "required": [
+          "ok",
+          "deleted"
         ]
       },
       "EventDto": {

@@ -55,13 +55,13 @@ async function mockMarkdownApi(
       return route.fulfill({ json: { items: [] } })
     if (
       new URL(request.url()).pathname.replace(/^\/api(?=\/)/, '') ===
-      '/avatars/default-raven.png'
+      '/avatars/content-capybara.png'
     )
       return route.fulfill({
         contentType: 'image/png',
         body: await readFile(
           new URL(
-            '../../api/src/assets/avatars/default-raven.png',
+            '../../api/src/assets/avatars/content-capybara.png',
             import.meta.url,
           ),
         ),

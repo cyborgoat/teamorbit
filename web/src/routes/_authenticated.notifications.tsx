@@ -114,19 +114,42 @@ function NotificationsPage() {
     onError: (e: Error) => toast.error(e.message),
   })
 
+  const deleteDismissed = useMutation({
+    mutationFn: (id: string) => orbit.notifications.deleteDismissed(id),
+    onSuccess: async () => {
+      if (data?.items.length === 1 && pagination.page > 1) {
+        pagination.setPage(pagination.page - 1)
+      }
+      await invalidate()
+      toast.success('Notification deleted')
+    },
+    onError: (e: Error) => toast.error(e.message),
+  })
+  const deleteAllDismissed = useMutation({
+    mutationFn: () => orbit.notifications.deleteAllDismissed(),
+    onSuccess: async (res) => {
+      pagination.setPage(1)
+      await invalidate()
+      toast.success(`Deleted ${res.deleted} dismissed notifications`)
+    },
+    onError: (e: Error) => toast.error(e.message),
+  })
+
   const items = data?.items ?? []
   const busy =
     markRead.isPending ||
     markUnread.isPending ||
     markAllRead.isPending ||
     dismiss.isPending ||
-    restore.isPending
+    restore.isPending ||
+    deleteDismissed.isPending ||
+    deleteAllDismissed.isPending
 
   return (
     <div>
       <PageHeader
         title="Notifications"
-        description="Grouped inbox for testing read, unread, dismiss, and restore."
+        description="Manage unread, read, and dismissed notifications."
         actions={
           group !== 'dismissed' ? (
             <Button
@@ -137,7 +160,24 @@ function NotificationsPage() {
             >
               Mark all as read
             </Button>
-          ) : null
+          ) : (
+            <Button
+              size="sm"
+              variant="destructive"
+              disabled={busy || (counts.data?.dismissed ?? 0) === 0}
+              onClick={() => {
+                if (
+                  confirm(
+                    'Permanently delete all dismissed notifications? This cannot be undone.',
+                  )
+                ) {
+                  deleteAllDismissed.mutate()
+                }
+              }}
+            >
+              Delete all
+            </Button>
+          )
         }
       />
 
@@ -272,14 +312,32 @@ function NotificationsPage() {
                         </>
                       ) : null}
                       {group === 'dismissed' ? (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          disabled={busy}
-                          onClick={() => restore.mutate(n.id)}
-                        >
-                          Restore
-                        </Button>
+                        <>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={busy}
+                            onClick={() => restore.mutate(n.id)}
+                          >
+                            Restore
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            disabled={busy}
+                            onClick={() => {
+                              if (
+                                confirm(
+                                  'Permanently delete this dismissed notification? This cannot be undone.',
+                                )
+                              ) {
+                                deleteDismissed.mutate(n.id)
+                              }
+                            }}
+                          >
+                            Delete
+                          </Button>
+                        </>
                       ) : null}
                     </div>
                   </TableCell>

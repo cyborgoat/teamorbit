@@ -92,3 +92,11 @@ export class MarkAllReadDto {
   @ApiProperty({ description: 'Number of notifications newly marked read' })
   marked: number;
 }
+
+export class DeleteAllDismissedDto {
+  @ApiProperty({ example: true })
+  ok: boolean;
+
+  @ApiProperty({ description: 'Number of dismissed notifications deleted' })
+  deleted: number;
+}

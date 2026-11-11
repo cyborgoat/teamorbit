@@ -94,7 +94,7 @@ All params, bodies and responses are typed from the OpenAPI spec.
 | `orbit.users`, `events`, `announcements`, `news`, `blogPosts` | `list(query?)`, `get(id)`, `create(body)`, `update(id, body)`, `delete(id)`, `iterate(query?)` |
 | `orbit.comments` | `list(query)`, `create(body)`, `update(id, body)`, `delete(id)`, `vote(id, value)` |
 | `orbit.forum` | `listPosts`, `getPost`, `createPost`, `updatePost`, `deletePost`, `votePost(id, value)` |
-| `orbit.notifications` | `list(query?)`, `markRead(id)`, `markUnread(id)`, `markAllRead()`, `delete(id)`, `restore(id)` |
+| `orbit.notifications` | `list(query?)`, `markRead(id)`, `markUnread(id)`, `markAllRead()`, `delete(id)`, `restore(id)`, `deleteDismissed(id)`, `deleteAllDismissed()` |
 | `orbit.uploads` | `upload(file, filename?)` |
 | `orbit.health()` | |
 
@@ -221,6 +221,8 @@ under `components['schemas']`. List endpoints accept `page`, `limit` (max 100) a
 | `POST` | `/api/notifications/{id}/read` | Bearer |  | `NotificationReadDto` |
 | `DELETE` | `/api/notifications/{id}/read` | Bearer |  | `OkDto` |
 | `POST` | `/api/notifications/{id}/restore` | Bearer |  | `OkDto` |
+| `DELETE` | `/api/notifications/dismissed` | Bearer |  | `DeleteAllDismissedDto` |
+| `DELETE` | `/api/notifications/{id}/dismissed` | Bearer |  | `OkDto` |
 | `DELETE` | `/api/notifications/{id}` | Bearer |  | `OkDto` |
 
 #### events

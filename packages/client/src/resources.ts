@@ -107,6 +107,14 @@ export function createResources(client: Raw, auth: { setToken(t: string | undefi
         call(client, 'DELETE', '/api/notifications/{id}', withId(id)) as Promise<
           ResponseOf<'/api/notifications/{id}', 'delete'>
         >,
+      deleteDismissed: (id: string) =>
+        call(client, 'DELETE', '/api/notifications/{id}/dismissed', withId(id)) as Promise<
+          ResponseOf<'/api/notifications/{id}/dismissed', 'delete'>
+        >,
+      deleteAllDismissed: () =>
+        call(client, 'DELETE', '/api/notifications/dismissed') as Promise<
+          ResponseOf<'/api/notifications/dismissed', 'delete'>
+        >,
       restore: (id: string) =>
         call(client, 'POST', '/api/notifications/{id}/restore', withId(id)) as Promise<
           ResponseOf<'/api/notifications/{id}/restore', 'post'>

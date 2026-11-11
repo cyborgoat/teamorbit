@@ -14,7 +14,7 @@ function mockFetch(handler) {
 }
 
 test('avatar presets are available without signing in', async () => {
-  const items = [{ id: 'grumpy-raven', name: 'Grumpy Raven', url: 'https://orbit.example/avatars/default-raven.png', isDefault: true }];
+  const items = [{ id: 'content-capybara', name: 'Content Capybara', url: 'https://orbit.example/avatars/content-capybara.png', isDefault: true }];
   const { fetch, calls } = mockFetch(() => ({ body: { items } }));
   const orbit = createTeamOrbitClient({ baseUrl: 'https://orbit.example', fetch });
   assert.deepEqual(await orbit.avatars.list(), { items });

@@ -18,6 +18,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { NotificationsService } from './notifications.service';
 import {
+  DeleteAllDismissedDto,
   MarkAllReadDto,
   NotificationListQueryDto,
   NotificationReadDto,
@@ -69,6 +70,21 @@ export class NotificationsController {
   @ApiOkResponse({ type: OkDto })
   restore(@CurrentUser() user: { id: string }, @Param('id') id: string) {
     return this.notifications.restoreForUser(user.id, id);
+  }
+
+  @Delete('dismissed')
+  @ApiOkResponse({ type: DeleteAllDismissedDto })
+  deleteAllDismissed(@CurrentUser() user: { id: string }) {
+    return this.notifications.deleteAllDismissedForUser(user.id);
+  }
+
+  @Delete(':id/dismissed')
+  @ApiOkResponse({ type: OkDto })
+  deleteDismissed(
+    @CurrentUser() user: { id: string },
+    @Param('id') id: string,
+  ) {
+    return this.notifications.deleteDismissedForUser(user.id, id);
   }
 
   @Delete(':id')
