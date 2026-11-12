@@ -5,8 +5,9 @@ import { ListControls } from '@/components/list-controls'
 import { queryKeys } from '@/lib/query-keys'
 import { Link } from '@tanstack/react-router'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Newspaper, Plus, Trash2 } from 'lucide-react'
+import { Newspaper, Plus } from 'lucide-react'
 import { toast } from 'sonner'
+import { TableCard, actionsHeadClass, actionsCellClass, RowDeleteButton } from '@/components/data-table'
 import { PageHeader } from '@/components/page-header'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -109,7 +110,7 @@ export function ArticleList({ kind }: { kind: 'news' | 'blog' }) {
           </EmptyHeader>
         </Empty>
       ) : (
-        <div className="overflow-hidden rounded-xl border">
+        <TableCard>
           <Table>
             <TableHeader>
               <TableRow>
@@ -117,7 +118,7 @@ export function ArticleList({ kind }: { kind: 'news' | 'blog' }) {
                 <TableHead>Tags</TableHead>
                 <TableHead>Views</TableHead>
                 <TableHead>Created</TableHead>
-                <TableHead className="w-20" />
+                <TableHead className={actionsHeadClass} />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -150,27 +151,20 @@ export function ArticleList({ kind }: { kind: 'news' | 'blog' }) {
                   <TableCell className="text-muted-foreground">
                     {new Date(item.createdAt).toLocaleDateString()}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className={actionsCellClass}>
                     {canModerate(user, item.author.id) && (
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        aria-label="Delete"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          if (confirm('Delete this article?'))
-                            remove.mutate(item.id)
+                      <RowDeleteButton
+                        onClick={() => {
+                          if (confirm('Delete this article?')) remove.mutate(item.id)
                         }}
-                      >
-                        <Trash2 />
-                      </Button>
+                      />
                     )}
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
-        </div>
+        </TableCard>
       )}
     </div>
   )

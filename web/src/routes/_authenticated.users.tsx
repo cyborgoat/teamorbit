@@ -12,9 +12,15 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query'
-import { Plus, Trash2, Users } from 'lucide-react'
+import { Plus, Users } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import {
+  RowDeleteButton,
+  TableCard,
+  actionsCellClass,
+  actionsHeadClass,
+} from '@/components/data-table'
 import { PageHeader } from '@/components/page-header'
 import { AvatarPicker } from '@/components/avatar-picker'
 import { AvatarSettingsDialog } from '@/components/avatar-settings-dialog'
@@ -421,7 +427,7 @@ function UsersPage() {
           </EmptyHeader>
         </Empty>
       ) : (
-        <div className="overflow-hidden rounded-xl border">
+        <TableCard>
           <Table>
             <TableHeader>
               <TableRow>
@@ -429,7 +435,7 @@ function UsersPage() {
                 <TableHead>Email</TableHead>
                 <TableHead>Role</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead className="w-20" />
+                <TableHead className={actionsHeadClass} />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -498,25 +504,21 @@ function UsersPage() {
                       }
                     />
                   </TableCell>
-                  <TableCell>
+                  <TableCell className={actionsCellClass}>
                     {u.status !== 'DELETED' &&
                     u.id !== user?.id &&
                     (user?.role === 'SUPERUSER' || u.role !== 'SUPERUSER') ? (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        aria-label={`Delete ${u.fullName}`}
+                      <RowDeleteButton
+                        label={`Delete ${u.fullName}`}
                         onClick={() => setDeleteTarget(u)}
-                      >
-                        <Trash2 />
-                      </Button>
+                      />
                     ) : null}
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
-        </div>
+        </TableCard>
       )}
       <Dialog
         open={deleteTarget !== null}

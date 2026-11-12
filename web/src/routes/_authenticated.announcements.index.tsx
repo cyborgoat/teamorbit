@@ -6,9 +6,10 @@ import { ListToolbar } from '@/components/list-toolbar'
 import { queryKeys } from '@/lib/query-keys'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Megaphone, Plus, Trash2 } from 'lucide-react'
+import { Megaphone, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { TableCard, actionsHeadClass, actionsCellClass, RowDeleteButton } from '@/components/data-table'
 import { PageHeader } from '@/components/page-header'
 import { Button } from '@/components/ui/button'
 import {
@@ -40,7 +41,7 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { orbit } from '@/lib/api'
 
-export const Route = createFileRoute('/_authenticated/announcements')({
+export const Route = createFileRoute('/_authenticated/announcements/')({
   component: AnnouncementsPage,
 })
 
@@ -187,14 +188,14 @@ function AnnouncementsPage() {
           </EmptyHeader>
         </Empty>
       ) : (
-        <div className="overflow-hidden rounded-xl border">
+        <TableCard>
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Title</TableHead>
                 <TableHead>Author</TableHead>
                 <TableHead>Created</TableHead>
-                <TableHead className="w-20" />
+                <TableHead className={actionsHeadClass} />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -218,26 +219,20 @@ function AnnouncementsPage() {
                   <TableCell className="text-muted-foreground">
                     {new Date(item.createdAt).toLocaleString()}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className={actionsCellClass}>
                     {canModerate(user, item.author.id) && (
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        aria-label="Delete"
+                      <RowDeleteButton
                         onClick={() => {
-                          if (confirm('Delete this announcement?'))
-                            remove.mutate(item.id)
+                          if (confirm('Delete this announcement?')) remove.mutate(item.id)
                         }}
-                      >
-                        <Trash2 />
-                      </Button>
+                      />
                     )}
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
-        </div>
+        </TableCard>
       )}
     </div>
   )

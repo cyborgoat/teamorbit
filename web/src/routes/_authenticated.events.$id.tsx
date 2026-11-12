@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Pencil } from 'lucide-react'
+import { Pencil, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { CommentThread } from '@/components/comment-thread'
 import {
@@ -27,6 +27,7 @@ function EventDetailPage() {
   const { id } = Route.useParams()
   const { user } = useAuth()
   const qc = useQueryClient()
+  const navigate = useNavigate()
   const { data, error, refetch, isLoading } = useQuery({
     queryKey: [...queryKeys.events, id],
     queryFn: () => orbit.events.get(id),
@@ -61,6 +62,19 @@ function EventDetailPage() {
       await qc.invalidateQueries({ queryKey: queryKeys.events })
       toast.success('Event updated')
       setEditing(false)
+    },
+    onError: (e: Error) => toast.error(e.message),
+  })
+
+  const remove = useMutation({
+    mutationFn: () => orbit.events.delete(id),
+    onSuccess: async () => {
+      // Leave the detail page first and drop its cache entry, otherwise the
+      // list invalidation refetches the deleted item and shows "not found".
+      qc.removeQueries({ queryKey: [...queryKeys.events, id] })
+      await navigate({ to: '/events' })
+      toast.success('Deleted')
+      qc.invalidateQueries({ queryKey: queryKeys.events })
     },
     onError: (e: Error) => toast.error(e.message),
   })
@@ -124,28 +138,41 @@ function EventDetailPage() {
           description={`${data.location} · ${new Date(data.startAt).toLocaleString()} – ${new Date(data.endAt).toLocaleString()}`}
         />
         {allowed ? (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setForm({
-                title: data.title,
-                description: data.description,
-                location: data.location,
-                startAt: toLocalInput(data.startAt),
-                endAt: toLocalInput(data.endAt),
-                coverImageUrl: data.coverImageUrl ?? '',
-                audience: data.audience,
-                recipientIds: (data.recipients ?? [])
-                  .map((r) => r.id)
-                  .filter((recipientId) => recipientId !== data.createdBy.id),
-              })
-              setEditing(true)
-            }}
-          >
-            <Pencil data-icon="inline-start" />
-            Edit
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={remove.isPending}
+              onClick={() => {
+                if (confirm('Delete this event?')) remove.mutate()
+              }}
+            >
+              <Trash2 data-icon="inline-start" />
+              Delete
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setForm({
+                  title: data.title,
+                  description: data.description,
+                  location: data.location,
+                  startAt: toLocalInput(data.startAt),
+                  endAt: toLocalInput(data.endAt),
+                  coverImageUrl: data.coverImageUrl ?? '',
+                  audience: data.audience,
+                  recipientIds: (data.recipients ?? [])
+                    .map((r) => r.id)
+                    .filter((recipientId) => recipientId !== data.createdBy.id),
+                })
+                setEditing(true)
+              }}
+            >
+              <Pencil data-icon="inline-start" />
+              Edit
+            </Button>
+          </div>
         ) : null}
       </div>
       <div className="flex flex-wrap items-center gap-2">

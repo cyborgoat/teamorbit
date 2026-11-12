@@ -3,8 +3,9 @@ import { ListToolbar } from '@/components/list-toolbar'
 import { queryKeys } from '@/lib/query-keys'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { MessageSquare, Plus, Trash2 } from 'lucide-react'
+import { MessageSquare, Plus } from 'lucide-react'
 import { toast } from 'sonner'
+import { TableCard, actionsHeadClass, actionsCellClass, RowDeleteButton } from '@/components/data-table'
 import { PageHeader } from '@/components/page-header'
 import { UserAvatar } from '@/components/user-avatar'
 import { Button } from '@/components/ui/button'
@@ -111,7 +112,7 @@ function ForumPage() {
           </EmptyHeader>
         </Empty>
       ) : (
-        <div className="overflow-hidden rounded-xl border">
+        <TableCard>
           <Table>
             <TableHeader>
               <TableRow>
@@ -121,12 +122,12 @@ function ForumPage() {
                 <TableHead>Views</TableHead>
                 <TableHead>Author</TableHead>
                 <TableHead>Created</TableHead>
-                <TableHead className="w-20" />
+                <TableHead className={actionsHeadClass} />
               </TableRow>
             </TableHeader>
             <TableBody>
               {items.map((item) => (
-                <TableRow key={item.id} className="cursor-pointer">
+                <TableRow key={item.id}>
                   <TableCell>
                     <Link
                       to="/forum/$postId"
@@ -159,27 +160,20 @@ function ForumPage() {
                   <TableCell className="text-muted-foreground">
                     {new Date(item.createdAt).toLocaleDateString()}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className={actionsCellClass}>
                     {canModerate(user, item.author.id) ? (
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        aria-label="Delete"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          if (confirm('Delete this post?'))
-                            remove.mutate(item.id)
+                      <RowDeleteButton
+                        onClick={() => {
+                          if (confirm('Delete this post?')) remove.mutate(item.id)
                         }}
-                      >
-                        <Trash2 />
-                      </Button>
+                      />
                     ) : null}
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
-        </div>
+        </TableCard>
       )}
     </div>
   )

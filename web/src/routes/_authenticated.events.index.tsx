@@ -12,9 +12,10 @@ import { queryKeys } from '@/lib/query-keys'
 import { fromLocalInput } from '@/lib/event-datetime'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { CalendarDays, Plus, Trash2 } from 'lucide-react'
+import { CalendarDays, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { TableCard, actionsHeadClass, actionsCellClass, RowDeleteButton } from '@/components/data-table'
 import { PageHeader } from '@/components/page-header'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -44,7 +45,7 @@ import {
 } from '@/components/ui/table'
 import { orbit } from '@/lib/api'
 
-export const Route = createFileRoute('/_authenticated/events')({
+export const Route = createFileRoute('/_authenticated/events/')({
   component: EventsPage,
 })
 
@@ -217,7 +218,7 @@ function EventsPage() {
           </EmptyHeader>
         </Empty>
       ) : (
-        <div className="overflow-hidden rounded-xl border">
+        <TableCard>
           <Table>
             <TableHeader>
               <TableRow>
@@ -225,7 +226,7 @@ function EventsPage() {
                 <TableHead>Audience</TableHead>
                 <TableHead>When</TableHead>
                 <TableHead>Location</TableHead>
-                <TableHead className="w-20" />
+                <TableHead className={actionsHeadClass} />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -268,26 +269,20 @@ function EventsPage() {
                     </div>
                   </TableCell>
                   <TableCell>{item.location}</TableCell>
-                  <TableCell>
+                  <TableCell className={actionsCellClass}>
                     {canModerate(user, item.createdBy.id) && (
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        aria-label="Delete"
+                      <RowDeleteButton
                         onClick={() => {
-                          if (confirm('Delete this event?'))
-                            remove.mutate(item.id)
+                          if (confirm('Delete this event?')) remove.mutate(item.id)
                         }}
-                      >
-                        <Trash2 />
-                      </Button>
+                      />
                     )}
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
-        </div>
+        </TableCard>
       )}
     </div>
   )

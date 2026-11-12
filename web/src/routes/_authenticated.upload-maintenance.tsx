@@ -6,6 +6,7 @@ import { orbit } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { canManage } from '@/lib/policies'
 import { PageHeader } from '@/components/page-header'
+import { TableCard } from '@/components/data-table'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -149,7 +150,7 @@ function UploadMaintenancePage() {
               </CardContent>
             </Card>
           ) : null}
-          <div className="overflow-x-auto rounded-lg border">
+          <TableCard>
             <Table>
               <TableHeader>
                 <TableRow>
@@ -189,7 +190,7 @@ function UploadMaintenancePage() {
                 ) : null}
               </TableBody>
             </Table>
-          </div>
+          </TableCard>
           <div className="flex items-center gap-3">
             <Button
               variant="outline"

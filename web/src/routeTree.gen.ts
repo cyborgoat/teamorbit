@@ -13,17 +13,17 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated.index'
-import { Route as AuthenticatedAnnouncementsRouteImport } from './routes/_authenticated.announcements'
-import { Route as AuthenticatedEventsRouteImport } from './routes/_authenticated.events'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated.notifications'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated.settings'
 import { Route as AuthenticatedUploadMaintenanceRouteImport } from './routes/_authenticated.upload-maintenance'
 import { Route as AuthenticatedUploadsRouteImport } from './routes/_authenticated.uploads'
 import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated.users'
+import { Route as AuthenticatedAnnouncementsIndexRouteImport } from './routes/_authenticated.announcements.index'
 import { Route as AuthenticatedAnnouncementsIdRouteImport } from './routes/_authenticated.announcements.$id'
 import { Route as AuthenticatedBlogIndexRouteImport } from './routes/_authenticated.blog.index'
 import { Route as AuthenticatedBlogIdRouteImport } from './routes/_authenticated.blog.$id'
 import { Route as AuthenticatedBlogNewRouteImport } from './routes/_authenticated.blog.new'
+import { Route as AuthenticatedEventsIndexRouteImport } from './routes/_authenticated.events.index'
 import { Route as AuthenticatedEventsIdRouteImport } from './routes/_authenticated.events.$id'
 import { Route as AuthenticatedForumIndexRouteImport } from './routes/_authenticated.forum.index'
 import { Route as AuthenticatedForumPostIdRouteImport } from './routes/_authenticated.forum.$postId'
@@ -49,17 +49,6 @@ const RegisterRoute = RegisterRouteImport.update({
 const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedAnnouncementsRoute =
-  AuthenticatedAnnouncementsRouteImport.update({
-    id: '/announcements',
-    path: '/announcements',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
-const AuthenticatedEventsRoute = AuthenticatedEventsRouteImport.update({
-  id: '/events',
-  path: '/events',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedNotificationsRoute =
@@ -89,11 +78,17 @@ const AuthenticatedUsersRoute = AuthenticatedUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedAnnouncementsIndexRoute =
+  AuthenticatedAnnouncementsIndexRouteImport.update({
+    id: '/announcements/',
+    path: '/announcements/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedAnnouncementsIdRoute =
   AuthenticatedAnnouncementsIdRouteImport.update({
-    id: '/$id',
-    path: '/$id',
-    getParentRoute: () => AuthenticatedAnnouncementsRoute,
+    id: '/announcements/$id',
+    path: '/announcements/$id',
+    getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedBlogIndexRoute = AuthenticatedBlogIndexRouteImport.update({
   id: '/blog/',
@@ -110,10 +105,16 @@ const AuthenticatedBlogNewRoute = AuthenticatedBlogNewRouteImport.update({
   path: '/blog/new',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedEventsIndexRoute =
+  AuthenticatedEventsIndexRouteImport.update({
+    id: '/events/',
+    path: '/events/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedEventsIdRoute = AuthenticatedEventsIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => AuthenticatedEventsRoute,
+  id: '/events/$id',
+  path: '/events/$id',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedForumIndexRoute = AuthenticatedForumIndexRouteImport.update({
   id: '/forum/',
@@ -151,8 +152,6 @@ export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/announcements': typeof AuthenticatedAnnouncementsRouteWithChildren
-  '/events': typeof AuthenticatedEventsRouteWithChildren
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/upload-maintenance': typeof AuthenticatedUploadMaintenanceRoute
@@ -166,15 +165,15 @@ export interface FileRoutesByFullPath {
   '/forum/new': typeof AuthenticatedForumNewRoute
   '/news/$id': typeof AuthenticatedNewsIdRoute
   '/news/new': typeof AuthenticatedNewsNewRoute
+  '/announcements/': typeof AuthenticatedAnnouncementsIndexRoute
   '/blog/': typeof AuthenticatedBlogIndexRoute
+  '/events/': typeof AuthenticatedEventsIndexRoute
   '/forum/': typeof AuthenticatedForumIndexRoute
   '/news/': typeof AuthenticatedNewsIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/announcements': typeof AuthenticatedAnnouncementsRouteWithChildren
-  '/events': typeof AuthenticatedEventsRouteWithChildren
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/upload-maintenance': typeof AuthenticatedUploadMaintenanceRoute
@@ -189,7 +188,9 @@ export interface FileRoutesByTo {
   '/forum/new': typeof AuthenticatedForumNewRoute
   '/news/$id': typeof AuthenticatedNewsIdRoute
   '/news/new': typeof AuthenticatedNewsNewRoute
+  '/announcements': typeof AuthenticatedAnnouncementsIndexRoute
   '/blog': typeof AuthenticatedBlogIndexRoute
+  '/events': typeof AuthenticatedEventsIndexRoute
   '/forum': typeof AuthenticatedForumIndexRoute
   '/news': typeof AuthenticatedNewsIndexRoute
 }
@@ -198,8 +199,6 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/_authenticated/announcements': typeof AuthenticatedAnnouncementsRouteWithChildren
-  '/_authenticated/events': typeof AuthenticatedEventsRouteWithChildren
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/upload-maintenance': typeof AuthenticatedUploadMaintenanceRoute
@@ -214,7 +213,9 @@ export interface FileRoutesById {
   '/_authenticated/forum/new': typeof AuthenticatedForumNewRoute
   '/_authenticated/news/$id': typeof AuthenticatedNewsIdRoute
   '/_authenticated/news/new': typeof AuthenticatedNewsNewRoute
+  '/_authenticated/announcements/': typeof AuthenticatedAnnouncementsIndexRoute
   '/_authenticated/blog/': typeof AuthenticatedBlogIndexRoute
+  '/_authenticated/events/': typeof AuthenticatedEventsIndexRoute
   '/_authenticated/forum/': typeof AuthenticatedForumIndexRoute
   '/_authenticated/news/': typeof AuthenticatedNewsIndexRoute
 }
@@ -224,8 +225,6 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/register'
-    | '/announcements'
-    | '/events'
     | '/notifications'
     | '/settings'
     | '/upload-maintenance'
@@ -239,15 +238,15 @@ export interface FileRouteTypes {
     | '/forum/new'
     | '/news/$id'
     | '/news/new'
+    | '/announcements/'
     | '/blog/'
+    | '/events/'
     | '/forum/'
     | '/news/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
     | '/register'
-    | '/announcements'
-    | '/events'
     | '/notifications'
     | '/settings'
     | '/upload-maintenance'
@@ -262,7 +261,9 @@ export interface FileRouteTypes {
     | '/forum/new'
     | '/news/$id'
     | '/news/new'
+    | '/announcements'
     | '/blog'
+    | '/events'
     | '/forum'
     | '/news'
   id:
@@ -270,8 +271,6 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/login'
     | '/register'
-    | '/_authenticated/announcements'
-    | '/_authenticated/events'
     | '/_authenticated/notifications'
     | '/_authenticated/settings'
     | '/_authenticated/upload-maintenance'
@@ -286,7 +285,9 @@ export interface FileRouteTypes {
     | '/_authenticated/forum/new'
     | '/_authenticated/news/$id'
     | '/_authenticated/news/new'
+    | '/_authenticated/announcements/'
     | '/_authenticated/blog/'
+    | '/_authenticated/events/'
     | '/_authenticated/forum/'
     | '/_authenticated/news/'
   fileRoutesById: FileRoutesById
@@ -327,20 +328,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/announcements': {
-      id: '/_authenticated/announcements'
-      path: '/announcements'
-      fullPath: '/announcements'
-      preLoaderRoute: typeof AuthenticatedAnnouncementsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/events': {
-      id: '/_authenticated/events'
-      path: '/events'
-      fullPath: '/events'
-      preLoaderRoute: typeof AuthenticatedEventsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
     '/_authenticated/notifications': {
       id: '/_authenticated/notifications'
       path: '/notifications'
@@ -376,12 +363,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedUsersRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/announcements/': {
+      id: '/_authenticated/announcements/'
+      path: '/announcements'
+      fullPath: '/announcements/'
+      preLoaderRoute: typeof AuthenticatedAnnouncementsIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/announcements/$id': {
       id: '/_authenticated/announcements/$id'
-      path: '/$id'
+      path: '/announcements/$id'
       fullPath: '/announcements/$id'
       preLoaderRoute: typeof AuthenticatedAnnouncementsIdRouteImport
-      parentRoute: typeof AuthenticatedAnnouncementsRoute
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/blog/': {
       id: '/_authenticated/blog/'
@@ -404,12 +398,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBlogNewRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/events/': {
+      id: '/_authenticated/events/'
+      path: '/events'
+      fullPath: '/events/'
+      preLoaderRoute: typeof AuthenticatedEventsIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/events/$id': {
       id: '/_authenticated/events/$id'
-      path: '/$id'
+      path: '/events/$id'
       fullPath: '/events/$id'
       preLoaderRoute: typeof AuthenticatedEventsIdRouteImport
-      parentRoute: typeof AuthenticatedEventsRoute
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/forum/': {
       id: '/_authenticated/forum/'
@@ -456,67 +457,46 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface AuthenticatedAnnouncementsRouteChildren {
-  AuthenticatedAnnouncementsIdRoute: typeof AuthenticatedAnnouncementsIdRoute
-}
-
-const AuthenticatedAnnouncementsRouteChildren: AuthenticatedAnnouncementsRouteChildren =
-  {
-    AuthenticatedAnnouncementsIdRoute: AuthenticatedAnnouncementsIdRoute,
-  }
-
-const AuthenticatedAnnouncementsRouteWithChildren =
-  AuthenticatedAnnouncementsRoute._addFileChildren(
-    AuthenticatedAnnouncementsRouteChildren,
-  )
-
-interface AuthenticatedEventsRouteChildren {
-  AuthenticatedEventsIdRoute: typeof AuthenticatedEventsIdRoute
-}
-
-const AuthenticatedEventsRouteChildren: AuthenticatedEventsRouteChildren = {
-  AuthenticatedEventsIdRoute: AuthenticatedEventsIdRoute,
-}
-
-const AuthenticatedEventsRouteWithChildren =
-  AuthenticatedEventsRoute._addFileChildren(AuthenticatedEventsRouteChildren)
-
 interface AuthenticatedRouteChildren {
-  AuthenticatedAnnouncementsRoute: typeof AuthenticatedAnnouncementsRouteWithChildren
-  AuthenticatedEventsRoute: typeof AuthenticatedEventsRouteWithChildren
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedUploadMaintenanceRoute: typeof AuthenticatedUploadMaintenanceRoute
   AuthenticatedUploadsRoute: typeof AuthenticatedUploadsRoute
   AuthenticatedUsersRoute: typeof AuthenticatedUsersRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedAnnouncementsIdRoute: typeof AuthenticatedAnnouncementsIdRoute
   AuthenticatedBlogIdRoute: typeof AuthenticatedBlogIdRoute
   AuthenticatedBlogNewRoute: typeof AuthenticatedBlogNewRoute
+  AuthenticatedEventsIdRoute: typeof AuthenticatedEventsIdRoute
   AuthenticatedForumPostIdRoute: typeof AuthenticatedForumPostIdRoute
   AuthenticatedForumNewRoute: typeof AuthenticatedForumNewRoute
   AuthenticatedNewsIdRoute: typeof AuthenticatedNewsIdRoute
   AuthenticatedNewsNewRoute: typeof AuthenticatedNewsNewRoute
+  AuthenticatedAnnouncementsIndexRoute: typeof AuthenticatedAnnouncementsIndexRoute
   AuthenticatedBlogIndexRoute: typeof AuthenticatedBlogIndexRoute
+  AuthenticatedEventsIndexRoute: typeof AuthenticatedEventsIndexRoute
   AuthenticatedForumIndexRoute: typeof AuthenticatedForumIndexRoute
   AuthenticatedNewsIndexRoute: typeof AuthenticatedNewsIndexRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
-  AuthenticatedAnnouncementsRoute: AuthenticatedAnnouncementsRouteWithChildren,
-  AuthenticatedEventsRoute: AuthenticatedEventsRouteWithChildren,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedUploadMaintenanceRoute: AuthenticatedUploadMaintenanceRoute,
   AuthenticatedUploadsRoute: AuthenticatedUploadsRoute,
   AuthenticatedUsersRoute: AuthenticatedUsersRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedAnnouncementsIdRoute: AuthenticatedAnnouncementsIdRoute,
   AuthenticatedBlogIdRoute: AuthenticatedBlogIdRoute,
   AuthenticatedBlogNewRoute: AuthenticatedBlogNewRoute,
+  AuthenticatedEventsIdRoute: AuthenticatedEventsIdRoute,
   AuthenticatedForumPostIdRoute: AuthenticatedForumPostIdRoute,
   AuthenticatedForumNewRoute: AuthenticatedForumNewRoute,
   AuthenticatedNewsIdRoute: AuthenticatedNewsIdRoute,
   AuthenticatedNewsNewRoute: AuthenticatedNewsNewRoute,
+  AuthenticatedAnnouncementsIndexRoute: AuthenticatedAnnouncementsIndexRoute,
   AuthenticatedBlogIndexRoute: AuthenticatedBlogIndexRoute,
+  AuthenticatedEventsIndexRoute: AuthenticatedEventsIndexRoute,
   AuthenticatedForumIndexRoute: AuthenticatedForumIndexRoute,
   AuthenticatedNewsIndexRoute: AuthenticatedNewsIndexRoute,
 }

@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Pencil } from 'lucide-react'
+import { Pencil, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { CommentThread } from '@/components/comment-thread'
 import { ListControls } from '@/components/list-controls'
@@ -23,6 +23,7 @@ function AnnouncementDetailPage() {
   const { id } = Route.useParams()
   const { user } = useAuth()
   const qc = useQueryClient()
+  const navigate = useNavigate()
   const { data, error, refetch, isLoading } = useQuery({
     queryKey: [...queryKeys.announcements, id],
     queryFn: () => orbit.announcements.get(id),
@@ -31,12 +32,24 @@ function AnnouncementDetailPage() {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const update = useMutation({
-    mutationFn: () =>
-      orbit.announcements.update(id, { title, description }),
+    mutationFn: () => orbit.announcements.update(id, { title, description }),
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: queryKeys.announcements })
       toast.success('Announcement updated')
       setEditing(false)
+    },
+    onError: (e: Error) => toast.error(e.message),
+  })
+
+  const remove = useMutation({
+    mutationFn: () => orbit.announcements.delete(id),
+    onSuccess: async () => {
+      // Leave the detail page first and drop its cache entry, otherwise the
+      // list invalidation refetches the deleted item and shows "not found".
+      qc.removeQueries({ queryKey: [...queryKeys.announcements, id] })
+      await navigate({ to: '/announcements' })
+      toast.success('Deleted')
+      qc.invalidateQueries({ queryKey: queryKeys.announcements })
     },
     onError: (e: Error) => toast.error(e.message),
   })
@@ -108,18 +121,31 @@ function AnnouncementDetailPage() {
           description={`By ${data.author?.fullName ?? '—'} · ${new Date(data.createdAt).toLocaleString()}`}
         />
         {allowed ? (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setTitle(data.title)
-              setDescription(data.description)
-              setEditing(true)
-            }}
-          >
-            <Pencil data-icon="inline-start" />
-            Edit
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={remove.isPending}
+              onClick={() => {
+                if (confirm('Delete this announcement?')) remove.mutate()
+              }}
+            >
+              <Trash2 data-icon="inline-start" />
+              Delete
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setTitle(data.title)
+                setDescription(data.description)
+                setEditing(true)
+              }}
+            >
+              <Pencil data-icon="inline-start" />
+              Edit
+            </Button>
+          </div>
         ) : null}
       </div>
       <p className="whitespace-pre-wrap text-sm leading-relaxed">

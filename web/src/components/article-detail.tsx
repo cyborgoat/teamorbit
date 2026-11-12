@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Pencil } from 'lucide-react'
+import { Pencil, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   ArticleFormFields,
@@ -28,6 +28,7 @@ export function ArticleDetail({
 }) {
   const { user } = useAuth()
   const qc = useQueryClient()
+  const navigate = useNavigate()
   const listPath = kind === 'news' ? '/news' : '/blog'
   const resource = kind === 'blog' ? orbit.blogPosts : orbit.news
   const { data, error, refetch, isLoading } = useQuery({
@@ -56,6 +57,19 @@ export function ArticleDetail({
       await qc.invalidateQueries({ queryKey: queryKeys[kind] })
       toast.success('Updated')
       setEditing(false)
+    },
+    onError: (e: Error) => toast.error(e.message),
+  })
+
+  const remove = useMutation({
+    mutationFn: () => resource.delete(id),
+    onSuccess: async () => {
+      // Leave the detail page first and drop its cache entry, otherwise the
+      // list invalidation refetches the deleted item and shows "not found".
+      qc.removeQueries({ queryKey: [...queryKeys[kind], id] })
+      await navigate({ to: listPath as '/news' | '/blog' })
+      toast.success('Deleted')
+      qc.invalidateQueries({ queryKey: queryKeys[kind] })
     },
     onError: (e: Error) => toast.error(e.message),
   })
@@ -116,22 +130,35 @@ export function ArticleDetail({
           description={`By ${data.author.fullName} · ${new Date(data.createdAt).toLocaleString()} · ${data.viewCount} ${data.viewCount === 1 ? 'view' : 'views'}`}
         />
         {allowed ? (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setForm({
-                title: data.title,
-                content: data.content,
-                tags: (data.tags ?? []).join(', '),
-                coverImageUrl: data.coverImageUrl ?? '',
-              })
-              setEditing(true)
-            }}
-          >
-            <Pencil data-icon="inline-start" />
-            Edit
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={remove.isPending}
+              onClick={() => {
+                if (confirm('Delete this article?')) remove.mutate()
+              }}
+            >
+              <Trash2 data-icon="inline-start" />
+              Delete
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setForm({
+                  title: data.title,
+                  content: data.content,
+                  tags: (data.tags ?? []).join(', '),
+                  coverImageUrl: data.coverImageUrl ?? '',
+                })
+                setEditing(true)
+              }}
+            >
+              <Pencil data-icon="inline-start" />
+              Edit
+            </Button>
+          </div>
         ) : null}
       </div>
       {(data.tags?.length ?? 0) > 0 && (
