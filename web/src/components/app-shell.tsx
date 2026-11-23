@@ -24,6 +24,7 @@ import {
 import { useAuth } from '@/lib/auth'
 import { useNotificationsSocket } from '@/hooks/use-notifications-socket'
 import { UserAvatar } from '@/components/user-avatar'
+import { BrandLockup } from '@/components/brand-lockup'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
@@ -128,19 +129,7 @@ function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <div className="flex h-full flex-col gap-4 p-4">
-      <div className="flex items-center gap-3">
-        <img
-          src="/favicon.svg"
-          alt=""
-          width={40}
-          height={40}
-          className="size-10 shrink-0"
-        />
-        <div>
-          <p className="text-lg font-semibold tracking-tight">teamorbit</p>
-          <p className="text-xs text-muted-foreground">Team administration</p>
-        </div>
-      </div>
+      <BrandLockup subtitle="Team administration" />
       <Separator />
       <div className="flex-1 overflow-y-auto">
         <NavLinks onNavigate={onNavigate} unread={unread} />
@@ -218,14 +207,7 @@ export function AppShell() {
               <SidebarBody />
             </SheetContent>
           </Sheet>
-          <img
-            src="/favicon.svg"
-            alt=""
-            width={28}
-            height={28}
-            className="size-7 shrink-0"
-          />
-          <span className="font-semibold">teamorbit</span>
+          <BrandLockup size={28} />
         </header>
         <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 sm:px-6">
           <Outlet />

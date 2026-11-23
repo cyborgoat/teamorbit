@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   Param,
   Patch,
   Post,
@@ -24,6 +25,8 @@ import { UsersQueryDto } from '../common/dto/pagination.dto';
 import { RolesGuard } from '../common/guards/roles.guard';
 import {
   CreateUserDto,
+  CreateUsersBatchDto,
+  CreateUsersBatchResponseDto,
   PaginatedUsersDto,
   UpdateUserDto,
   UserDto,
@@ -63,6 +66,14 @@ export class UsersController {
   @ApiCreatedResponse({ type: UserDto })
   create(@Body() dto: CreateUserDto, @CurrentUser() user: { role: Role }) {
     return this.users.create(dto, user.role);
+  }
+
+  @Post('batch')
+  @Roles(Role.ADMIN, Role.SUPERUSER)
+  @Header('Cache-Control', 'no-store')
+  @ApiCreatedResponse({ type: CreateUsersBatchResponseDto })
+  createBatch(@Body() dto: CreateUsersBatchDto) {
+    return this.users.createBatch(dto);
   }
 
   @Patch(':id')

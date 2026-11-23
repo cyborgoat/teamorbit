@@ -16,7 +16,10 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import { ThrottlerStorage } from '@nestjs/throttler';
 import { PrismaService } from '../src/prisma/prisma.service';
-import type { UserDto } from '../src/users/dto/user.dto';
+import type {
+  CreateUsersBatchResponseDto,
+  UserDto,
+} from '../src/users/dto/user.dto';
 import type { LoginResponseDto } from '../src/auth/dto/auth.dto';
 import * as bcrypt from 'bcrypt';
 import { AppModule } from '../src/app.module';
@@ -419,6 +422,155 @@ describe('App (e2e)', () => {
       .expect(201);
     return bodyOf(response).accessToken;
   }
+
+  it('validates batch user requests before creating any accounts', async () => {
+    const token = await adminToken();
+    const candidate = {
+      username: `${prefix}-batch-invalid`,
+      fullName: 'Valid Name',
+    };
+    for (const invalid of [
+      { username: 'missing-name' },
+      { username: 'blank-name', fullName: '  ' },
+      { ...candidate, email: 'invalid-email' },
+      { ...candidate, role: 'ADMIN' },
+      null,
+    ]) {
+      await request(app.getHttpServer())
+        .post('/api/users/batch')
+        .auth(token, { type: 'bearer' })
+        .send({ users: [candidate, invalid] })
+        .expect(400);
+    }
+    expect(
+      await prisma.user.findUnique({ where: { username: candidate.username } }),
+    ).toBeNull();
+  });
+
+  it('accepts 50 batch users and rejects 51', async () => {
+    const token = await adminToken();
+    const users = Array.from({ length: 51 }, (_, index) => ({
+      username: `${prefix}-batch-limit-${index}`,
+      fullName: `Batch User ${index}`,
+    }));
+    const submit = (entries: typeof users) =>
+      request(app.getHttpServer())
+        .post('/api/users/batch')
+        .auth(token, { type: 'bearer' })
+        .send({ users: entries });
+
+    await submit(users).expect(400);
+    const response = await submit(users.slice(0, 50)).expect(201);
+    const { created, skipped } = response.body as CreateUsersBatchResponseDto;
+    expect(created).toHaveLength(50);
+    expect(skipped).toEqual([]);
+  });
+
+  it('creates batch users with generated passwords and skips username and email conflicts', async () => {
+    const token = await adminToken();
+    const username = `${prefix}-batch-member`;
+    const otherUsername = `${prefix}-batch-other`;
+    const email = `${username}@example.test`;
+    const users = [
+      { username: adminUsername, fullName: 'Already Exists', email },
+      {
+        username: ` ${username} `,
+        fullName: ' Batch Member ',
+        email: ` ${email} `,
+      },
+      { username, fullName: 'Duplicate Username' },
+      { username: otherUsername, fullName: 'Duplicate Email', email },
+      { username: otherUsername, fullName: 'Batch Other', email: ' ' },
+    ];
+    const batch = (accessToken: string) =>
+      request(app.getHttpServer())
+        .post('/api/users/batch')
+        .auth(accessToken, { type: 'bearer' })
+        .send({ users });
+    const response = await batch(token)
+      .expect(201)
+      .expect('Cache-Control', 'no-store');
+    const { created, skipped } = response.body as CreateUsersBatchResponseDto;
+    expect(created.map(({ user }) => user)).toMatchObject([
+      {
+        username,
+        fullName: 'Batch Member',
+        email,
+        role: 'USER',
+        status: 'ACTIVE',
+      },
+      {
+        username: otherUsername,
+        fullName: 'Batch Other',
+        email: null,
+        role: 'USER',
+        status: 'ACTIVE',
+      },
+    ]);
+    expect(created[0].password).not.toBe(created[1].password);
+    expect(skipped).toEqual([
+      { row: 1, username: adminUsername, field: 'username' },
+      { row: 3, username, field: 'username' },
+      { row: 4, username: otherUsername, field: 'email' },
+    ]);
+    const login = await request(app.getHttpServer())
+      .post('/api/auth/login')
+      .send({ email, password: created[0].password })
+      .expect(201);
+    const memberToken = bodyOf(login).accessToken;
+    await batch(memberToken).expect(403);
+    await request(app.getHttpServer())
+      .post('/api/auth/change-password')
+      .auth(memberToken, { type: 'bearer' })
+      .send({
+        currentPassword: created[0].password,
+        newPassword: 'replacement123',
+      })
+      .expect(201);
+    await request(app.getHttpServer())
+      .post('/api/auth/login')
+      .send({ username, password: 'replacement123' })
+      .expect(201);
+    await request(app.getHttpServer())
+      .get(`/api/users/${created[0].user.id}`)
+      .auth(token, { type: 'bearer' })
+      .expect(200)
+      .expect((res) => expect(res.body).not.toHaveProperty('password'));
+
+    const superuser = await prisma.user.create({
+      data: {
+        username: `${prefix}-batch-superuser`,
+        fullName: 'Batch Superuser',
+        passwordHash: await bcrypt.hash(password, 10),
+        role: 'SUPERUSER',
+        status: 'ACTIVE',
+      },
+    });
+    const superuserToken = app.get(JwtService).sign({ sub: superuser.id });
+    const repeated = await batch(superuserToken).expect(201);
+    expect((repeated.body as CreateUsersBatchResponseDto).created).toEqual([]);
+    expect((repeated.body as CreateUsersBatchResponseDto).skipped).toHaveLength(
+      users.length,
+    );
+  });
+
+  it('skips a batch username claimed by a concurrent request', async () => {
+    const token = await adminToken();
+    const username = `${prefix}-batch-concurrent`;
+    const submit = () =>
+      request(app.getHttpServer())
+        .post('/api/users/batch')
+        .auth(token, { type: 'bearer' })
+        .send({ users: [{ username, fullName: 'Concurrent Member' }] })
+        .expect(201);
+    const results = (await Promise.all([submit(), submit()])).map(
+      (res) => res.body as CreateUsersBatchResponseDto,
+    );
+    expect(results.flatMap((result) => result.created)).toHaveLength(1);
+    expect(results.flatMap((result) => result.skipped)).toEqual([
+      { row: 1, username, field: 'username' },
+    ]);
+  });
 
   it('validates configuration, media, exact tags, pagination and nullable updates', async () => {
     const token = await adminToken();

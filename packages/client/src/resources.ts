@@ -81,7 +81,12 @@ export function createResources(client: Raw, auth: { setToken(t: string | undefi
           ResponseOf<'/api/auth/change-password', 'post'>
         >,
     },
-    users: crud(client, '/api/users', '/api/users/{id}'),
+    users: {
+      ...crud(client, '/api/users', '/api/users/{id}'),
+      /** Creates active users and returns their generated passwords once. */
+      createBatch: (body: BodyOf<'/api/users/batch', 'post'>) =>
+        call(client, 'POST', '/api/users/batch', { body }) as Promise<ResponseOf<'/api/users/batch', 'post'>>,
+    },
     events: crud(client, '/api/events', '/api/events/{id}'),
     announcements: crud(client, '/api/announcements', '/api/announcements/{id}'),
     news: crud(client, '/api/news', '/api/news/{id}'),

@@ -6,6 +6,7 @@ import {
 } from '@tanstack/react-router'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { BrandLockup } from '@/components/brand-lockup'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -41,13 +42,9 @@ function RegisterPage() {
     <div className="flex min-h-screen items-center justify-center px-4 py-10">
       <Card className="w-full max-w-md shadow-sm">
         <CardHeader>
-          <img
-            src="/favicon.svg"
-            alt="teamorbit"
-            width={48}
-            height={48}
-            className="mb-2 size-12"
-          />
+          <div className="mb-2">
+            <BrandLockup size={48} />
+          </div>
           <CardTitle className="text-2xl">Create account</CardTitle>
           <CardDescription>
             New members start as PENDING until an admin activates them on the

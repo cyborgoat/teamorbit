@@ -24,6 +24,7 @@ import {
 import { PageHeader } from '@/components/page-header'
 import { AvatarPicker } from '@/components/avatar-picker'
 import { AvatarSettingsDialog } from '@/components/avatar-settings-dialog'
+import { BatchUsersDialog } from '@/components/batch-users-dialog'
 import { UserAvatar } from '@/components/user-avatar'
 import { Badge } from '@/components/ui/badge'
 import { PillSelect, statusVariant } from '@/components/pill-select'
@@ -227,6 +228,7 @@ function UsersPage() {
         description="Create members directly, or activate PENDING self-registrations."
         actions={
           <Dialog open={open} onOpenChange={setOpen}>
+            <BatchUsersDialog />
             <DialogTrigger asChild>
               <Button>
                 <Plus data-icon="inline-start" />

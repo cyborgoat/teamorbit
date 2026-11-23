@@ -122,6 +122,7 @@ All params, bodies and responses are typed from the OpenAPI spec.
 | --- | --- |
 | `orbit.auth` | `login(identifier, password, method?)`, `register(body)`, `me()`, `updateMe(body)`, `changePassword(body)`, `logout()` |
 | `orbit.users`, `events`, `announcements`, `news`, `blogPosts` | `list(query?)`, `get(id)`, `create(body)`, `update(id, body)`, `delete(id)`, `iterate(query?)` |
+| `orbit.users` | `createBatch({ users })` (admin or superuser, up to 50 users, generated passwords returned once) |
 | `orbit.comments` | `list(query)`, `create(body)`, `update(id, body)`, `delete(id)`, `vote(id, value)` |
 | `orbit.forum` | `listPosts`, `getPost`, `createPost`, `updatePost`, `deletePost`, `votePost(id, value)` |
 | `orbit.notifications` | `list(query?)`, `markRead(id)`, `markUnread(id)`, `markAllRead()`, `delete(id)`, `restore(id)`, `deleteDismissed(id)`, `deleteAllDismissed()` |
@@ -226,6 +227,7 @@ under `components['schemas']`. List endpoints accept `page`, `limit` (max 100) a
 | `GET` | `/api/users/{id}` | Bearer |  | `UserDto` |
 | `PATCH` | `/api/users/{id}` | Bearer | `UpdateUserDto` | `UserDto` |
 | `DELETE` | `/api/users/{id}` | Bearer |  | `OkDto` |
+| `POST` | `/api/users/batch` | Bearer | `CreateUsersBatchDto` | `CreateUsersBatchResponseDto` |
 
 #### avatars
 

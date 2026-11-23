@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.0 — 2026-11-23
+
+- Add `orbit.users.createBatch(body)` for admins and superusers. Create up to 50 accounts per request and receive generated passwords for created users and conflict details for skipped rows.
+
 ## 0.3.0 — 2026-11-11
 
 - Add `notifications.deleteDismissed(id)` and `notifications.deleteAllDismissed()` for permanently deleting dismissed notifications.

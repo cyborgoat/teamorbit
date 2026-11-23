@@ -6,6 +6,7 @@ import {
 } from '@tanstack/react-router'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { BrandLockup } from '@/components/brand-lockup'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -38,14 +39,10 @@ function LoginPage() {
     <div className="flex min-h-screen items-center justify-center px-4 py-10">
       <Card className="w-full max-w-md shadow-sm">
         <CardHeader>
-          <img
-            src="/favicon.svg"
-            alt="teamorbit"
-            width={48}
-            height={48}
-            className="mb-2 size-12"
-          />
-          <CardTitle className="text-2xl">Sign in to teamorbit</CardTitle>
+          <div className="mb-2">
+            <BrandLockup size={48} />
+          </div>
+          <CardTitle className="text-2xl">Sign in</CardTitle>
           <CardDescription>
             Sign in with an active account, or register a new one for admin
             approval.

@@ -116,6 +116,22 @@ export interface paths {
         patch: operations["UsersController_update"];
         trace?: never;
     };
+    "/api/users/batch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["UsersController_createBatch"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/avatars": {
         parameters: {
             query?: never;
@@ -598,6 +614,31 @@ export interface components {
             status?: "ACTIVE" | "INACTIVE" | "PENDING" | "SUSPENDED" | "DELETED";
             /** @description Custom avatar URL; null restores the default animal avatar. */
             avatarUrl?: string | null;
+        };
+        BatchUserDto: {
+            username: string;
+            fullName: string;
+            /** Format: email */
+            email?: string | null;
+        };
+        CreateUsersBatchDto: {
+            users: components["schemas"]["BatchUserDto"][];
+        };
+        BatchCreatedUserDto: {
+            user: components["schemas"]["UserDto"];
+            /** @description Generated password shown only in this response */
+            password: string;
+        };
+        BatchSkippedUserDto: {
+            /** @description One-based position in the submitted batch */
+            row: number;
+            username: string;
+            /** @enum {string} */
+            field: "username" | "email";
+        };
+        CreateUsersBatchResponseDto: {
+            created: components["schemas"]["BatchCreatedUserDto"][];
+            skipped: components["schemas"]["BatchSkippedUserDto"][];
         };
         UpdateUserDto: {
             username?: string;
@@ -1346,6 +1387,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UserDto"];
+                };
+            };
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorDto"];
+                };
+            };
+        };
+    };
+    UsersController_createBatch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateUsersBatchDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreateUsersBatchResponseDto"];
                 };
             };
             default: {

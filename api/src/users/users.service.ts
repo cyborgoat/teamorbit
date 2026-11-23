@@ -5,12 +5,18 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Role, UserStatus } from '@prisma/client';
+import { Prisma, Role, UserStatus } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { randomBytes } from 'node:crypto';
 import type { UserSortField } from '../common/dto/pagination.dto';
 import { paginate } from '../common/utils';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
+import {
+  CreateUserDto,
+  CreateUsersBatchDto,
+  CreateUsersBatchResponseDto,
+  UpdateUserDto,
+} from './dto/user.dto';
 
 @Injectable()
 export class UsersService {
@@ -84,6 +90,54 @@ export class UsersService {
         }),
       )
       .then(presentUser);
+  }
+
+  async createBatch(
+    dto: CreateUsersBatchDto,
+  ): Promise<CreateUsersBatchResponseDto> {
+    const accounts: { password: string; data: Prisma.UserCreateInput }[] = [];
+    for (const { username, fullName, email } of dto.users) {
+      const password = randomBytes(18).toString('base64url');
+      const passwordHash = await bcrypt.hash(password, 10);
+      accounts.push({
+        password,
+        data: {
+          username,
+          fullName,
+          email: email ?? null,
+          passwordHash,
+          role: Role.USER,
+          status: UserStatus.ACTIVE,
+        },
+      });
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      const result: CreateUsersBatchResponseDto = { created: [], skipped: [] };
+      // Let the unique indexes arbitrate conflicts, including concurrent writes.
+      for (const [index, { data, password }] of accounts.entries()) {
+        try {
+          const user = await tx.user.create({ data, select: userSelect });
+          result.created.push({ user: presentUser(user), password });
+        } catch (error) {
+          if (
+            !(error instanceof Prisma.PrismaClientKnownRequestError) ||
+            error.code !== 'P2002'
+          ) {
+            throw error;
+          }
+          const target = error.meta?.target;
+          const field: unknown = Array.isArray(target) ? target[0] : undefined;
+          if (field !== 'username' && field !== 'email') throw error;
+          result.skipped.push({
+            row: index + 1,
+            username: data.username,
+            field,
+          });
+        }
+      }
+      return result;
+    });
   }
 
   async update(

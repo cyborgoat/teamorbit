@@ -531,6 +531,52 @@
         ]
       }
     },
+    "/api/users/batch": {
+      "post": {
+        "operationId": "UsersController_createBatch",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUsersBatchDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateUsersBatchResponseDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "users"
+        ]
+      }
+    },
     "/api/avatars": {
       "get": {
         "operationId": "AvatarsController_list",
@@ -3125,6 +3171,105 @@
           "username",
           "fullName",
           "password"
+        ]
+      },
+      "BatchUserDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "minLength": 3
+          },
+          "fullName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "email": {
+            "type": "string",
+            "nullable": true,
+            "format": "email"
+          }
+        },
+        "required": [
+          "username",
+          "fullName"
+        ]
+      },
+      "CreateUsersBatchDto": {
+        "type": "object",
+        "properties": {
+          "users": {
+            "minItems": 1,
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BatchUserDto"
+            }
+          }
+        },
+        "required": [
+          "users"
+        ]
+      },
+      "BatchCreatedUserDto": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/UserDto"
+          },
+          "password": {
+            "type": "string",
+            "description": "Generated password shown only in this response"
+          }
+        },
+        "required": [
+          "user",
+          "password"
+        ]
+      },
+      "BatchSkippedUserDto": {
+        "type": "object",
+        "properties": {
+          "row": {
+            "type": "number",
+            "description": "One-based position in the submitted batch"
+          },
+          "username": {
+            "type": "string"
+          },
+          "field": {
+            "enum": [
+              "username",
+              "email"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "row",
+          "username",
+          "field"
+        ]
+      },
+      "CreateUsersBatchResponseDto": {
+        "type": "object",
+        "properties": {
+          "created": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BatchCreatedUserDto"
+            }
+          },
+          "skipped": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BatchSkippedUserDto"
+            }
+          }
+        },
+        "required": [
+          "created",
+          "skipped"
         ]
       },
       "UpdateUserDto": {
