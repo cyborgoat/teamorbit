@@ -1,20 +1,43 @@
 import type { ComponentProps, ReactNode } from 'react'
 import { Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+import { Table } from '@/components/ui/table'
 
-/** Bordered, rounded wrapper so every table in the app looks the same. */
-export function TableCard({ className, ...props }: ComponentProps<'div'>) {
+export function ListPage({ children }: { children: ReactNode }) {
   return (
-    <div
-      className={cn('overflow-hidden rounded-xl border', className)}
-      {...props}
-    />
+    <div data-slot="list-page" className="flex min-h-0 flex-col [&>*]:shrink-0">
+      {children}
+    </div>
+  )
+}
+
+export function ListTable({
+  children,
+  label,
+}: {
+  children: ComponentProps<typeof Table>['children']
+  label: string
+}) {
+  return (
+    <Table
+      aria-label={label}
+      containerProps={{
+        'data-slot': 'list-scroll',
+        'aria-label': `Scroll ${label.toLowerCase()}`,
+        role: 'region',
+        tabIndex: 0,
+        className:
+          'min-h-0 overflow-auto overscroll-contain focus-visible:outline-2 focus-visible:outline-ring focus-visible:-outline-offset-2',
+      }}
+      className="border-separate border-spacing-0"
+    >
+      {children}
+    </Table>
   )
 }
 
 /** Shared width/alignment for the trailing actions column. */
-export const actionsHeadClass = 'w-14'
+export const actionsHeadClass = 'w-8'
 export const actionsCellClass = 'text-right'
 
 /**

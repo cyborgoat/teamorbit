@@ -15,7 +15,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { CalendarDays, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { TableCard, actionsHeadClass, actionsCellClass, RowDeleteButton } from '@/components/data-table'
+import {
+  ListPage,
+  ListTable,
+  actionsHeadClass,
+  actionsCellClass,
+  RowDeleteButton,
+} from '@/components/data-table'
 import { PageHeader } from '@/components/page-header'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -36,7 +42,6 @@ import {
   EmptyTitle,
 } from '@/components/ui/empty'
 import {
-  Table,
   TableBody,
   TableCell,
   TableHead,
@@ -62,6 +67,7 @@ function EventsPage() {
     isFetching,
     isLoading,
     pagination,
+    scrollKey,
     items,
     filtered,
     toolbar,
@@ -117,7 +123,7 @@ function EventsPage() {
   })
 
   return (
-    <div>
+    <ListPage>
       <PageHeader
         title="Events"
         description="Team schedule with local date/time pickers and optional cover images."
@@ -202,7 +208,7 @@ function EventsPage() {
       {error ? null : isLoading ? (
         <p className="text-sm text-muted-foreground">Loading…</p>
       ) : items.length === 0 ? (
-        <Empty className="border border-dashed py-16">
+        <Empty className="py-10">
           <EmptyHeader>
             <EmptyMedia variant="icon">
               <CalendarDays />
@@ -218,72 +224,69 @@ function EventsPage() {
           </EmptyHeader>
         </Empty>
       ) : (
-        <TableCard>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Event</TableHead>
-                <TableHead>Audience</TableHead>
-                <TableHead>When</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead className={actionsHeadClass} />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {items.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      {item.coverImageUrl ? (
-                        <img
-                          src={item.coverImageUrl}
-                          alt=""
-                          className="size-10 rounded-md object-cover"
-                        />
-                      ) : null}
-                      <div>
-                        <Link
-                          to="/events/$id"
-                          params={{ id: item.id }}
-                          className="font-medium hover:underline"
-                        >
-                          {item.title}
-                        </Link>
-                        <div className="line-clamp-1 text-sm text-muted-foreground">
-                          {item.description}
-                        </div>
+        <ListTable label="Events" key={scrollKey}>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Event</TableHead>
+              <TableHead>Audience</TableHead>
+              <TableHead>When</TableHead>
+              <TableHead>Location</TableHead>
+              <TableHead className={actionsHeadClass} />
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {items.map((item) => (
+              <TableRow key={item.id}>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    {item.coverImageUrl ? (
+                      <img
+                        src={item.coverImageUrl}
+                        alt=""
+                        className="size-7 rounded-md object-cover"
+                      />
+                    ) : null}
+                    <div>
+                      <Link
+                        to="/events/$id"
+                        params={{ id: item.id }}
+                        className="font-medium hover:underline"
+                      >
+                        {item.title}
+                      </Link>
+                      <div className="max-w-56 truncate text-xs text-muted-foreground">
+                        {item.description}
                       </div>
                     </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="secondary">
-                      {item.audience === 'INVITE_ONLY'
-                        ? 'Invite-only'
-                        : 'Global'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {new Date(item.startAt).toLocaleString()}
-                    <div className="text-xs">
-                      → {new Date(item.endAt).toLocaleString()}
-                    </div>
-                  </TableCell>
-                  <TableCell>{item.location}</TableCell>
-                  <TableCell className={actionsCellClass}>
-                    {canModerate(user, item.createdBy.id) && (
-                      <RowDeleteButton
-                        onClick={() => {
-                          if (confirm('Delete this event?')) remove.mutate(item.id)
-                        }}
-                      />
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableCard>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Badge variant="secondary">
+                    {item.audience === 'INVITE_ONLY' ? 'Invite-only' : 'Global'}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-sm text-muted-foreground">
+                  {new Date(item.startAt).toLocaleString()}
+                  <div className="text-xs">
+                    → {new Date(item.endAt).toLocaleString()}
+                  </div>
+                </TableCell>
+                <TableCell>{item.location}</TableCell>
+                <TableCell className={actionsCellClass}>
+                  {canModerate(user, item.createdBy.id) && (
+                    <RowDeleteButton
+                      onClick={() => {
+                        if (confirm('Delete this event?'))
+                          remove.mutate(item.id)
+                      }}
+                    />
+                  )}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </ListTable>
       )}
-    </div>
+    </ListPage>
   )
 }

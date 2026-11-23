@@ -188,12 +188,12 @@ export function AppShell() {
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <aside className="sticky top-0 hidden h-screen w-60 shrink-0 border-r border-sidebar-border bg-sidebar md:block">
+    <div data-slot="app-shell" className="flex min-h-dvh bg-background">
+      <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 border-r border-sidebar-border bg-sidebar md:block">
         <SidebarBody />
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center gap-3 border-b px-4 py-3 md:hidden">
+        <header className="flex shrink-0 items-center gap-3 border-b px-4 py-2 md:hidden">
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="outline" size="icon-sm" aria-label="Open menu">
@@ -209,7 +209,7 @@ export function AppShell() {
           </Sheet>
           <BrandLockup size={28} />
         </header>
-        <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 sm:px-6">
+        <main className="mx-auto min-h-0 w-full max-w-5xl flex-1 px-4 py-6 sm:px-6">
           <Outlet />
         </main>
       </div>

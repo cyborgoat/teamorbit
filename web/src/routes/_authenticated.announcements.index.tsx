@@ -9,7 +9,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Megaphone, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { TableCard, actionsHeadClass, actionsCellClass, RowDeleteButton } from '@/components/data-table'
+import {
+  ListPage,
+  ListTable,
+  actionsHeadClass,
+  actionsCellClass,
+  RowDeleteButton,
+} from '@/components/data-table'
 import { PageHeader } from '@/components/page-header'
 import { Button } from '@/components/ui/button'
 import {
@@ -31,7 +37,6 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
-  Table,
   TableBody,
   TableCell,
   TableHead,
@@ -55,6 +60,7 @@ function AnnouncementsPage() {
     isFetching,
     isLoading,
     pagination,
+    scrollKey,
     items,
     filtered,
     toolbar,
@@ -96,7 +102,7 @@ function AnnouncementsPage() {
   })
 
   return (
-    <div>
+    <ListPage>
       <PageHeader
         title="Announcements"
         description="Short team notices. Creating one also pushes a live notification."
@@ -172,7 +178,7 @@ function AnnouncementsPage() {
       {error ? null : isLoading ? (
         <p className="text-sm text-muted-foreground">Loading…</p>
       ) : items.length === 0 ? (
-        <Empty className="border border-dashed py-16">
+        <Empty className="py-10">
           <EmptyHeader>
             <EmptyMedia variant="icon">
               <Megaphone />
@@ -188,52 +194,51 @@ function AnnouncementsPage() {
           </EmptyHeader>
         </Empty>
       ) : (
-        <TableCard>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Title</TableHead>
-                <TableHead>Author</TableHead>
-                <TableHead>Created</TableHead>
-                <TableHead className={actionsHeadClass} />
+        <ListTable label="Announcements" key={scrollKey}>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Title</TableHead>
+              <TableHead>Author</TableHead>
+              <TableHead>Created</TableHead>
+              <TableHead className={actionsHeadClass} />
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {items.map((item) => (
+              <TableRow key={item.id}>
+                <TableCell>
+                  <Link
+                    to="/announcements/$id"
+                    params={{ id: item.id }}
+                    className="font-medium hover:underline"
+                  >
+                    {item.title}
+                  </Link>
+                  <div className="max-w-64 truncate text-xs lg:max-w-md text-muted-foreground">
+                    {item.description}
+                  </div>
+                </TableCell>
+                <TableCell className="text-muted-foreground">
+                  {item.author?.fullName ?? '—'}
+                </TableCell>
+                <TableCell className="text-muted-foreground">
+                  {new Date(item.createdAt).toLocaleString()}
+                </TableCell>
+                <TableCell className={actionsCellClass}>
+                  {canModerate(user, item.author.id) && (
+                    <RowDeleteButton
+                      onClick={() => {
+                        if (confirm('Delete this announcement?'))
+                          remove.mutate(item.id)
+                      }}
+                    />
+                  )}
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {items.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell>
-                    <Link
-                      to="/announcements/$id"
-                      params={{ id: item.id }}
-                      className="font-medium hover:underline"
-                    >
-                      {item.title}
-                    </Link>
-                    <div className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">
-                      {item.description}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {item.author?.fullName ?? '—'}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {new Date(item.createdAt).toLocaleString()}
-                  </TableCell>
-                  <TableCell className={actionsCellClass}>
-                    {canModerate(user, item.author.id) && (
-                      <RowDeleteButton
-                        onClick={() => {
-                          if (confirm('Delete this announcement?')) remove.mutate(item.id)
-                        }}
-                      />
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableCard>
+            ))}
+          </TableBody>
+        </ListTable>
       )}
-    </div>
+    </ListPage>
   )
 }

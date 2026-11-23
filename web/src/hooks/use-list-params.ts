@@ -15,12 +15,15 @@ export function useListParams<S extends string>(
   const [order, setOrder] = useState<SortOrder>(defaultOrder)
 
   useEffect(() => {
+    const nextQuery = search.trim()
+    if (nextQuery === q) return
+
     const t = setTimeout(() => {
-      setQ(search.trim())
+      setQ(nextQuery)
       setPage(1)
     }, 300)
     return () => clearTimeout(t)
-  }, [search, setPage])
+  }, [search, q, setPage])
 
   return {
     page,

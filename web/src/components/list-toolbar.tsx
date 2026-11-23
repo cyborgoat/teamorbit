@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import type { SortOrder } from '@/hooks/use-list-params'
 
-const pillClass = 'h-8 px-3 text-sm'
+const pillClass = 'h-7 border-0 px-2'
 
 /** A pill-styled filter: "Label: value" that opens a menu on click. */
 export function FilterPill<T extends string>({
@@ -25,7 +25,7 @@ export function FilterPill<T extends string>({
       options={options}
       onChange={onChange}
       prefix={`${label}:`}
-      variant={value === 'ALL' ? 'outline' : 'secondary'}
+      variant={value === 'ALL' ? 'ghost' : 'secondary'}
       className={pillClass}
       aria-label={`Filter by ${label.toLowerCase()}`}
     />
@@ -56,14 +56,14 @@ export function ListToolbar<S extends string>({
   onClear?: (() => void) | null
 }) {
   return (
-    <div className="mb-4 flex flex-wrap items-center gap-2">
+    <div className="mb-2 flex flex-wrap items-center gap-1.5">
       <div className="relative w-full sm:w-64">
         <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           type="search"
           aria-label={placeholder}
           placeholder={placeholder}
-          className="rounded-4xl pl-8"
+          className="h-8 rounded-md border-0 bg-muted/70 pl-8 focus-visible:ring-2"
           value={search}
           onChange={(e) => onSearch(e.target.value)}
         />
@@ -77,13 +77,12 @@ export function ListToolbar<S extends string>({
             onChange={sort.onChange}
             prefix="Sort:"
             className={pillClass}
-            variant="outline"
+            variant="ghost"
             aria-label="Sort by"
           />
           <Button
-            variant="outline"
-            size="icon"
-            className="rounded-4xl"
+            variant="ghost"
+            size="icon-sm"
             aria-label={sort.order === 'asc' ? 'Ascending' : 'Descending'}
             title={sort.order === 'asc' ? 'Ascending' : 'Descending'}
             onClick={sort.onToggleOrder}

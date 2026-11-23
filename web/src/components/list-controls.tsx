@@ -32,10 +32,11 @@ export function ListControls({
   return (
     <nav
       aria-label="Pagination"
-      className="mb-4 flex items-center justify-end gap-3 text-sm"
+      className="mb-1 flex items-center justify-end gap-1.5 text-xs text-muted-foreground"
     >
       <Button
-        variant="outline"
+        variant="ghost"
+        size="sm"
         disabled={page <= 1 || pending}
         onClick={() => setPage(page - 1)}
       >
@@ -45,7 +46,8 @@ export function ListControls({
         Page {page} of {Math.max(1, Math.ceil(total / limit))}
       </span>
       <Button
-        variant="outline"
+        variant="ghost"
+        size="sm"
         disabled={page * limit >= total || pending}
         onClick={() => setPage(page + 1)}
       >

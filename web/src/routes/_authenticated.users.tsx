@@ -16,8 +16,9 @@ import { Plus, Users } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import {
+  ListPage,
+  ListTable,
   RowDeleteButton,
-  TableCard,
   actionsCellClass,
   actionsHeadClass,
 } from '@/components/data-table'
@@ -55,7 +56,6 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import {
-  Table,
   TableBody,
   TableCell,
   TableHead,
@@ -205,7 +205,7 @@ function UsersPage() {
           title="Users"
           description="Only Admin and Superuser can manage members."
         />
-        <Empty className="border border-dashed py-16">
+        <Empty className="py-10">
           <EmptyHeader>
             <EmptyMedia variant="icon">
               <Users />
@@ -222,7 +222,7 @@ function UsersPage() {
   }
 
   return (
-    <div>
+    <ListPage>
       <PageHeader
         title="Users"
         description="Create members directly, or activate PENDING self-registrations."
@@ -230,7 +230,7 @@ function UsersPage() {
           <Dialog open={open} onOpenChange={setOpen}>
             <BatchUsersDialog />
             <DialogTrigger asChild>
-              <Button>
+              <Button size="sm">
                 <Plus data-icon="inline-start" />
                 Create user
               </Button>
@@ -353,12 +353,6 @@ function UsersPage() {
         }
       />
 
-      {error ? (
-        <p className="mb-4 text-sm text-destructive">
-          {(error as Error).message}
-        </p>
-      ) : null}
-
       <ListToolbar
         search={params.search}
         onSearch={params.setSearch}
@@ -415,7 +409,7 @@ function UsersPage() {
       {error ? null : isLoading ? (
         <p className="text-sm text-muted-foreground">Loading…</p>
       ) : items.length === 0 ? (
-        <Empty className="border border-dashed py-16">
+        <Empty className="py-10">
           <EmptyHeader>
             <EmptyMedia variant="icon">
               <Users />
@@ -429,98 +423,138 @@ function UsersPage() {
           </EmptyHeader>
         </Empty>
       ) : (
-        <TableCard>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Member</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className={actionsHeadClass} />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {items.map((u) => (
-                <TableRow key={u.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
+        <ListTable
+          label="Users"
+          key={JSON.stringify([
+            page,
+            q,
+            roleFilter,
+            statusFilter,
+            sortBy,
+            order,
+          ])}
+        >
+          <TableHeader>
+            <TableRow>
+              <TableHead>Member</TableHead>
+              <TableHead className="hidden md:table-cell">Email</TableHead>
+              <TableHead>Role</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className={actionsHeadClass} aria-label="Actions" />
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {items.map((u) => (
+              <TableRow key={u.id}>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    {user?.role === 'SUPERUSER' ||
+                    u.role !== 'SUPERUSER' ||
+                    u.id === user?.id ? (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-sm"
+                        className="rounded-full hover:ring-2 hover:ring-primary/40"
+                        aria-label={`Edit avatar for ${u.fullName}`}
+                        aria-haspopup="dialog"
+                        title="Edit avatar"
+                        onClick={() => setAvatarMember(u)}
+                      >
+                        <UserAvatar
+                          name={u.fullName}
+                          avatarUrl={u.avatarUrl}
+                          size="sm"
+                        />
+                      </Button>
+                    ) : (
                       <UserAvatar
                         name={u.fullName}
                         avatarUrl={u.avatarUrl}
-                        size="lg"
+                        size="sm"
+                        className="mx-0.5"
                       />
-                      <div>
-                        <div className="font-medium">{u.fullName}</div>
-                        <div className="text-sm text-muted-foreground">
-                          @{u.username}
-                        </div>
-                        {user?.role === 'SUPERUSER' ||
-                        u.role !== 'SUPERUSER' ||
-                        u.id === user?.id ? (
-                          <Button
-                            variant="ghost"
-                            size="xs"
-                            aria-label={`Edit avatar for ${u.fullName}`}
-                            onClick={() => setAvatarMember(u)}
-                          >
-                            Edit avatar
-                          </Button>
-                        ) : null}
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>{u.email ?? '—'}</TableCell>
-                  <TableCell>
-                    {user?.role === 'SUPERUSER' ||
-                    (user?.role === 'ADMIN' && u.role === 'USER') ? (
-                      <PillSelect
-                        value={u.role}
-                        options={roleOptions}
-                        variant="outline"
-                        aria-label={`Role for ${u.fullName}`}
-                        disabled={
-                          updateRole.isPending &&
-                          updateRole.variables?.id === u.id
-                        }
-                        onChange={(role) =>
-                          updateRole.mutate({ id: u.id, role })
-                        }
-                      />
-                    ) : (
-                      <Badge variant="outline">{u.role}</Badge>
                     )}
-                  </TableCell>
-                  <TableCell>
+                    <div className="min-w-0 whitespace-normal [overflow-wrap:anywhere]">
+                      <div
+                        className="line-clamp-1 font-medium"
+                        title={u.fullName}
+                      >
+                        {u.fullName}
+                      </div>
+                      <div
+                        className="line-clamp-1 text-xs text-muted-foreground"
+                        title={`@${u.username}`}
+                      >
+                        @{u.username}
+                      </div>
+                      {u.email && (
+                        <div
+                          className="line-clamp-1 text-xs text-muted-foreground md:hidden"
+                          title={u.email}
+                        >
+                          {u.email}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell className="hidden text-muted-foreground md:table-cell">
+                  <div
+                    className="max-w-40 truncate lg:max-w-56"
+                    title={u.email ?? undefined}
+                  >
+                    {u.email ?? '—'}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  {user?.role === 'SUPERUSER' ||
+                  (user?.role === 'ADMIN' && u.role === 'USER') ? (
                     <PillSelect
-                      value={u.status}
-                      options={assignableStatuses}
-                      variant={statusVariant(u.status)}
-                      aria-label={`Status for ${u.fullName}`}
+                      value={u.role}
+                      options={roleOptions}
+                      variant="ghost"
+                      aria-label={`Role for ${u.fullName}`}
                       disabled={
-                        updateStatus.isPending &&
-                        updateStatus.variables?.id === u.id
+                        updateRole.isPending &&
+                        updateRole.variables?.id === u.id
                       }
-                      onChange={(status) =>
-                        updateStatus.mutate({ id: u.id, status })
-                      }
+                      onChange={(role) => updateRole.mutate({ id: u.id, role })}
                     />
-                  </TableCell>
-                  <TableCell className={actionsCellClass}>
-                    {u.status !== 'DELETED' &&
-                    u.id !== user?.id &&
-                    (user?.role === 'SUPERUSER' || u.role !== 'SUPERUSER') ? (
-                      <RowDeleteButton
-                        label={`Delete ${u.fullName}`}
-                        onClick={() => setDeleteTarget(u)}
-                      />
-                    ) : null}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableCard>
+                  ) : (
+                    <Badge variant="ghost">{u.role}</Badge>
+                  )}
+                </TableCell>
+                <TableCell>
+                  <PillSelect
+                    value={u.status}
+                    options={assignableStatuses}
+                    variant={statusVariant(u.status)}
+                    className="border-0"
+                    aria-label={`Status for ${u.fullName}`}
+                    disabled={
+                      updateStatus.isPending &&
+                      updateStatus.variables?.id === u.id
+                    }
+                    onChange={(status) =>
+                      updateStatus.mutate({ id: u.id, status })
+                    }
+                  />
+                </TableCell>
+                <TableCell className={actionsCellClass}>
+                  {u.status !== 'DELETED' &&
+                  u.id !== user?.id &&
+                  (user?.role === 'SUPERUSER' || u.role !== 'SUPERUSER') ? (
+                    <RowDeleteButton
+                      label={`Delete ${u.fullName}`}
+                      onClick={() => setDeleteTarget(u)}
+                    />
+                  ) : null}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </ListTable>
       )}
       <Dialog
         open={deleteTarget !== null}
@@ -563,6 +597,6 @@ function UsersPage() {
           onClose={() => setAvatarMember(null)}
         />
       )}
-    </div>
+    </ListPage>
   )
 }

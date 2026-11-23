@@ -32,8 +32,9 @@ export function useResourceList<
 ) {
   const params = useListParams<S>(opts.defaultSort, opts.defaultOrder)
   const { page, setPage, limit, q, sortBy, order } = params
+  const resultKey = [...queryKey, page, q, sortBy, order, opts.extra]
   const query = useQuery({
-    queryKey: [...queryKey, page, q, sortBy, order, opts.extra],
+    queryKey: resultKey,
     queryFn: () =>
       list({
         page,
@@ -49,6 +50,7 @@ export function useResourceList<
   return {
     ...query,
     pagination: { page, setPage, limit },
+    scrollKey: JSON.stringify(resultKey),
     items: (query.data?.items ?? []) as TItem[],
     filtered,
     toolbar: {

@@ -7,7 +7,13 @@ import { Link } from '@tanstack/react-router'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Newspaper, Plus } from 'lucide-react'
 import { toast } from 'sonner'
-import { TableCard, actionsHeadClass, actionsCellClass, RowDeleteButton } from '@/components/data-table'
+import {
+  ListPage,
+  ListTable,
+  actionsHeadClass,
+  actionsCellClass,
+  RowDeleteButton,
+} from '@/components/data-table'
 import { PageHeader } from '@/components/page-header'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -19,7 +25,6 @@ import {
   EmptyTitle,
 } from '@/components/ui/empty'
 import {
-  Table,
   TableBody,
   TableCell,
   TableHead,
@@ -39,6 +44,7 @@ export function ArticleList({ kind }: { kind: 'news' | 'blog' }) {
     isFetching,
     isLoading,
     pagination,
+    scrollKey,
     items,
     filtered,
     toolbar,
@@ -66,7 +72,7 @@ export function ArticleList({ kind }: { kind: 'news' | 'blog' }) {
   })
 
   return (
-    <div>
+    <ListPage>
       <PageHeader
         title={kind === 'blog' ? 'Blog' : 'News'}
         description="Read and manage team articles."
@@ -94,7 +100,7 @@ export function ArticleList({ kind }: { kind: 'news' | 'blog' }) {
       {error ? null : isLoading ? (
         <p className="text-sm text-muted-foreground">Loading…</p>
       ) : items.length === 0 ? (
-        <Empty className="border border-dashed py-16">
+        <Empty className="py-10">
           <EmptyHeader>
             <EmptyMedia variant="icon">
               <Newspaper />
@@ -110,62 +116,62 @@ export function ArticleList({ kind }: { kind: 'news' | 'blog' }) {
           </EmptyHeader>
         </Empty>
       ) : (
-        <TableCard>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Article</TableHead>
-                <TableHead>Tags</TableHead>
-                <TableHead>Views</TableHead>
-                <TableHead>Created</TableHead>
-                <TableHead className={actionsHeadClass} />
+        <ListTable
+          label={kind === 'blog' ? 'Blog posts' : 'News articles'}
+          key={scrollKey}
+        >
+          <TableHeader>
+            <TableRow>
+              <TableHead>Article</TableHead>
+              <TableHead>Tags</TableHead>
+              <TableHead>Views</TableHead>
+              <TableHead>Created</TableHead>
+              <TableHead className={actionsHeadClass} />
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {items.map((item) => (
+              <TableRow key={item.id}>
+                <TableCell>
+                  <Link
+                    to={kind === 'blog' ? '/blog/$id' : '/news/$id'}
+                    params={{ id: item.id }}
+                    className="font-medium hover:underline"
+                  >
+                    {item.title}
+                  </Link>
+                  <pre className="max-w-64 truncate text-xs lg:max-w-md text-muted-foreground">
+                    {item.content}
+                  </pre>
+                </TableCell>
+                <TableCell>
+                  <div className="flex flex-wrap gap-1">
+                    {(item.tags ?? []).map((tag) => (
+                      <Badge key={tag} variant="secondary">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                </TableCell>
+                <TableCell className="tabular-nums">{item.viewCount}</TableCell>
+                <TableCell className="text-muted-foreground">
+                  {new Date(item.createdAt).toLocaleDateString()}
+                </TableCell>
+                <TableCell className={actionsCellClass}>
+                  {canModerate(user, item.author.id) && (
+                    <RowDeleteButton
+                      onClick={() => {
+                        if (confirm('Delete this article?'))
+                          remove.mutate(item.id)
+                      }}
+                    />
+                  )}
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {items.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell>
-                    <Link
-                      to={kind === 'blog' ? '/blog/$id' : '/news/$id'}
-                      params={{ id: item.id }}
-                      className="font-medium hover:underline"
-                    >
-                      {item.title}
-                    </Link>
-                    <pre className="mt-1 max-w-md truncate font-mono text-xs text-muted-foreground">
-                      {item.content}
-                    </pre>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {(item.tags ?? []).map((tag) => (
-                        <Badge key={tag} variant="secondary">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                  </TableCell>
-                  <TableCell className="tabular-nums">
-                    {item.viewCount}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {new Date(item.createdAt).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell className={actionsCellClass}>
-                    {canModerate(user, item.author.id) && (
-                      <RowDeleteButton
-                        onClick={() => {
-                          if (confirm('Delete this article?')) remove.mutate(item.id)
-                        }}
-                      />
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableCard>
+            ))}
+          </TableBody>
+        </ListTable>
       )}
-    </div>
+    </ListPage>
   )
 }

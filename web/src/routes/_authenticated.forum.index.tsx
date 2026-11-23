@@ -5,7 +5,13 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { MessageSquare, Plus } from 'lucide-react'
 import { toast } from 'sonner'
-import { TableCard, actionsHeadClass, actionsCellClass, RowDeleteButton } from '@/components/data-table'
+import {
+  ListPage,
+  ListTable,
+  actionsHeadClass,
+  actionsCellClass,
+  RowDeleteButton,
+} from '@/components/data-table'
 import { PageHeader } from '@/components/page-header'
 import { UserAvatar } from '@/components/user-avatar'
 import { Button } from '@/components/ui/button'
@@ -17,7 +23,6 @@ import {
   EmptyTitle,
 } from '@/components/ui/empty'
 import {
-  Table,
   TableBody,
   TableCell,
   TableHead,
@@ -43,6 +48,7 @@ function ForumPage() {
     isFetching,
     isLoading,
     pagination,
+    scrollKey,
     items,
     filtered,
     toolbar,
@@ -70,7 +76,7 @@ function ForumPage() {
   })
 
   return (
-    <div>
+    <ListPage>
       <PageHeader
         title="Forum"
         description="Markdown discussion posts with comments, replies, and votes."
@@ -96,7 +102,7 @@ function ForumPage() {
       {error ? null : isLoading ? (
         <p className="text-sm text-muted-foreground">Loading…</p>
       ) : items.length === 0 ? (
-        <Empty className="border border-dashed py-16">
+        <Empty className="py-10">
           <EmptyHeader>
             <EmptyMedia variant="icon">
               <MessageSquare />
@@ -112,69 +118,65 @@ function ForumPage() {
           </EmptyHeader>
         </Empty>
       ) : (
-        <TableCard>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Post</TableHead>
-                <TableHead>Score</TableHead>
-                <TableHead>Comments</TableHead>
-                <TableHead>Views</TableHead>
-                <TableHead>Author</TableHead>
-                <TableHead>Created</TableHead>
-                <TableHead className={actionsHeadClass} />
+        <ListTable label="Forum posts" key={scrollKey}>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Post</TableHead>
+              <TableHead>Score</TableHead>
+              <TableHead>Comments</TableHead>
+              <TableHead>Views</TableHead>
+              <TableHead>Author</TableHead>
+              <TableHead>Created</TableHead>
+              <TableHead className={actionsHeadClass} />
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {items.map((item) => (
+              <TableRow key={item.id}>
+                <TableCell>
+                  <Link
+                    to="/forum/$postId"
+                    params={{ postId: item.id }}
+                    className="block font-medium hover:underline"
+                  >
+                    {item.title}
+                  </Link>
+                  <pre className="max-w-64 truncate text-xs lg:max-w-md text-muted-foreground">
+                    {item.content}
+                  </pre>
+                </TableCell>
+                <TableCell className="tabular-nums">{item.score}</TableCell>
+                <TableCell className="tabular-nums">
+                  {item.commentCount}
+                </TableCell>
+                <TableCell className="tabular-nums">{item.viewCount}</TableCell>
+                <TableCell className="text-muted-foreground">
+                  <div className="flex items-center gap-2">
+                    <UserAvatar
+                      name={item.author.fullName}
+                      avatarUrl={item.author.avatarUrl}
+                      size="sm"
+                    />
+                    {item.author.fullName}
+                  </div>
+                </TableCell>
+                <TableCell className="text-muted-foreground">
+                  {new Date(item.createdAt).toLocaleDateString()}
+                </TableCell>
+                <TableCell className={actionsCellClass}>
+                  {canModerate(user, item.author.id) ? (
+                    <RowDeleteButton
+                      onClick={() => {
+                        if (confirm('Delete this post?')) remove.mutate(item.id)
+                      }}
+                    />
+                  ) : null}
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {items.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell>
-                    <Link
-                      to="/forum/$postId"
-                      params={{ postId: item.id }}
-                      className="block font-medium hover:underline"
-                    >
-                      {item.title}
-                    </Link>
-                    <pre className="mt-1 max-w-md truncate font-mono text-xs text-muted-foreground">
-                      {item.content}
-                    </pre>
-                  </TableCell>
-                  <TableCell className="tabular-nums">{item.score}</TableCell>
-                  <TableCell className="tabular-nums">
-                    {item.commentCount}
-                  </TableCell>
-                  <TableCell className="tabular-nums">
-                    {item.viewCount}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    <div className="flex items-center gap-2">
-                      <UserAvatar
-                        name={item.author.fullName}
-                        avatarUrl={item.author.avatarUrl}
-                        size="sm"
-                      />
-                      {item.author.fullName}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {new Date(item.createdAt).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell className={actionsCellClass}>
-                    {canModerate(user, item.author.id) ? (
-                      <RowDeleteButton
-                        onClick={() => {
-                          if (confirm('Delete this post?')) remove.mutate(item.id)
-                        }}
-                      />
-                    ) : null}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableCard>
+            ))}
+          </TableBody>
+        </ListTable>
       )}
-    </div>
+    </ListPage>
   )
 }

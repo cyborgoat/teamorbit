@@ -6,7 +6,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Bell } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { TableCard } from '@/components/data-table'
+import { ListPage, ListTable } from '@/components/data-table'
 import { PageHeader } from '@/components/page-header'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -18,7 +18,6 @@ import {
   EmptyTitle,
 } from '@/components/ui/empty'
 import {
-  Table,
   TableBody,
   TableCell,
   TableHead,
@@ -147,7 +146,7 @@ function NotificationsPage() {
     deleteAllDismissed.isPending
 
   return (
-    <div>
+    <ListPage>
       <PageHeader
         title="Notifications"
         description="Manage unread, read, and dismissed notifications."
@@ -182,22 +181,19 @@ function NotificationsPage() {
         }
       />
 
-      <div className="mb-4 flex flex-wrap items-center gap-2">
+      <div className="mb-2 flex flex-wrap items-center gap-1.5">
         {groups.map((g) => (
           <Button
             key={g.id}
             size="sm"
-            variant={group === g.id ? 'default' : 'outline'}
+            variant={group === g.id ? 'secondary' : 'ghost'}
             onClick={() => {
               setGroup(g.id)
               pagination.setPage(1)
             }}
           >
             {g.label}
-            <Badge
-              variant={group === g.id ? 'secondary' : 'outline'}
-              className="ml-1"
-            >
+            <Badge variant="ghost" className="ml-1">
               {counts.data?.[g.id] ?? '…'}
             </Badge>
           </Button>
@@ -214,7 +210,7 @@ function NotificationsPage() {
       {error ? null : isLoading ? (
         <p className="text-sm text-muted-foreground">Loading…</p>
       ) : items.length === 0 ? (
-        <Empty className="border border-dashed py-16">
+        <Empty className="py-10">
           <EmptyHeader>
             <EmptyMedia variant="icon">
               <Bell />
@@ -233,121 +229,121 @@ function NotificationsPage() {
           </EmptyHeader>
         </Empty>
       ) : (
-        <TableCard>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Notification</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>When</TableHead>
-                <TableHead className="w-64 text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {items.map((n) => (
-                <TableRow
-                  key={n.id}
-                  className={cn(group === 'unread' && 'bg-muted/30')}
-                >
-                  <TableCell>
-                    <div className="flex items-start gap-2">
-                      {group === 'unread' ? (
-                        <span className="mt-1.5 size-2 shrink-0 rounded-full bg-primary" />
-                      ) : (
-                        <span className="mt-1.5 size-2 shrink-0" />
-                      )}
-                      <div>
-                        <div className="font-medium">{n.title}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {n.body}
-                        </div>
+        <ListTable label="Notifications" key={group + pagination.page}>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Notification</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>When</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {items.map((n) => (
+              <TableRow
+                key={n.id}
+                className={cn(group === 'unread' && 'bg-muted/30')}
+              >
+                <TableCell>
+                  <div className="flex items-start gap-2">
+                    {group === 'unread' ? (
+                      <span className="mt-1.5 size-2 shrink-0 rounded-full bg-primary" />
+                    ) : (
+                      <span className="mt-1.5 size-2 shrink-0" />
+                    )}
+                    <div className="w-48 min-w-0 sm:w-60 md:w-72">
+                      <div className="truncate font-medium" title={n.title}>
+                        {n.title}
+                      </div>
+                      <div className="whitespace-normal break-words text-xs text-muted-foreground">
+                        {n.body}
                       </div>
                     </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{n.type}</Badge>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {new Date(n.createdAt).toLocaleString()}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap justify-end gap-2">
-                      {group === 'unread' ? (
-                        <>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            disabled={busy}
-                            onClick={() => markRead.mutate(n.id)}
-                          >
-                            Mark read
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            disabled={busy}
-                            onClick={() => dismiss.mutate(n.id)}
-                          >
-                            Delete
-                          </Button>
-                        </>
-                      ) : null}
-                      {group === 'read' ? (
-                        <>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            disabled={busy}
-                            onClick={() => markUnread.mutate(n.id)}
-                          >
-                            Mark unread
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            disabled={busy}
-                            onClick={() => dismiss.mutate(n.id)}
-                          >
-                            Delete
-                          </Button>
-                        </>
-                      ) : null}
-                      {group === 'dismissed' ? (
-                        <>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            disabled={busy}
-                            onClick={() => restore.mutate(n.id)}
-                          >
-                            Restore
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            disabled={busy}
-                            onClick={() => {
-                              if (
-                                confirm(
-                                  'Permanently delete this dismissed notification? This cannot be undone.',
-                                )
-                              ) {
-                                deleteDismissed.mutate(n.id)
-                              }
-                            }}
-                          >
-                            Delete
-                          </Button>
-                        </>
-                      ) : null}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableCard>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Badge variant="ghost">{n.type}</Badge>
+                </TableCell>
+                <TableCell className="text-muted-foreground">
+                  {new Date(n.createdAt).toLocaleString()}
+                </TableCell>
+                <TableCell>
+                  <div className="flex justify-end gap-1">
+                    {group === 'unread' ? (
+                      <>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          disabled={busy}
+                          onClick={() => markRead.mutate(n.id)}
+                        >
+                          Mark read
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          disabled={busy}
+                          onClick={() => dismiss.mutate(n.id)}
+                        >
+                          Delete
+                        </Button>
+                      </>
+                    ) : null}
+                    {group === 'read' ? (
+                      <>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          disabled={busy}
+                          onClick={() => markUnread.mutate(n.id)}
+                        >
+                          Mark unread
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          disabled={busy}
+                          onClick={() => dismiss.mutate(n.id)}
+                        >
+                          Delete
+                        </Button>
+                      </>
+                    ) : null}
+                    {group === 'dismissed' ? (
+                      <>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          disabled={busy}
+                          onClick={() => restore.mutate(n.id)}
+                        >
+                          Restore
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          disabled={busy}
+                          onClick={() => {
+                            if (
+                              confirm(
+                                'Permanently delete this dismissed notification? This cannot be undone.',
+                              )
+                            ) {
+                              deleteDismissed.mutate(n.id)
+                            }
+                          }}
+                        >
+                          Delete
+                        </Button>
+                      </>
+                    ) : null}
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </ListTable>
       )}
-    </div>
+    </ListPage>
   )
 }

@@ -95,6 +95,50 @@
   }
 }
 
+[data-slot='list-page'] > [data-slot='page-header'] {
+  @apply mb-3 gap-2;
+}
+
+[data-slot='list-scroll'] {
+  scroll-padding-top: 1.75rem;
+
+  [data-slot='table-row'] {
+    @apply border-0;
+  }
+
+  [data-slot='table-header'] [data-slot='table-row'] {
+    @apply bg-background;
+  }
+
+  [data-slot='table-head'] {
+    @apply sticky top-0 z-10 h-7 border-b border-border/70 bg-background text-xs text-muted-foreground;
+  }
+
+  [data-slot='table-cell'] {
+    @apply border-b border-border/70 px-2 py-1;
+  }
+}
+
+/* Keep the full page reachable when there is little room below the controls. */
+@media (min-height: 26rem) {
+  [data-slot='app-shell']:has([data-slot='list-page']) {
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  main:has(> [data-slot='list-page']) {
+    @apply py-3;
+  }
+
+  [data-slot='list-page'] {
+    height: 100%;
+  }
+
+  [data-slot='list-page'] > [data-slot='list-scroll'] {
+    flex: 1 1 0%;
+  }
+}
+
 @layer components {
   .markdown-body {
     overflow-wrap: anywhere;
