@@ -181,7 +181,6 @@ function SettingsPage() {
                   setPassword({ ...password, currentPassword: e.target.value })
                 }
                 required
-                minLength={6}
               />
             </div>
             <div className="space-y-2">

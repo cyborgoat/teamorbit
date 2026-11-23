@@ -79,7 +79,6 @@ export class UpdateProfileDto {
 export class ChangePasswordDto {
   @ApiProperty()
   @IsString()
-  @MinLength(6)
   currentPassword: string;
 
   @ApiProperty()

@@ -3028,8 +3028,7 @@
         "type": "object",
         "properties": {
           "currentPassword": {
-            "type": "string",
-            "minLength": 6
+            "type": "string"
           },
           "newPassword": {
             "type": "string",
